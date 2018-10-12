@@ -4,7 +4,11 @@ from jinja2 import Template
 
 class HttpResponse(web.Response):
     def __init__(self, content, *args, **kwargs):
-        super(HttpResponse, self).__init__(body=content, *args, **kwargs)
+        if "content_type" not in kwargs:
+            kwargs["content_type"] = "text/html"
+        if "body" not in kwargs:
+            kwargs["body"] = content
+        super(HttpResponse, self).__init__(*args, **kwargs)
 
 
 def render_to_response(template, context=None, request=None):
