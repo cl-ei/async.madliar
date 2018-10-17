@@ -47,13 +47,9 @@ async def index(req):
 
 async def music_response(request):
     if request.query.get("ref"):
-        encoding = "utf-8"
         view_data = {
             "ref": True,
-            "music_list": json.dumps(
-                [_.decode(encoding) for _ in os.listdir(MUSIC_FOLDER)],
-                ensure_ascii=False
-            )
+            "music_list": json.dumps(os.listdir(MUSIC_FOLDER), ensure_ascii=False)
         }
     else:
         view_data = {"ref": False}

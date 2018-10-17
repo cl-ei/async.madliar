@@ -31,6 +31,6 @@ def __make_logger(name, log_file_name, level="DEBUG", log_format=None):
 
 
 logging = __make_logger(
-    name="madliar_app",
-    log_file_name="madliar_app.log",
+    name="web_syslog",
+    log_file_name="web_syslog.log",
 )
