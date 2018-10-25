@@ -4,7 +4,7 @@ import socket
 
 import logging
 
-fh = logging.FileHandler(os.path.join("./log", "papaya.log"))
+fh = logging.FileHandler(os.path.join("/home/wwwroot/notebook.madliar/notebook_user/i@caoliang.net", "papaya_log.txt"))
 log_format = '%(asctime)s: %(message)s'
 fh.setFormatter(logging.Formatter(log_format))
 logger = logging.getLogger("papapa_loger")
