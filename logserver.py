@@ -7,10 +7,12 @@ from websocket_server import WebsocketServer
 
 
 global_ws_server = None
+cached_message = []
 
 
 def new_client(client, server):
-    pass
+    for msg in cached_message:
+        server.send_message(client, msg)
 
 
 def client_left(client, server):
@@ -24,7 +26,12 @@ def message_received(client, server, message):
 def on_pika_message(ch, method, properties, body):
     try:
         msg = pickle.loads(body)
-        global_ws_server.send_message_to_all(json.dumps({"action": "console", "data": msg}))
+        json_message = json.dumps({"action": "console", "data": msg})
+        global_ws_server.send_message_to_all(json_message)
+
+        cached_message.append(json_message)
+        if len(cached_message) > 80:
+            cached_message.pop(0)
     except Exception as e:
         logging.error("Error happend on_pika_message: %s" % e)
 
