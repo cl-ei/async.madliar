@@ -1,4 +1,16 @@
+import os
 import socket
+
+
+import logging
+
+fh = logging.FileHandler(os.path.join("./log", "papaya.log"))
+log_format = '%(asctime)s: %(message)s'
+fh.setFormatter(logging.Formatter(log_format))
+logger = logging.getLogger("papapa_loger")
+logger.setLevel(logging.DEBUG)
+logger.addHandler(fh)
+logging = logger
 
 
 def main():
@@ -14,10 +26,7 @@ def main():
                 content = content + data if content else data
             else:
                 break
-
-        print("------- received -------")
-        print(content.decode("utf-8"))
-        print("--------- end ----------")
+        logging.info(content.decode("utf-8"))
         sock.close()
 
 
