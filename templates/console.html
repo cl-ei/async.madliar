@@ -1,0 +1,270 @@
+
+<html>
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>{{ title }}</title>
+    <meta name="HandheldFriendly" content="True" />
+    <meta name="MobileOptimized" content="360" />
+    <style id="dynamic-style">
+        @-webkit-keyframes move{0%{top:0;}100%{top:-150px;}}
+    </style>
+    <style>
+        @font-face {
+            font-family: aaxiaonangua;
+            src:url('/static/fonts/aaxiaonangua.ttf'); /* IE9 */
+        }
+        html{
+            color: #444;
+            -webkit-text-size-adjust: 100%;
+            -ms-text-size-adjust: 100%;
+            text-rendering: optimizelegibility;
+            -webkit-font-smoothing: antialiased;
+            font-family: PingFang SC, Lantinghei SC, Microsoft Yahei, Hiragino Sans GB, Microsoft Sans Serif, WenQuanYi Micro Hei, sans;
+        }
+        body{
+            margin: 0;padding: 20px;width: 100%;color: white;overflow-x: hidden;
+        }
+        #main-box a{
+            color: white;
+        }
+        .table1 table {
+            width:100%;
+            margin:15px 0
+        }
+        .table1 th {
+            background-color:#93DAFF;
+            color:#000000
+        }
+        .table1 td:nth-child(1), th:nth-child(1) {
+            width: 2em;
+        }
+        .table1 td:nth-child(2), th:nth-child(2) {
+            width: 300px;
+        }
+        .table1 td:nth-child(3), th:nth-child(3) {
+            width: 250px;
+        }
+        .table1 td:nth-child(4), th:nth-child(4) {
+            /* width: 100px; */
+        }
+
+        .table1, .table1 th,.table1 td{
+            font-size:0.95em;
+            text-align:left;
+            padding:4px;
+            border:1px solid #dddddd;
+            border-collapse:collapse;
+            word-break: break-all;
+            white-space: nowrap;
+            height: 30px;
+            border: none;
+        }
+        #inner-warning-box{
+            color: #ff009c;
+        }
+        #main-box{
+            display: block;
+            width: 700px;
+            max-height: 500px;
+            overflow-y: scroll;
+            border: 1px solid #ccc;
+            padding: 10px;
+        }
+        #wrap{
+            display: block;
+            float: left;
+            height: 90px;
+            width: 300px;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 20px;
+            background: #000;
+        }
+        #console{
+            height: 100%;
+            width: calc(100% - 60px);
+            margin-left: 20px;
+            background: #000;
+            float: left;
+            font-size: 12px;
+            overflow-y: scroll;
+        }
+        #list{
+            transform: translateZ(0);
+            position:absolute;
+            left:0;
+            top:0;
+            margin:0;
+            padding:0;
+            -webkit-animation:3s move infinite linear;
+            width:100%;
+            color: rgb(183, 183, 221);
+            text-shadow: #fff -2px 0px 0px, #fff 0px -2px 0px, #fff 2px 0px 0px, #fff 0px 2px 0px, #fff -1px -1px 0px, #fff 1px 1px 0px, #fff 1px -1px 0px, #fff -1px 1px 0px;
+            font-size: 24px;
+            font-weight: 600;
+            font-family: aaxiaonangua;
+        }
+        #list li{
+            list-style: none;
+            text-align: center;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            overflow: hidden;
+        }
+    </style>
+    <style id="dynamic-line-height"></style>
+</head>
+<body>
+<div id="console"></div>
+<script src="/static/js/reconnectwebsocket.min.js"></script>
+<script src="/static/js/jquery.min.js"></script>
+<script src="/static/js/bootstrap.min.js"></script>
+<script>
+
+$(function(){
+    function getTimeString(){
+        var myDate = new Date();
+        var h = String(myDate.getHours());
+        var m = String(myDate.getMinutes());
+        var s = String(myDate.getSeconds());
+        var ms = String(myDate.getMilliseconds());
+        if (h.length < 2){
+            h = "&nbsp;" + h;
+        }
+        if (m.length < 2){
+            m = "0" + m;
+        }
+        if (s.length < 2){
+            s = "0" + s;
+        }
+        if (ms.length == 1){
+            ms = "00" + ms;
+        }else if (ms.length == 2){
+            ms = "0" + ms;
+        }
+        return h + ":" + m + ":" + s + "." + ms;
+    }
+    function setScrollAnimationProperty(pos){
+        document.getElementById("dynamic-style").innerHTML = [
+            '@-webkit-keyframes move{0%{transform: translateY(0);}100%{transform: translateY(-' + pos + 'px);}}\n',
+            '@keyframes move{0%{transform: translateY(0);}100%{transform: translateY(-' + pos + 'px);}}\n',
+        ].join("");
+    }
+
+    window.line_height = 20;
+    window.base_speed = 1.6;
+    window.lines = 8;
+    window.box_height = window.line_height*window.lines;
+
+    document.getElementById("dynamic-line-height").innerHTML = [
+        '.li-item{height:' + window.line_height + 'px}',
+    ].join("");
+    $("#wrap").css({"height": window.box_height + "px"});
+    window.console_lines = 40;
+    window.scrollStartingRowNumbers = window.lines;
+    console.log("window.scrollStartingRowNumbers: ", window.scrollStartingRowNumbers);
+
+    function getStringInnerLength(str){
+        return str.replace(/[\u0391-\uFFE5]/g,"aa").length;
+    };
+
+    window.globalMessage = "";
+    function renderScrollSonglist(sl){
+        var scrollInnerHtml = "";
+        for (var i = 0; i < sl.length; i++){
+            scrollInnerHtml += '<li class="li-item"><a>' + sl[i][0] + "</a><br></li>";
+        }
+        scrollInnerHtml += '<li class="li-item"><a></a><br></li>';
+        if (sl.length <= window.scrollStartingRowNumbers){
+            $("#list").css({"-webkit-animation": "0s move infinite linear"}).html(scrollInnerHtml);
+        }else{
+            scrollInnerHtml += scrollInnerHtml;
+            setScrollAnimationProperty(window.line_height*(sl.length + 1));
+            var s = window.base_speed * sl.length;
+            console.log("s: ", s);
+            $("#list").css({"-webkit-animation": String(s) + "s move infinite linear"}).html(scrollInnerHtml);
+        }
+    }
+    function renderSonglist(sl){
+        sl = sl || [];
+        var songlistInnerHtml = "";
+        for (var i = 0; i < sl.length; i++){
+            var c = sl[i];
+            var song = c[0];
+            var user = c[1];
+
+            songlistInnerHtml += "<tr>" + "<td>" + (i + 1) + "</td>" +
+                "<td>" + song + "</td>" +
+                "<td>" + user + "</td>" +
+                '<td><a class="del-button" href="javascript:;" data-song="' + c[2] + '">删除</a></td>' + "</tr>";
+        }
+
+        $("#songlist-box").html(songlistInnerHtml);
+        $(".del-button").off("click").click(function(){
+            var song = $(this).data("song");
+            console.log(song);
+            ws.send("delsong" + song)
+        });
+        renderScrollSonglist(sl);
+    }
+    window.consoleMessage = [];
+    function printToConsole(msg){
+        var datetimestr = getTimeString() + " > ";
+        window.consoleMessage.push(datetimestr + msg);
+        if(window.consoleMessage.length > window.console_lines){
+            window.consoleMessage = window.consoleMessage.splice(
+            window.consoleMessage.length - window.console_lines, window.consoleMessage.length);
+        }
+        var html = window.consoleMessage.join("<br />");
+        $("#console").html(html);
+        $("#console").scrollTop(10000);
+    }
+    var t1 = 0;
+    var socketStatus = false;
+    var ws = new ReconnectingWebSocket("wss://www.madliar.com/wss");
+    ws.onopen = function (evnt) {
+        socketStatus = true;
+        clearInterval(t1);
+        t1 = setInterval(function(){ws.send("heartbeat")}, 10000);
+        console.log("Websocket connected! t1: ", t1);
+        ws.send("songlist");
+        printToConsole('<span style="">已经连接到后端大土豆~ （请不要吃它，因为那是你的服务器啊(〜￣△￣)〜</span>');
+    };
+    ws.onmessage = function (evnt) {
+        var msg = evnt.data;
+        try{
+            d = JSON.parse(msg)
+        }catch(e){
+            console.log("e: ", e)
+            return;
+        }
+        if(d.action == "songlist"){
+            renderSonglist(d.data);
+            printToConsole("点歌列表已更新。");
+        }else if(d.action == "OK"){
+            return;
+        }else if (d.action == "console"){
+            var color = d.color || "white";
+            printToConsole('<span style="color: ' + color + '">' + d.data + "</span>");
+        }else{
+            ws.send("songlist");
+        }
+    };
+    ws.onerror = function (evnt) {
+        socketStatus=false;
+        printToConsole("连接已断开！正在重新连接...");
+    };
+    ws.onclose = function (evnt) {
+        socketStatus=false;
+        printToConsole('<span style="color: red;">连接已异常断开！</span>');
+    };
+    function adajustSonglistHeight(){
+        var songlistHeight = window.innerHeight - window.box_height - 60 - 40;
+        $("#main-box").css({"height": songlistHeight + "px"});
+    }
+    window.onresize = adajustSonglistHeight;
+    adajustSonglistHeight();
+})
+</script>
+</body>
+</html>

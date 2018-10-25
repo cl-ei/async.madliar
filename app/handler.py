@@ -59,3 +59,11 @@ async def music_response(request):
         "templates/music/index.html",
         context=view_data
     )
+
+
+async def console_response(request):
+    view_data = {"CDN_URL": CDN_URL}
+    return render_to_response(
+        "templates/console.html",
+        context=view_data
+    )
