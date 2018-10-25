@@ -82,7 +82,8 @@
             margin-left: 20px;
             background: #000;
             float: left;
-            font-size: 12px;
+            font-size: 14px;
+            font-weight: 600;
             overflow-y: scroll;
         }
         #list{
@@ -156,7 +157,7 @@ $(function(){
         '.li-item{height:' + window.line_height + 'px}',
     ].join("");
     $("#wrap").css({"height": window.box_height + "px"});
-    window.console_lines = 40;
+    window.console_lines = 140;
     window.scrollStartingRowNumbers = window.lines;
     console.log("window.scrollStartingRowNumbers: ", window.scrollStartingRowNumbers);
 
