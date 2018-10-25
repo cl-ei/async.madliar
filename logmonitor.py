@@ -44,7 +44,7 @@ def main():
 
         msg = content.decode("utf-8")
         logging.info(msg)
-        send_message_to_songlist_server(str(datetime.datetime.now())[:-3] + " > " msg)
+        send_message_to_songlist_server(str(datetime.datetime.now())[:-3] + " > " + msg)
         sock.close()
 
 
