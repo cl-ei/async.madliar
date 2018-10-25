@@ -9,10 +9,6 @@
         @-webkit-keyframes move{0%{top:0;}100%{top:-150px;}}
     </style>
     <style>
-        @font-face {
-            font-family: aaxiaonangua;
-            src:url('/static/fonts/aaxiaonangua.ttf'); /* IE9 */
-        }
         html{
             color: #444;
             -webkit-text-size-adjust: 100%;
@@ -228,7 +224,7 @@ $(function(){
         t1 = setInterval(function(){ws.send("heartbeat")}, 10000);
         console.log("Websocket connected! t1: ", t1);
         ws.send("songlist");
-        printToConsole('<span style="">已经连接到后端大土豆~ （请不要吃它，因为那是你的服务器啊(〜￣△￣)〜</span>');
+        printToConsole('<span style="">已经连接到log服务器</span>');
     };
     ws.onmessage = function (evnt) {
         var msg = evnt.data;
