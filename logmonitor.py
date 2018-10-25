@@ -2,6 +2,7 @@ import os
 import socket
 import logging
 import pickle
+import datetime
 
 fh = logging.FileHandler(os.path.join("/home/wwwroot/notebook.madliar/notebook_user/i@caoliang.net", "papaya_log.txt"))
 log_format = '%(asctime)s: %(message)s'
@@ -43,7 +44,7 @@ def main():
 
         msg = content.decode("utf-8")
         logging.info(msg)
-        send_message_to_songlist_server(msg)
+        send_message_to_songlist_server(str(datetime.datetime.now())[:-3] + " > " msg)
         sock.close()
 
 
