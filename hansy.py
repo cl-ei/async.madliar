@@ -51,7 +51,7 @@ def main():
         print("Exception")
         return
 
-    if int(time.time()) - time_sec > 70:
+    if int(time.time()) - time_sec > 200:
         print("Timeout.")
         return
 
