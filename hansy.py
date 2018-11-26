@@ -177,6 +177,7 @@ def send_danmaku(msg, roomid=4424139, color=0xffffff):
     for kv in cookie.split(";"):
         if "bili_jct" in kv:
             csrf_token = kv.split("=")[-1].strip()
+            break
     if not csrf_token:
         return False
 
