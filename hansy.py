@@ -48,9 +48,11 @@ def main():
         time_sec = int(r.get("HANSY_TIME"))
         index = int(r.get("HANSY_INDEX"))
     except Exception:
+        print("Exception")
         return
 
     if int(time.time()) - time_sec > 70:
+        print("Timeout.")
         return
 
     index += 1
@@ -61,7 +63,8 @@ def main():
         "喜欢泡泡的小伙伴，加粉丝QQ群436496941来撩骚呀~",
         "更多好听的原创歌和翻唱作品，网易云音乐搜索「管珩心」~",
     ]
-    send_danmaku(msg_list[index], roomid=4424139)
+    r = send_danmaku(msg_list[index], roomid=2516117)
+    print("Result: %s" % r)
 
 
 if __name__ == "__main__":
