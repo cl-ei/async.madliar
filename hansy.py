@@ -4,7 +4,7 @@ import time
 
 
 def send_danmaku(msg, roomid=4424139, color=0xffffff):
-    with open("./cookie.txt") as f:
+    with open("/home/wwwroot/notebook.madliar/notebook_user/i@caoliang.net/cookie.txt") as f:
         cookie = f.read().strip()
     csrf_token = ""
     for kv in cookie.split(";"):
