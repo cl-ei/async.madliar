@@ -56,7 +56,8 @@ def main():
         return
 
     index += 1
-    r.set("HANSY_INDEX", index % 3)
+    index = index % 3
+    r.set("HANSY_INDEX", index)
 
     msg_list = [
         "各位小可爱记得点上关注哟，点个关注不迷路 ヽ(✿ﾟ▽ﾟ)ノ",
