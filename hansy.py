@@ -181,7 +181,7 @@ def send_danmaku(msg, roomid=4424139, color=0xffffff):
         return False
 
     headers = {
-        "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.102 Safari/537.36",
+        "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko)",
         "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
         "Cookie": cookie,
     }
@@ -195,7 +195,6 @@ def send_danmaku(msg, roomid=4424139, color=0xffffff):
         "csrf_token": csrf_token,
     }
     r = requests.post(url="https://live.bilibili.com/msg/send", data=data, headers=headers)
-    print(r, r.status_code, r.content)
     time.sleep(1)
     return not (r.status_code != 200 or json.loads(r.content.decode("utf-8")).get("code") != 0)
 
