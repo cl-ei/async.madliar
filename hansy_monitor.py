@@ -123,6 +123,8 @@ def parse_danmaku(msg):
         c_logging.info(msg)
         logging.info(msg)
         print(msg)
+        if user in ("蓝屏一天掰个头", "偷闲一天打个盹"):
+            return
 
         raw_msg = raw_msg.strip()
         if "好听" in raw_msg:
