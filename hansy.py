@@ -1,7 +1,23 @@
+import os
+import sys
 import json
 import requests
 import time
 import redis
+import logging
+
+if sys.platform == "darwin":
+    log_file = "log/hansy_b.log"
+else:
+    log_file = "/home/wwwroot/log/hansy_b.log"
+
+fh = logging.FileHandler(log_file)
+log_format = '%(asctime)s: %(message)s'
+fh.setFormatter(logging.Formatter(log_format))
+logger = logging.getLogger("b_loger")
+logger.setLevel(logging.DEBUG)
+logger.addHandler(fh)
+logging = logger
 
 
 REDIS_CONFIG = {
@@ -47,11 +63,13 @@ def main():
     try:
         time_sec = int(r.get("HANSY_TIME"))
         index = int(r.get("HANSY_INDEX"))
-    except Exception:
-        print("Exception")
+    except Exception as e:
+        logging.error("Exception: %s" % e)
+        print("Exception: %s" % e)
         return
 
     if int(time.time()) - time_sec > 200:
+        logging.error("Timeout, %s sec." % (int(time.time() - time_sec)))
         print("Timeout.")
         return
 
@@ -66,6 +84,8 @@ def main():
     ]
     r = send_danmaku(msg_list[index], roomid=2516117)
     print("Result: %s" % r)
+    if not r:
+        logging.error("Execute error!")
 
 
 if __name__ == "__main__":
