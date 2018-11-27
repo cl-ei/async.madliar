@@ -62,22 +62,26 @@ logger.addHandler(fh)
 logging = logger
 
 
-def send_danmaku(msg, roomid=ROOM_ID, color=0xffffff):
-    with open("/home/wwwroot/notebook.madliar/notebook_user/i@caoliang.net/cookie.txt") as f:
-        cookie = f.read().strip()
-    csrf_token = ""
-    for kv in cookie.split(";"):
-        if "bili_jct" in kv:
-            csrf_token = kv.split("=")[-1].strip()
-            break
-    if not csrf_token:
-        return False
+if sys.platform == "darwin":
+    cookie_file = "cookie.txt"
+else:
+    cookie_file = "/home/wwwroot/notebook.madliar/notebook_user/i@caoliang.net/cookie.txt"
 
-    headers = {
-        "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko)",
-        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-        "Cookie": cookie,
-    }
+with open(cookie_file) as f:
+    cookie = f.read().strip()
+csrf_token = ""
+for kv in cookie.split(";"):
+    if "bili_jct" in kv:
+        csrf_token = kv.split("=")[-1].strip()
+        break
+headers = {
+    "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko)",
+    "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+    "Cookie": cookie,
+}
+
+
+def send_danmaku(msg, roomid=ROOM_ID, color=0xffffff):
     data = {
         "color": color,
         "fontsize": 25,
@@ -88,7 +92,13 @@ def send_danmaku(msg, roomid=ROOM_ID, color=0xffffff):
         "csrf_token": csrf_token,
     }
     r = requests.post(url="https://live.bilibili.com/msg/send", data=data, headers=headers)
-    return not (r.status_code != 200 or json.loads(r.content.decode("utf-8")).get("code") != 0)
+    try:
+        response = json.loads(r.content.decode("utf-8"))
+        if response.get("code") == 0:
+            return True
+        c_logging.error("SEND_DANMAKU ERROR: req: %s, response: %s" % (data, r.content))
+    except Exception as e:
+        c_logging.error("SEND_DANMAKU ERROR: %s, data: %s" % (e, data))
 
 
 def parse_danmaku(msg):
