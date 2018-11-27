@@ -9,6 +9,7 @@ import logging
 import redis
 import requests
 from threading import Thread
+from traceback import format_exc
 
 REDIS_CONFIG = {
     "host": "47.104.176.84",
@@ -16,7 +17,7 @@ REDIS_CONFIG = {
     "password": "redispassword",
     "db": 8
 }
-redis_conn = redis.Redis(*REDIS_CONFIG)
+redis_conn = redis.Redis(**REDIS_CONFIG)
 
 ROOM_ID = 2516117
 monitor_url = "ws://broadcastlv.chat.bilibili.com:2244/sub"
@@ -177,6 +178,7 @@ def on_message(ws_obj, message):
                 parse_danmaku(msg)
             except Exception as e:
                 print("e: %s, m: %s" % (e, current_msg))
+                c_logging.error(format_exc())
 
 
 def on_error(ws_obj, error):
