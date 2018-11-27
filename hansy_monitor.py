@@ -128,6 +128,8 @@ def parse_danmaku(msg):
 
         raw_msg = raw_msg.strip()
         if "好听" in raw_msg:
+            if random.randint(0, 10) > 3:
+                return
             danmaku_msg = random.choice([
                 "φ(≧ω≦*)♪好听好听！ 打call ᕕ( ᐛ )ᕗ",
                 "好听！给跪了! ○|￣|_ (这么好听还不摁个关注？！",
