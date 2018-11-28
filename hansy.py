@@ -74,13 +74,14 @@ def main():
         return
 
     index += 1
-    index = index % 3
+    index = index % 4
     r.set("HANSY_INDEX", index)
 
     msg_list = [
         "各位小可爱记得点上关注哟，点个关注不迷路 ヽ(✿ﾟ▽ﾟ)ノ",
         "喜欢泡泡的小伙伴，加粉丝QQ群436496941来撩骚呀~",
         "更多好听的原创歌和翻唱作品，网易云音乐搜索「管珩心」~",
+        "获取「电磁泡」勋章：赠送1个B坷垃，或充电50电池，或给up的投稿累计投20币~",
     ]
     r = send_danmaku(msg_list[index], roomid=2516117)
     print("Result: %s" % r)
