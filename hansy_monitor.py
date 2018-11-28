@@ -106,8 +106,6 @@ def parse_danmaku(msg):
     cmd = msg.get("cmd")
     datetime_str = str(datetime.datetime.now())
     if cmd == "DANMU_MSG":
-        redis_conn.set("HANSY_TIME", int(time.time()))
-
         content = msg.get("info", "")
         raw_msg = content[1]
         user = content[2][1]
@@ -126,6 +124,7 @@ def parse_danmaku(msg):
         if user in ("蓝屏一天掰个头", "偷闲一天打个盹"):
             return
 
+        redis_conn.set("HANSY_TIME", int(time.time()))
         raw_msg = raw_msg.strip()
         if "好听" in raw_msg:
             if random.randint(0, 10) > 3:
