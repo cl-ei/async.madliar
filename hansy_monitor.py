@@ -137,8 +137,8 @@ def parse_danmaku(msg):
             send_danmaku(danmaku_msg)
         elif "晚上好" in raw_msg:
             send_danmaku("%s 小可爱晚上好鸭(*ﾟ∀ ﾟ)" % user)
-        elif "挥挥" in raw_msg or "灰灰" in raw_msg:
-            send_danmaku("( σ'ω')σ %s 小可爱挥挥~ (情敌-1 " % user[:10])
+        elif "挥挥" in raw_msg or "灰灰" in raw_msg or "晚安" in raw_msg:
+            send_danmaku("( σ'ω')σ %s小可爱挥挥~ (情敌-1 " % user)
         elif raw_msg.replace("#", "").replace("＃", "").replace(" ", "").replace("　", "").startswith("点歌"):
             if decoration != "电磁泡":
                 send_danmaku("%s：点歌失败...佩戴「电磁泡」勋章才能点歌成功哦qwq" % user)
