@@ -139,6 +139,11 @@ def parse_danmaku(msg):
             send_danmaku("%s 小可爱晚上好鸭(*ﾟ∀ ﾟ)" % user)
         elif "挥挥" in raw_msg or "灰灰" in raw_msg:
             send_danmaku("( σ'ω')σ %s 小可爱挥挥~ (情敌-1 " % user[:10])
+        elif raw_msg.replace("#", "").replace("＃", "").replace(" ", "").replace("　", "").startswith("点歌"):
+            if decoration != "电磁泡":
+                send_danmaku("%s：点歌失败...要佩戴「电磁泡」勋章才能点歌成功哦o( =•ω•= )m ~" % user)
+                time.sleep(1)
+                send_danmaku("获取「电磁泡」勋章：赠送1个B坷垃，或充电50电池，或给up的投稿累计投20币~")
 
     elif cmd == "SEND_GIFT":
         data = msg.get("data")
