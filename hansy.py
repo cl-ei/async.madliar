@@ -62,6 +62,7 @@ msg_list = [
     "各位小可爱记得点上关注哟，点个关注不迷路 ヽ(✿ﾟ▽ﾟ)ノ",
     "喜欢泡泡的小伙伴，加粉丝QQ群436496941来撩骚呀~",
     "更多好听的原创歌和翻唱作品，网易云音乐搜索「管珩心」~",
+    "泡泡的海盗船舰队正在招聘船长~加入舰队即可领取感恩福利礼包(✿≖ ◡ ≖)✧",
     "获取「电磁泡」勋章：赠送1个B坷垃，或充电50电池，或给up的投稿累计投20币~",
     "一定要记得网易云关注「管珩心」哦，不定期推送高质量单曲，小珩心捧着奶茶等你来听~",
 ]
@@ -77,7 +78,7 @@ def main():
         print("Exception: %s" % e)
         return
 
-    if int(time.time()) - time_sec > 200:
+    if int(time.time()) - time_sec > 121*len(msg_list):
         logging.error("Timeout, %s sec." % (int(time.time() - time_sec)))
         print("Timeout.")
         return
