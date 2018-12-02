@@ -135,17 +135,31 @@ def parse_danmaku(msg):
                 "🤖 好听! 我的大仙泡最美最萌最好听 ´･∀･)乂(･∀･｀",
             ])
             send_danmaku(danmaku_msg)
-        elif "晚上好" in raw_msg:
-            send_danmaku("🤖 %s晚上好鸭(*ﾟ∀ ﾟ)" % user)
-        elif ("挥挥" in raw_msg) or ("灰灰" in raw_msg) or ("拜拜" in raw_msg):
-            send_danmaku("🤖 ( σ'ω')σ %s小可爱挥挥~ (情敌-1 " % user)
-        elif "晚安" in raw_msg:
-            send_danmaku("🤖 %s晚安安~好梦 (✿◡‿◡)" % user)
+
+        elif "盹" in raw_msg:
+            if "晚上好" in raw_msg:
+                send_danmaku("🤖 %s晚上好鸭(*ﾟ∀ ﾟ)" % user)
+            elif "中午好" in raw_msg:
+                send_danmaku("🤖 %s中午好鸭(￣3￣)" % user)
+            elif "早上好" in raw_msg:
+                send_danmaku("🤖 %s早上好鸭(｡･ω･｡)" % user)
+            elif ("挥挥" in raw_msg) or ("灰灰" in raw_msg) or ("拜拜" in raw_msg):
+                send_danmaku("🤖 ( σ'ω')σ %s小可爱挥挥~ (情敌-1 " % user)
+            elif "晚安" in raw_msg:
+                send_danmaku("🤖 %s晚安安~好梦 (✿◡‿◡)" % user)
+
         elif raw_msg.replace("#", "").replace("＃", "").replace(" ", "").replace("　", "").startswith("点歌"):
             if decoration != "电磁泡":
                 send_danmaku("🤖 %s点歌失败!佩戴「电磁泡」勋章才能点歌哦qwq" % user)
-                time.sleep(0.3)
+                time.sleep(1)
                 send_danmaku("📢 获取「电磁泡」勋章：赠送1个B坷垃，或充电50电池，或给up的投稿投币20~")
+
+        elif user == "泡泡家の大连" and ("心" in raw_msg or "美" in raw_msg or "好" in raw_msg):
+            send_danmaku(random.choice([
+                "🤖 大连你是个大居蹄子！",
+                "🤖 大连给我把你的舌头吞回去！",
+                "🤖 大连啊大连，你在东北玩泥巴，我在大连木有家呀(〜￣△￣)〜",
+            ]))
 
     elif cmd == "SEND_GIFT":
         data = msg.get("data")
