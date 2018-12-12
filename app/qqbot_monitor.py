@@ -46,7 +46,6 @@ def onQQMessage(bot, contact, member, content):
         return prize_dispatcher(content)
 
     else:
-        for d in dir(member):
-            print("%s: %s" % (d, getattr(member, d, None)))
+        print(getattr(member, "name", None))
 
     print("\n")
