@@ -66,7 +66,7 @@ def auto_reply(bot, contact, member, content):
     req_m = content[:127]
     response = get_reply(req_m)
     if response:
-        bot.SendTo("🤖 " + contact, response)
+        bot.SendTo(contact, "🤖 " + response)
 
 
 def onQQMessage(bot, contact, member, content):
