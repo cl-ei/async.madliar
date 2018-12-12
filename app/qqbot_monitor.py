@@ -4,6 +4,9 @@ import logging
 import pika
 import pickle
 import datetime
+import random
+import requests
+import json
 
 
 if sys.platform == "darwin":
@@ -41,14 +44,33 @@ def robot_dispatcher(bot, contact, member, content):
     bot.SendTo(contact, 'xxx')
 
 
+def get_reply(msg):
+    req_param = {
+        "reqType": 0,
+        "perception": {"inputText": {"text": msg}},
+        "userInfo": {
+            "apiKey": "c83e8c03c71d43b6b0ce271d485896d8",
+            "userId": "248138"
+        }
+    }
+    try:
+        r = requests.post(url="http://openapi.tuling123.com/openapi/api/v2", json=req_param)
+        data = json.loads(r.content.decode("utf-8"))
+        response = data.get("results", [])[0].get("values", {}).get("text", "")
+    except Exception:
+        response = None
+    return response
+
+
 def onQQMessage(bot, contact, member, content):
     if str(getattr(member, "uin", None)) == "3139399240" and "live.bilibili.com" not in content:
         return prize_dispatcher(content)
 
-    else:
-        print(getattr(member, "name", None))
-        for d in dir(contact):
-            if d[0] != "_":
-                print("%s: %s" % (d, getattr(member, d, None)))
-
-    print("\n")
+    elif contact.nick == "此人已死" or content[0] == "#":
+        if contact.nick == "此人已死":
+            if random.randint(0, 10) > 3:
+                return
+        req_m = content[:127]
+        response = get_reply(req_m)
+        if response:
+            bot.SendTo("🤖 " + contact, response)
