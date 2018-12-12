@@ -35,7 +35,7 @@ def client_left(client, server):
 
 
 def parse_message_from_monitor(msg):
-    jsonstring = json.dumps(msg)
+    jsonstring = json.dumps(msg, ensure_ascii=False)
     msg_string = "Message received: %s" % jsonstring
     logging.info(msg_string)
     print(msg_string)
