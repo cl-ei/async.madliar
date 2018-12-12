@@ -21,12 +21,7 @@ logger.addHandler(fh)
 logging = logger
 
 
-def onQQMessage(bot, contact, member, content):
-    if str(getattr(member, "uin", None)) != "3139399240":
-        return
-    if "live.bilibili.com" not in content:
-        return
-
+def prize_dispatcher(content):
     detail, url = content.split("\n")
     time_roomid, gtype = detail.split("→")
     room_id = time_roomid.split(" ")[-1]
@@ -40,3 +35,18 @@ def onQQMessage(bot, contact, member, content):
 
     print("QQBOT: %s -> %s" % (gtype, room_id))
     logging.info("%s: %s -> %s" % (str(datetime.datetime.now()), gtype, room_id))
+
+
+def robot_dispatcher(bot, contact, member, content):
+    bot.SendTo(contact, 'xxx')
+
+
+def onQQMessage(bot, contact, member, content):
+    if str(getattr(member, "uin", None)) == "3139399240" and "live.bilibili.com" not in content:
+        return prize_dispatcher(content)
+
+    else:
+        for d in dir(member):
+            print("%s: %s" % (d, getattr(member, d, None)))
+
+    print("\n")
