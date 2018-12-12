@@ -20,11 +20,6 @@ logger.setLevel(logging.DEBUG)
 logger.addHandler(fh)
 logging = logger
 
-connection_param = pika.ConnectionParameters(host='localhost')
-pika_connection = pika.BlockingConnection(connection_param)
-pika_channel = pika_connection.channel()
-pika_channel.queue_declare(queue='prizeinfo')
-
 
 def onQQMessage(bot, contact, member, content):
     if str(getattr(member, "uin", None)) != "3139399240":
@@ -37,6 +32,11 @@ def onQQMessage(bot, contact, member, content):
     room_id = time_roomid.split(" ")[-1]
     msg = {"gtype": gtype, "roomid": room_id}
 
+    connection_param = pika.ConnectionParameters(host='localhost')
+    pika_connection = pika.BlockingConnection(connection_param)
+    pika_channel = pika_connection.channel()
+    pika_channel.queue_declare(queue='prizeinfo')
     pika_channel.basic_publish(exchange='', routing_key='prizeinfo', body=pickle.dumps(msg))
+
     print("QQBOT: %s -> %s" % (gtype, room_id))
     logging.info("%s: %s -> %s" % (str(datetime.datetime.now()), gtype, room_id))
