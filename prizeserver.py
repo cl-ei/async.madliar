@@ -35,9 +35,11 @@ def client_left(client, server):
 
 
 def parse_message_from_monitor(msg):
-    logging.info("Message received: %s" % json.dumps(msg))
-    print("Message received: %s" % json.dumps(msg))
-    global_ws_server.send_message_to_all(json.dumps(msg))
+    jsonstring = json.dumps(msg)
+    msg_string = "Message received: %s" % jsonstring
+    logging.info(msg_string)
+    print(msg_string)
+    global_ws_server.send_message_to_all(jsonstring)
 
 
 def on_pika_message(ch, method, properties, body):
