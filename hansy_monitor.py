@@ -30,8 +30,10 @@ CONST_MESSAGE = 7
 
 
 if sys.platform == "darwin":
+    DEBUG = True
     LOG_PATH = "./log/"
 else:
+    DEBUG = False
     LOG_PATH = "/home/wwwroot/log/hansy/"
 
 fh = logging.FileHandler(os.path.join(LOG_PATH, "prize.log"), encoding="utf-8")
@@ -83,6 +85,9 @@ headers = {
 
 
 def send_danmaku(msg, roomid=ROOM_ID, color=0xffffff):
+    if DEBUG:
+        return
+
     data = {
         "color": color,
         "fontsize": 25,
@@ -105,6 +110,13 @@ def send_danmaku(msg, roomid=ROOM_ID, color=0xffffff):
 def parse_danmaku(msg):
     cmd = msg.get("cmd")
     datetime_str = str(datetime.datetime.now())
+    if DEBUG and cmd in (
+        "DANMU_MSG", "SEND_GIFT", "COMBO_END", "ENTRY_EFFECT",
+        "WELCOME_GUARD", "WELCOME", "NOTICE_MSG", "COMBO_SEND",
+        "ROOM_RANK", "ROOM_BLOCK_MSG", "WISH_BOTTLE",
+    ):
+        return
+
     if cmd == "DANMU_MSG":
         content = msg.get("info", "")
         raw_msg = content[1]
@@ -123,8 +135,9 @@ def parse_danmaku(msg):
         print(msg)
         if user in ("蓝屏一天掰个头", "偷闲一天打个盹"):
             return
+        if not DEBUG:
+            redis_conn.set("HANSY_TIME", int(time.time()))
 
-        redis_conn.set("HANSY_TIME", int(time.time()))
         raw_msg = raw_msg.strip()
         if "好听" in raw_msg:
             if random.randint(0, 10) > 3:
@@ -201,6 +214,10 @@ def parse_danmaku(msg):
         logging.info(msg)
         if gift_type == "gold":
             g_logging.info(msg)
+
+    else:
+        print("\t\tCMD: %s" % cmd)
+        print("\n\ntotal msg: \n\n%s\n\n" % msg)
 
 
 def on_message(ws_obj, message):
