@@ -62,15 +62,19 @@ def get_reply(msg):
     return response
 
 
+def auto_reply(bot, contact, member, content):
+    req_m = content[:127]
+    response = get_reply(req_m)
+    if response:
+        bot.SendTo("🤖 " + contact, response)
+
+
 def onQQMessage(bot, contact, member, content):
     if str(getattr(member, "uin", None)) == "3139399240" and "live.bilibili.com" not in content:
         return prize_dispatcher(content)
 
-    elif contact.nick == "此人已死" or content[0] == "#":
-        if contact.nick == "此人已死":
-            if random.randint(0, 10) > 3:
-                return
-        req_m = content[:127]
-        response = get_reply(req_m)
-        if response:
-            bot.SendTo("🤖 " + contact, response)
+    elif contact.nick == "此人已死":
+        if random.randint(0, 10) < 5:
+            return auto_reply(bot, contact, member, content)
+    elif content.startswith("$$"):
+        return auto_reply(bot, contact, member, content.strip("$$"))
