@@ -47,5 +47,8 @@ def onQQMessage(bot, contact, member, content):
 
     else:
         print(getattr(member, "name", None))
+        for d in dir(contact):
+            if d[0] != "_":
+                print("%s: %s" % (d, getattr(member, d, None)))
 
     print("\n")
