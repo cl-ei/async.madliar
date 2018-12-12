@@ -40,10 +40,6 @@ def prize_dispatcher(content):
     logging.info("%s: %s -> %s" % (str(datetime.datetime.now()), gtype, room_id))
 
 
-def robot_dispatcher(bot, contact, member, content):
-    bot.SendTo(contact, 'xxx')
-
-
 def get_reply(msg):
     req_param = {
         "reqType": 0,
@@ -70,11 +66,11 @@ def auto_reply(bot, contact, member, content):
 
 
 def onQQMessage(bot, contact, member, content):
-    if str(getattr(member, "uin", None)) == "3139399240" and "live.bilibili.com" not in content:
+    if str(getattr(member, "uin", None)) == "3139399240" and "live.bilibili.com" in content:
         return prize_dispatcher(content)
-
-    elif contact.nick == "此人已死":
-        if random.randint(0, 10) < 5:
-            return auto_reply(bot, contact, member, content)
-    elif content.startswith("$$"):
-        return auto_reply(bot, contact, member, content.strip("$$"))
+    return True
+    # if contact.nick == "此人已死":
+    #     if random.randint(0, 10) < 5:
+    #         return auto_reply(bot, contact, member, content)
+    # elif content.startswith("$$"):
+    #     return auto_reply(bot, contact, member, content.strip("$$"))
