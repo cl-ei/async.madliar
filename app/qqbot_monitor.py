@@ -44,7 +44,7 @@ def push_prize_info(msg):
 def prize_dispatcher(content):
     detail, url = content.split("\n")
     time_roomid, gtype = detail.split("→")
-    room_id = time_roomid.split(" ")[-1]
+    room_id = int(time_roomid.split(" ")[-1])
     msg = {"gtype": gtype, "roomid": room_id}
     push_prize_info(msg)
 
