@@ -1,10 +1,10 @@
 import json
+import socket
 import websocket
 import time
 import datetime
 import os
 import logging
-import pika
 import pickle
 from threading import Thread
 
@@ -27,19 +27,13 @@ logger.addHandler(fh)
 logging = logger
 
 
-# pika
-connection_param = pika.ConnectionParameters(host='localhost')
-pika_connection = pika.BlockingConnection(connection_param)
-pika_channel = pika_connection.channel()
-pika_channel.queue_declare(queue='prizeinfo')
-
-
 def push_prize_info(msg):
-    pika_channel.basic_publish(exchange='', routing_key='danmaku', body=pickle.dumps(msg))
-
-
-# when tears down
-# pika_connection.close()
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.sendto(pickle.dumps(msg), ('127.0.0.1', 11111))
+        s.close()
+    except Exception:
+        pass
 
 
 def parse_danmaku(msg):
@@ -55,7 +49,7 @@ def parse_danmaku(msg):
             logging.info(msg)
 
             msg = {"gtype": "unkown-%s" % message, "roomid": room_id}
-            pika_channel.basic_publish(exchange='', routing_key='prizeinfo', body=pickle.dumps(msg))
+            push_prize_info(msg)
 
 
 def on_message(ws_obj, message):

@@ -2,13 +2,14 @@ import os
 import sys
 import json
 import pickle
-import pika
+import socket
 import logging
+import traceback
 from threading import Thread
 from websocket_server import WebsocketServer
 
 
-if sys.platform == "darwin":
+if sys.platform in ("darwin", "win32"):
     DEBUG = True
     LOG_PATH = "./log/"
 else:
@@ -42,13 +43,6 @@ def parse_message_from_monitor(msg):
     global_ws_server.send_message_to_all(jsonstring)
 
 
-def on_pika_message(ch, method, properties, body):
-    try:
-        parse_message_from_monitor(pickle.loads(body))
-    except Exception as e:
-        logging.error("Error happend on_pika_message: %s" % e)
-
-
 def main():
     global global_ws_server
     server = WebsocketServer(8080, "haha5")
@@ -58,14 +52,20 @@ def main():
     t = Thread(target=server.run_forever)
     t.start()
 
-    # pika
-    connection_param = pika.ConnectionParameters(host='localhost')
-    connection = pika.BlockingConnection(connection_param)
-    channel = connection.channel()
-    channel.queue_declare(queue='prizeinfo')
-    channel.basic_consume(on_pika_message, queue='prizeinfo', no_ack=True)
-    channel.start_consuming()
+    # UDP server
+    monitor = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    monitor.bind(('0.0.0.0', 11111))
     print("Server is running.")
+
+    while True:
+        try:
+            data, addr = monitor.recvfrom(10240)
+            msg = pickle.loads(data)
+            parse_message_from_monitor(msg)
+        except Exception as e:
+            error_msg = traceback.format_exc()
+            logging.error(error_msg)
+            raise e
 
 
 if __name__ == "__main__":
