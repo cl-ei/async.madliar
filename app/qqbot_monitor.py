@@ -80,7 +80,8 @@ def onQQMessage(bot, contact, member, content):
     else:
         contact_name = getattr(contact, "name", "__contact_name")
         member_name = getattr(member, "name", "__member_name")
-        msg = "%s [from %s] -> %s" % (member_name, contact_name, content)
+        member_nick = getattr(member, "nick", "__member_nick")
+        msg = "%s [%s __from__ %s] -> %s" % (member_name, member_nick, contact_name, content)
         chat_logging.info(msg)
     return True
     # if contact.nick == "此人已死":
