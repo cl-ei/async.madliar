@@ -98,11 +98,11 @@ def main():
 
     logging.info("Found captain list, zongdu: %s, tidu: %s, jianzhang: %s" % (zongdu_list, tidu_list, jianzhang_list))
 
-    for z in zongdu_list:
+    for z in room_list[0]:
         push_prize_info({"gtype": "总督", "roomid": int(z)})
-    for z in tidu_list:
+    for z in room_list[1]:
         push_prize_info({"gtype": "提督", "roomid": int(z)})
-    for z in jianzhang_list:
+    for z in room_list[2]:
         push_prize_info({"gtype": "舰长", "roomid": int(z)})
 
 
