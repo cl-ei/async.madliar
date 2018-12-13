@@ -16,6 +16,14 @@ else:
     DEBUG = False
     LOG_PATH = "/home/wwwroot/log/"
 
+fh = logging.FileHandler(os.path.join(LOG_PATH, "qqchat.log"), encoding="utf-8")
+fh.setFormatter(logging.Formatter('%(asctime)s: %(message)s'))
+logger = logging.getLogger("qqchat")
+logger.setLevel(logging.DEBUG)
+logger.addHandler(fh)
+chat_logging = logger
+
+
 fh = logging.FileHandler(os.path.join(LOG_PATH, "qqbot.log"), encoding="utf-8")
 fh.setFormatter(logging.Formatter('%(message)s'))
 logger = logging.getLogger("qqbot")
@@ -66,15 +74,14 @@ def auto_reply(bot, contact, member, content):
 
 
 def onQQMessage(bot, contact, member, content):
-    print("_"*80)
-
-    print("%s: %s" % (getattr(contact, "name", None), getattr(contact, "nick", None)))
-    print("%s: %s" % (getattr(member, "name", None), getattr(member, "nick", None)))
-    print("type: %s" % type(content))
-    print("\n")
-
-    if str(getattr(member, "uin", None)) == "3139399240" and "live.bilibili.com" in content:
-        return prize_dispatcher(content)
+    if str(getattr(member, "uin", None)) == "3139399240":
+        if "live.bilibili.com" in content:
+            return prize_dispatcher(content)
+    else:
+        contact_name = getattr(contact, "name", "__contact_name")
+        member_name = getattr(member, "name", "__member_name")
+        msg = "%s [from %s] -> %s" % (member_name, contact_name, content)
+        chat_logging.info(msg)
     return True
     # if contact.nick == "此人已死":
     #     if random.randint(0, 10) < 5:
