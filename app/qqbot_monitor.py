@@ -1,9 +1,9 @@
 import os
 import sys
 import logging
-import pika
 import pickle
 import datetime
+import socket
 import random
 import requests
 import json
@@ -32,17 +32,21 @@ logger.addHandler(fh)
 logging = logger
 
 
+def push_prize_info(msg):
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.sendto(pickle.dumps(msg), ('127.0.0.1', 11111))
+        s.close()
+    except Exception:
+        pass
+
+
 def prize_dispatcher(content):
     detail, url = content.split("\n")
     time_roomid, gtype = detail.split("→")
     room_id = time_roomid.split(" ")[-1]
     msg = {"gtype": gtype, "roomid": room_id}
-
-    connection_param = pika.ConnectionParameters(host='localhost')
-    pika_connection = pika.BlockingConnection(connection_param)
-    pika_channel = pika_connection.channel()
-    pika_channel.queue_declare(queue='prizeinfo')
-    pika_channel.basic_publish(exchange='', routing_key='prizeinfo', body=pickle.dumps(msg))
+    push_prize_info(msg)
 
     print("QQBOT: %s -> %s" % (gtype, room_id))
     logging.info("%s: %s -> %s" % (str(datetime.datetime.now()), gtype, room_id))
