@@ -66,6 +66,22 @@ def auto_reply(bot, contact, member, content):
 
 
 def onQQMessage(bot, contact, member, content):
+    print("_"*80)
+    for d in dir(contact):
+        if d[0] != "_":
+            print("%s: %s" % (d, getattr(contact, d, None)))
+    print("\n")
+
+    for d in dir(member):
+        if d[0] != "_":
+            print("%s: %s" % (d, getattr(member, d, None)))
+    print("\n")
+
+    for d in dir(content):
+        if d[0] != "_":
+            print("%s: %s" % (d, getattr(content, d, None)))
+    print("\n")
+
     if str(getattr(member, "uin", None)) == "3139399240" and "live.bilibili.com" in content:
         return prize_dispatcher(content)
     return True
