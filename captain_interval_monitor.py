@@ -90,19 +90,19 @@ def main():
     jianzhang_list = compare(old_cap_3, room_list[2])
 
     new_info = {
-        "c1": zongdu_list,
-        "c2": tidu_list,
-        "c3": jianzhang_list,
+        "c1": room_list[0],
+        "c2": room_list[1],
+        "c3": room_list[2],
     }
     redis_conn.set("CAPTAIN_INFO", pickle.dumps(new_info))
 
     logging.info("Found captain list, zongdu: %s, tidu: %s, jianzhang: %s" % (zongdu_list, tidu_list, jianzhang_list))
 
-    for z in room_list[0]:
+    for z in zongdu_list:
         push_prize_info({"gtype": "总督", "roomid": int(z)})
-    for z in room_list[1]:
+    for z in tidu_list:
         push_prize_info({"gtype": "提督", "roomid": int(z)})
-    for z in room_list[2]:
+    for z in jianzhang_list:
         push_prize_info({"gtype": "舰长", "roomid": int(z)})
 
 
