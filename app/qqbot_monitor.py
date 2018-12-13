@@ -74,6 +74,9 @@ def auto_reply(bot, contact, member, content):
 
 
 def onQQMessage(bot, contact, member, content):
+    if not content:
+        return True
+
     if str(getattr(member, "uin", None)) == "3139399240":
         if "live.bilibili.com" in content:
             return prize_dispatcher(content)
