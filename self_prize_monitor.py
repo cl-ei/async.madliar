@@ -69,7 +69,7 @@ def get_gift_id(room_id):
             if r.status_code == 200:
                 data = json.loads(r.content.decode("utf-8"))
                 if data.get("code", 0) == 0:
-                    return [int(d["raffleId"]) for d in data.get("data", {}).get("list", []) if "raffleId" in d and d["raffleId"]]
+                    return [(int(d["raffleId"]), d["title"]) for d in data.get("data", {}).get("list", []) if "raffleId" in d and d["raffleId"]]
         except Exception as e:
             tv_logging.error("Get gift id ERROR: %s, room id: %s" % (e, room_id))
             pass
@@ -110,7 +110,7 @@ def accept_prize(room_id):
     msg = "Found prize room: %s, gift id: %s" % (room_id, g_id_list)
     tv_logging.info(msg)
     print(msg)
-    for gift_id in g_id_list:
+    for gift_id, _ in g_id_list:
         send_request_for_accept_prize(room_id, gift_id)
 
 
