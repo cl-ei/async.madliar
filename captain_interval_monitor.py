@@ -3,15 +3,17 @@ import sys
 import json
 import requests
 import time
-import socket
 import redis
 import pickle
 import logging
 
+
 if sys.platform in ("darwin", "win32"):
     log_file = "log/captain.log"
+    cookie_file = "./cookie.txt"
 else:
     log_file = "/home/wwwroot/log/captain.log"
+    cookie_file = "/home/wwwroot/notebook.madliar/notebook_user/i@caoliang.net/cookie.txt"
 
 fh = logging.FileHandler(log_file)
 log_format = '%(asctime)s: %(message)s'
@@ -62,14 +64,72 @@ def compare(old_list, new_list):
     return new_list
 
 
-def push_prize_info(msg):
-    try:
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        s.sendto(pickle.dumps(msg), ('127.0.0.1', 11111))
-        s.close()
-    except Exception:
-        pass
+with open(cookie_file) as f:
+    cookie = f.read().strip()
+csrf_token = ""
+for kv in cookie.split(";"):
+    if "bili_jct" in kv:
+        csrf_token = kv.split("=")[-1].strip()
+        break
+if not csrf_token:
+    logging.error("Error csrf token!")
+    sys.exit(0)
+headers = {
+    "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko)",
+    "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+    "Cookie": cookie,
+}
 
+
+def get_gift_id(room_id):
+    req_url = "https://api.live.bilibili.com/lottery/v1/Lottery/check_guard?roomid=%s" % room_id
+    req_data = {"roomid": room_id}
+    for _ in range(0, 3):
+        try:
+            time.sleep(0.2)
+            r = requests.get(url=req_url, data=req_data, headers=headers, timeout=5)
+            if r.status_code == 200:
+                data = json.loads(r.content.decode("utf-8"))
+                if data.get("code", 0) == 0:
+                    return [int(d["id"]) for d in data.get("data", []) if "id" in d and d["id"]]
+        except Exception as e:
+            logging.error("Get gift id ERROR: %s, room id: %s" % (e, room_id))
+            pass
+    return []
+
+
+def send_request_for_accept_prize(room_id, gift_id):
+    req_url = "https://api.live.bilibili.com/lottery/v2/Lottery/join"
+    data = {
+        "roomid": int(room_id),
+        "id": gift_id,
+        "type": "guard",
+        "csrf_token": csrf_token,
+        "csrf": csrf_token,
+        "visit_id": "",
+    }
+    r = None
+    for _ in range(3):
+        time.sleep(0.2)
+        r = requests.post(url=req_url, data=data, headers=headers)
+        if r.status_code == 200:
+            break
+    content = getattr(r, "content", b"")
+    try:
+        content = json.loads(content.decode("utf-8")).get("data", {}).get("message", "")
+        message = "accept_prize, room id: %s -> %s, %s" % (room_id, gift_id, content)
+        print(message)
+        logging.info(message)
+    except Exception as e:
+        message = "accept_prize ERROR: %s, room id: %s" % (e, room_id)
+        print(message)
+        logging.error(message)
+
+
+def accept_prize(room_id):
+    g_id_list = get_gift_id(room_id)
+    for gift_id in g_id_list:
+        send_request_for_accept_prize(room_id, gift_id)
 
 
 def main():
@@ -98,12 +158,9 @@ def main():
 
     logging.info("Found captain list, zongdu: %s, tidu: %s, jianzhang: %s" % (zongdu_list, tidu_list, jianzhang_list))
 
-    for z in zongdu_list:
-        push_prize_info({"gtype": "总督", "roomid": int(z)})
-    for z in tidu_list:
-        push_prize_info({"gtype": "提督", "roomid": int(z)})
-    for z in jianzhang_list:
-        push_prize_info({"gtype": "舰长", "roomid": int(z)})
+    total_list = set(zongdu_list + tidu_list + jianzhang_list)
+    for room_id in total_list:
+        accept_prize(room_id)
 
 
 if __name__ == "__main__":
