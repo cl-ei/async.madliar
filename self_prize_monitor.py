@@ -1,9 +1,11 @@
 import json
 import socket
+import requests
 import websocket
 import time
 import datetime
 import os
+import sys
 import logging
 import pickle
 from threading import Thread
@@ -17,7 +19,20 @@ CONST_PARAM = 1
 CONST_HEART_BEAT = 2
 CONST_MESSAGE = 7
 
-LOG_PATH = "/home/wwwroot/log/"
+if sys.platform in ("darwin", "win32"):
+    LOG_PATH = "./log/"
+    cookie_file = "./cookie.txt"
+else:
+    LOG_PATH = "/home/wwwroot/log/"
+    cookie_file = "/home/wwwroot/notebook.madliar/notebook_user/i@caoliang.net/cookie.txt"
+
+fh = logging.FileHandler(os.path.join(LOG_PATH, "tv_accepter.log"), encoding="utf-8")
+fh.setFormatter(logging.Formatter('%(message)s'))
+logger = logging.getLogger("tv_accepter")
+logger.setLevel(logging.DEBUG)
+logger.addHandler(fh)
+tv_logging = logger
+
 
 fh = logging.FileHandler(os.path.join(LOG_PATH, "self_monotor.log"), encoding="utf-8")
 fh.setFormatter(logging.Formatter('%(message)s'))
@@ -27,13 +42,76 @@ logger.addHandler(fh)
 logging = logger
 
 
-def push_prize_info(msg):
+with open(cookie_file) as f:
+    cookie = f.read().strip()
+csrf_token = ""
+for kv in cookie.split(";"):
+    if "bili_jct" in kv:
+        csrf_token = kv.split("=")[-1].strip()
+        break
+if not csrf_token:
+    logging.error("Error csrf token!")
+    sys.exit(0)
+headers = {
+    "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko)",
+    "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+    "Cookie": cookie,
+}
+
+
+def get_gift_id(room_id):
+    req_url = "https://api.live.bilibili.com/gift/v3/smalltv/check?roomid=%s" % room_id
+    req_data = {"roomid": room_id}
+    for _ in range(0, 3):
+        try:
+            time.sleep(0.2)
+            r = requests.get(url=req_url, data=req_data, headers=headers, timeout=5)
+            if r.status_code == 200:
+                data = json.loads(r.content.decode("utf-8"))
+                if data.get("code", 0) == 0:
+                    return [int(d["raffleId"]) for d in data.get("data", {}).get("list", []) if "raffleId" in d and d["raffleId"]]
+        except Exception as e:
+            tv_logging.error("Get gift id ERROR: %s, room id: %s" % (e, room_id))
+            pass
+    return []
+
+
+def send_request_for_accept_prize(room_id, gift_id):
+    req_url = "https://api.live.bilibili.com/gift/v3/smalltv/join"
+
+    data = {
+        "roomid": room_id,
+        "raffleId": gift_id,
+        "type": "Gift",
+        "csrf_token": csrf_token,
+        "csrf": csrf_token,
+        "visit_id": "",
+    }
+    r = None
+    for _ in range(3):
+        time.sleep(0.2)
+        r = requests.post(url=req_url, data=data, headers=headers)
+        if r.status_code == 200:
+            break
+    content = getattr(r, "content", b"")
     try:
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        s.sendto(pickle.dumps(msg), ('127.0.0.1', 11111))
-        s.close()
-    except Exception:
-        pass
+        code = json.loads(content.decode("utf-8")).get("code", -1)
+        message = "\taccept_prize, room id: %s -> %s, code: %s" % (room_id, gift_id, code)
+        print(message)
+        tv_logging.info(message)
+    except Exception as e:
+        message = "\taccept_prize ERROR: %s, room id: %s" % (e, room_id)
+        print(message)
+        tv_logging.error(message)
+
+
+def accept_prize(room_id):
+    g_id_list = get_gift_id(room_id)
+    msg = "Found prize room: %s, gift id: %s" % (room_id, g_id_list)
+    tv_logging.info(msg)
+    print(msg)
+    for gift_id in g_id_list:
+        send_request_for_accept_prize(room_id, gift_id)
 
 
 def parse_danmaku(msg):
@@ -43,13 +121,13 @@ def parse_danmaku(msg):
         if message_type in (2, 3):
             room_id = msg.get("roomid")
             message = msg.get("msg_self", "")
+            real_roomid = msg.get("real_roomid", "")
+
             datetime_str = str(datetime.datetime.now())
             msg = "[{}] [{}] [{}][{}]".format(datetime_str, message_type, room_id, message)
             print(msg)
             logging.info(msg)
-
-            msg = {"gtype": "unkown-%s" % message, "roomid": room_id}
-            push_prize_info(msg)
+            accept_prize(real_roomid)
 
 
 def on_message(ws_obj, message):
