@@ -29,12 +29,14 @@ CONST_HEART_BEAT = 2
 CONST_MESSAGE = 7
 
 
-if sys.platform == "darwin":
+if sys.platform in ("darwin", "win32"):
     DEBUG = True
     LOG_PATH = "./log/"
+    cookie_file = "cookie.txt"
 else:
     DEBUG = False
     LOG_PATH = "/home/wwwroot/log/hansy/"
+    cookie_file = "/home/wwwroot/notebook.madliar/notebook_user/i@caoliang.net/cookie.txt"
 
 fh = logging.FileHandler(os.path.join(LOG_PATH, "prize.log"), encoding="utf-8")
 fh.setFormatter(logging.Formatter('%(message)s'))
@@ -64,11 +66,6 @@ logger.setLevel(logging.DEBUG)
 logger.addHandler(fh)
 logging = logger
 
-
-if sys.platform == "darwin":
-    cookie_file = "cookie.txt"
-else:
-    cookie_file = "/home/wwwroot/notebook.madliar/notebook_user/i@caoliang.net/cookie.txt"
 
 with open(cookie_file) as f:
     cookie = f.read().strip()
@@ -110,13 +107,6 @@ def send_danmaku(msg, roomid=ROOM_ID, color=0xffffff):
 def parse_danmaku(msg):
     cmd = msg.get("cmd")
     datetime_str = str(datetime.datetime.now())
-    if DEBUG and cmd in (
-        "DANMU_MSG", "SEND_GIFT", "COMBO_END", "ENTRY_EFFECT",
-        "WELCOME_GUARD", "WELCOME", "NOTICE_MSG", "COMBO_SEND",
-        "ROOM_RANK", "ROOM_BLOCK_MSG", "WISH_BOTTLE",
-    ):
-        return
-
     if cmd == "DANMU_MSG":
         content = msg.get("info", "")
         raw_msg = content[1]
