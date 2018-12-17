@@ -27,7 +27,7 @@ else:
     cookie_file = "/home/wwwroot/notebook.madliar/notebook_user/i@caoliang.net/cookie.txt"
 
 fh = logging.FileHandler(os.path.join(LOG_PATH, "tv_accepter.log"), encoding="utf-8")
-fh.setFormatter(logging.Formatter('%(message)s'))
+fh.setFormatter(logging.Formatter('%(asctime)s: %(message)s'))
 logger = logging.getLogger("tv_accepter")
 logger.setLevel(logging.DEBUG)
 logger.addHandler(fh)
