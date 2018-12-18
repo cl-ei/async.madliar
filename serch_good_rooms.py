@@ -30,6 +30,7 @@ class Cache(object):
     __r = redis.Redis(**REDIS_CONFIG)
 
     __ROOM_KEY = "AN_%s"  # room_id
+    __QUERIED_LIST = "QUERIED_LIST"
 
     @classmethod
     def get_room_info(cls, room_id):
@@ -50,6 +51,31 @@ class Cache(object):
         except Exception:
             r = False
         return r
+
+    @classmethod
+    def get_if_its_queried_room(cls, room_id):
+        try:
+            room_list = pickle.loads(cls.__r.get(cls.__QUERIED_LIST))
+        except Exception:
+            room_list = []
+        return int(room_id) in room_list
+
+    @classmethod
+    def _set_queried_room(cls, room_id):
+        try:
+            room_list = pickle.loads(cls.__r.get(cls.__QUERIED_LIST))
+        except Exception:
+            room_list = []
+        room_list.append(int(room_id))
+        return cls.__r.set(cls.__QUERIED_LIST, pickle.dumps(room_list))
+
+    @classmethod
+    def get_queried_room_list(cls):
+        try:
+            room_list = pickle.loads(cls.__r.get(cls.__QUERIED_LIST))
+        except Exception:
+            room_list = []
+        return room_list
 
 
 def get_online_rooms(page_limit=20):
@@ -80,21 +106,15 @@ def get_online_rooms(page_limit=20):
                 pass
         time.sleep(1)
 
-    #
-    # content = getattr(r, "content", b"")
-    # try:
-    #     code = json.loads(content.decode("utf-8")).get("code", -1)
-    #     message = "\taccept_prize, room id: %s -> %s, code: %s" % (room_id, gift_id, code)
-    #     print(message)
-    #     tv_logging.info(message)
-    # except Exception as e:
-    #     message = "\taccept_prize ERROR: %s, room id: %s" % (e, room_id)
-    #     print(message)
-    #     tv_logging.error(message)
+
+def search_detail_info():
+    pass
 
 
 if __name__ == "__main__":
-    # print(Cache.get_room_info(123))
-    # print(Cache.save_room_info(123, {"a": 123}))
-    # print(Cache.get_room_info(123))
-    get_online_rooms(page_limit=1)
+    # while True:
+    #     time.sleep(60*10)
+    #     get_online_rooms(page_limit=1)
+    print(Cache.get_if_its_queried_room(123))
+    print(Cache._set_quired_room(123))
+    print(Cache.get_if_its_queried_room(123))
