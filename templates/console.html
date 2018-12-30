@@ -15,7 +15,7 @@
             -ms-text-size-adjust: 100%;
             text-rendering: optimizelegibility;
             -webkit-font-smoothing: antialiased;
-            font-family: PingFang SC, Lantinghei SC, Microsoft Yahei, Hiragino Sans GB, Microsoft Sans Serif, WenQuanYi Micro Hei, sans;
+            font-family: Consolas, Monaco, monospace;
         }
         body{
             margin: 0;padding: 0;width: 100%;color: white;overflow-x: hidden;
@@ -84,21 +84,6 @@
             font-size: 12px;
             overflow-y: scroll;
         }
-        #list{
-            transform: translateZ(0);
-            position:absolute;
-            left:0;
-            top:0;
-            margin:0;
-            padding:0;
-            -webkit-animation:3s move infinite linear;
-            width:100%;
-            color: rgb(183, 183, 221);
-            text-shadow: #fff -2px 0px 0px, #fff 0px -2px 0px, #fff 2px 0px 0px, #fff 0px 2px 0px, #fff -1px -1px 0px, #fff 1px 1px 0px, #fff 1px -1px 0px, #fff -1px 1px 0px;
-            font-size: 24px;
-            font-weight: 600;
-            font-family: aaxiaonangua;
-        }
         #list li{
             list-style: none;
             text-align: center;
@@ -152,7 +137,6 @@ $(function(){
                     color = "#FFB900";
                 }
                 m = m.replace(/.\[\d+m/g, "###").split("###");
-                console.log("m -> ", m)
                 if (m.length === 1){
                     printToConsole(m[0])
                 }else if (m.length === 3){
