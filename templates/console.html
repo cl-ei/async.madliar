@@ -153,16 +153,11 @@ $(function(){
                 }
                 m = m.replace(/.\[\d+m/g, "###").split("###");
                 console.log("m -> ", m)
-                //
-                // var header = (m.match(/###/g) || [""])[0];
-                // console.log("inner raw header: %s", header)
-                // if(header.length < 1){
-                //     printToConsole(m);
-                //     return
-                // }
-                // var innerHeader = header.slice(3, header.length -3),
-                //     innerMsg = m.slice(header.length);
-                // printToConsole('<span style="color: ' + color + ';">' + innerHeader + '</span>' + innerMsg);
+                if (m.length === 1){
+                    printToConsole(m[0])
+                }else if (m.length === 3){
+                    printToConsole('<span style="color: ' + color + ';">' + m[1] + '</span>' + m[2]);
+                }
             }
         }
     };
