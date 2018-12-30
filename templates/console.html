@@ -143,8 +143,16 @@ $(function(){
         for (var i = 0; i < msgs.length; i++){
             var m = msgs[i];
             if (m.length > 10 && m.indexOf("stdout output") < 0){
-                window.MMM = m;
-                printToConsole(m)
+                var color = "#006400";
+                if(m.indexOf("[INFO]") > -1){
+                    color = "#006400";
+                }else if(m.indexOf("[ERROR]") > -1){
+                    color = "#B64955";
+                }else if(m.indexOf("[WARN]") > -1){
+                    color = "#FFB900";
+                }
+                m = m.replace(/�\[\d+m/g, "");
+                printToConsole('<span style="color: ' + color + ';">' + m + '</span>');
             }
         }
     };
