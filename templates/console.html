@@ -151,8 +151,11 @@ $(function(){
                 }else if(m.indexOf("[WARN]") > -1){
                     color = "#FFB900";
                 }
-                m = m.replace(/�\[\d+m/g, "");
-                printToConsole('<span style="color: ' + color + ';">' + m + '</span>');
+                m = m.replace(/�\[\d+m/g, "###")[0];
+                var header = m.match(/###/g);
+                var innerHeader = header.slice(3, header.length -3),
+                    innerMsg = m.slice(header.length);
+                printToConsole('<span style="color: ' + color + ';">' + innerHeader + '</span>' + innerMsg);
             }
         }
     };
