@@ -152,6 +152,7 @@ $(function(){
                     color = "#FFB900";
                 }
                 m = m.replace(/�\[\d+m/g, "###");
+                console.log("m: ", m)
                 var header = (m.match(/###/g) || [""])[0];
                 console.log("inner raw header: %s", header)
                 if(header.length < 1){
