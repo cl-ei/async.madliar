@@ -151,16 +151,18 @@ $(function(){
                 }else if(m.indexOf("[WARN]") > -1){
                     color = "#FFB900";
                 }
-                m = m.replace(/.\[\d+m/g, "###");
-                var header = (m.match(/###/g) || [""])[0];
-                console.log("inner raw header: %s", header)
-                if(header.length < 1){
-                    printToConsole(m);
-                    return
-                }
-                var innerHeader = header.slice(3, header.length -3),
-                    innerMsg = m.slice(header.length);
-                printToConsole('<span style="color: ' + color + ';">' + innerHeader + '</span>' + innerMsg);
+                m = m.replace(/.\[\d+m/g, "###").split("###");
+                console.log("m -> ", m)
+                //
+                // var header = (m.match(/###/g) || [""])[0];
+                // console.log("inner raw header: %s", header)
+                // if(header.length < 1){
+                //     printToConsole(m);
+                //     return
+                // }
+                // var innerHeader = header.slice(3, header.length -3),
+                //     innerMsg = m.slice(header.length);
+                // printToConsole('<span style="color: ' + color + ';">' + innerHeader + '</span>' + innerMsg);
             }
         }
     };
