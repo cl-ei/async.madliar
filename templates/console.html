@@ -139,8 +139,13 @@ $(function(){
         console.log("Websocket connected! t1: ", t1);
     };
     ws.onmessage = function (evnt) {
-        var msg = evnt.data;
-        printToConsole(msg)
+        var msgs = evnt.data.split("\n");
+        for (var i = 0; i < msgs.length; i++){
+            var m = msgs[i];
+            if (m.length > 10 && m.indexOf("stdout output") < 0){
+                printToConsole(m)
+            }
+        }
     };
     ws.onerror = function (evnt) {
         socketStatus=false;
