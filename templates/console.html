@@ -103,12 +103,13 @@
 
 $(function(){
     window.consoleMessage = [];
+    window.consoleLinesLimit = 10000;
     function printToConsole(msg){
         // var datetimestr = getTimeString() + " > ";
         window.consoleMessage.push(msg.replace("\n", "<br \>"));
-        if(window.consoleMessage.length > window.console_lines){
+        if(window.consoleMessage.length > window.consoleLinesLimit){
             window.consoleMessage = window.consoleMessage.splice(
-            window.consoleMessage.length - window.console_lines, window.consoleMessage.length);
+            window.consoleMessage.length - window.consoleLinesLimit, window.consoleMessage.length);
         }
         var html = window.consoleMessage.join("<br />");
         $("#console").html(html);
