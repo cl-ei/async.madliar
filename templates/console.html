@@ -103,10 +103,10 @@
 <script>
 
 $(function(){
-    window.consoleLinesLimit = 10;
+    window.consoleLinesLimit = 1000;
     function printToConsole(msg){
         var thisLine = msg.replace("\n", "<br \>");
-        $("#console").append("<span><br />" + thisLine + "</span>");
+        $("#console").append("<span>" + thisLine + "<br /></span>");
         while($("#console").children().length > window.consoleLinesLimit){
             $("#console").children().eq(0).remove();
         }
