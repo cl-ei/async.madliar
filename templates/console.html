@@ -106,12 +106,11 @@ $(function(){
     window.consoleLinesLimit = 10;
     function printToConsole(msg){
         var thisLine = msg.replace("\n", "<br \>");
-        $("#console").append("<br />" + thisLine);
+        $("#console").append("<span><br />" + thisLine + "</span>");
         while($("#console").children().length > window.consoleLinesLimit){
             $("#console").children().eq(0).remove();
         }
         $("#console").scrollTop(10000000000);
-
     }
     var t1 = 0;
     var socketStatus = false;
