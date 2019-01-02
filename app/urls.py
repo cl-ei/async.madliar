@@ -1,3 +1,4 @@
+from etc.config import DEBUG
 from app.handler import (
     index,
     robots_response,
@@ -18,4 +19,4 @@ user_url_map = (
 static_url_map = (
     ("/dist_article", "./dist_article"),
     ("/music", "./music"),
-)
+) if DEBUG else ()
