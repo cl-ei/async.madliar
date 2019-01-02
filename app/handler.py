@@ -35,7 +35,7 @@ async def index(req):
     if DEBUG:
         article_js_link = os.path.join(DIST_ARTICLE_PATH, article_js_file_name)
     else:
-        article_js_link = CDN_URL + os.path.join(DIST_ARTICLE_PATH, article_js_file_name)
+        article_js_link = CDN_URL + os.path.join("dist_article", article_js_file_name)
     context = {
         "article_js_link": article_js_link,
         "page": {
