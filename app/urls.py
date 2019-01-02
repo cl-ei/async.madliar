@@ -16,5 +16,6 @@ user_url_map = (
 )
 
 static_url_map = (
-    ("/static", "../madliar.com/static"),
+    ("/dist_article", "./dist_article"),
+    ("/music", "./music"),
 )

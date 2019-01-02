@@ -21,7 +21,7 @@ else:
 
 
 sys.stdout.write("System start args: %s, %s\n" % (host, port))
-app = web.Application(middlewares=installed_middlewares, router=router, debug=False)
+app = web.Application(middlewares=installed_middlewares, router=router, debug=True)
 web.run_app(
     app=app,
     host=host,

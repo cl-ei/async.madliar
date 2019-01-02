@@ -3,10 +3,10 @@ import json
 from app.http import HttpResponse, render_to_response
 from etc import (
     PROJECT_ROOT,
-    PARSED_ARTICLE_JSON,
-    PARSED_ARTICLE_JSON_PATH,
+    DIST_ARTICLE_PATH,
     CDN_URL,
     MUSIC_FOLDER,
+    DEBUG,
 )
 
 
@@ -27,11 +27,17 @@ async def record_response(req):
 
 
 async def index(req):
-    article_file_path = os.path.join(PROJECT_ROOT, PARSED_ARTICLE_JSON)
-    article_js_file_name = os.listdir(article_file_path)[0]
-    article_js = os.path.join(PARSED_ARTICLE_JSON_PATH, article_js_file_name)
+    article_js_file_name = ""
+    for f in os.listdir(DIST_ARTICLE_PATH):
+        if f.lower().endswith(".js"):
+            article_js_file_name = f
+            break
+    if DEBUG:
+        article_js_link = os.path.join(DIST_ARTICLE_PATH, article_js_file_name)
+    else:
+        article_js_link = CDN_URL + os.path.join(DIST_ARTICLE_PATH, article_js_file_name)
     context = {
-        "article_js": article_js,
+        "article_js_link": article_js_link,
         "page": {
             "author": "CL",
             "description": u"CL，编程爱好者，这是CL的官方博客，记录生活感悟和学习点滴。",
@@ -47,6 +53,9 @@ async def index(req):
 
 async def music_response(request):
     if request.query.get("ref"):
+        if not os.path.exists(MUSIC_FOLDER):
+            os.mkdir(MUSIC_FOLDER)
+
         view_data = {
             "ref": True,
             "music_list": json.dumps(os.listdir(MUSIC_FOLDER), ensure_ascii=False)

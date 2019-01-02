@@ -4,7 +4,7 @@ import random
 import re
 import sys
 
-from etc.config import PROJECT_ROOT, POST_ARTICLE_PATH, PARSED_ARTICLE_JSON, CDN_URL
+from etc.config import PROJECT_ROOT, RAW_ARTICLE_PATH, DIST_ARTICLE_PATH, CDN_URL
 
 
 def randstr(length=24):
@@ -93,7 +93,7 @@ class ArticleParser(object):
 def generate_cached_article_json(*args, **kwargs):
     sys.stdout.write("Start load article.\n")
 
-    article_path = os.path.join(PROJECT_ROOT, POST_ARTICLE_PATH)
+    article_path = os.path.join(PROJECT_ROOT, RAW_ARTICLE_PATH)
     file_list = os.listdir(article_path)
 
     article_list = {}
@@ -114,12 +114,13 @@ def generate_cached_article_json(*args, **kwargs):
         "window.articleIdList=", id_list
     ]).replace("/static", CDN_URL + "/static")
 
-    article_js_file_path = os.path.join(PROJECT_ROOT, PARSED_ARTICLE_JSON)
-    for existed_file in os.listdir(article_js_file_path):
+    if not os.path.exists(DIST_ARTICLE_PATH):
+        os.mkdir(DIST_ARTICLE_PATH)
+    for existed_file in os.listdir(DIST_ARTICLE_PATH):
         print(existed_file)
-        os.remove(os.path.join(article_js_file_path, existed_file))
+        os.remove(os.path.join(DIST_ARTICLE_PATH, existed_file))
 
-    article_js_file = os.path.join(PARSED_ARTICLE_JSON, randstr(64) + ".js")
+    article_js_file = os.path.join(DIST_ARTICLE_PATH, randstr(64) + ".js")
     with open(article_js_file, "wb") as f:
         f.write(total_article.encode("utf-8"))
 

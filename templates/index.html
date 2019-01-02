@@ -11,7 +11,7 @@
     <meta name="keywords" content="{{ page.get('keywords') }}"/>
     <meta name="author" content="{{ page.get('author') }}">
 
-    <link rel="icon" href="/static/img/favicon.png">
+    <link rel="icon" href="{{ CDN_URL }}/favicon.png">
     <link rel="stylesheet" href="{{ CDN_URL }}/static/css/bootstrap.min.css" />
     <link rel="stylesheet" href="{{ CDN_URL }}/static/css/animate.min.css" />
     <link rel="stylesheet" href="{{ CDN_URL }}/static/css/font-awesome.min.css">
@@ -108,7 +108,7 @@
     <script src="{{ CDN_URL }}/static/js/jquery.min.js"></script>
     <script src="{{ CDN_URL }}/static/js/bootstrap.min.js"></script>
     <script src="{{ CDN_URL }}/static/js/marked.js"></script>
-    <script src="{{ CDN_URL }}/{{ article_js }}"></script>
+    <script src="{{ article_js_link }}"></script>
     <script src="{{ CDN_URL }}/static/blog/js/mHdwTj0ItvA57e3a9B.js"></script>
 </body>
 </html>
