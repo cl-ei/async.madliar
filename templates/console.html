@@ -133,6 +133,8 @@ $(function(){
                     color = "#B64955";
                 }else if(m.indexOf("[WARN]") > -1){
                     color = "#FFB900";
+                }else if(m.indexOf("[DEBUG]") > -1){
+                    color = "#00CDCD";
                 }
                 m = m.replace(/.\[\d+m/g, "###").split("###");
                 if (m.length === 1){
