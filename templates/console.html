@@ -130,8 +130,13 @@ $(function(){
             }
             var color = "#006400";
             var sepPos = m.indexOf("]");
+            if (sepPos < 0) {
+                printToConsole(m);
+                return;
+            }
             var header = m.slice(0, sepPos + 2);
             var body = m.slice(header.length);
+
             if(m.indexOf("[INFO]") > -1){
                 color = "#006400";
             }else if(m.indexOf("[ERROR]") > -1){
