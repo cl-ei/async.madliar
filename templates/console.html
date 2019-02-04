@@ -129,8 +129,8 @@ $(function(){
                 continue
             }
             var color = "#006400";
-            var sepPos = m.indexOf(":");
-            var header = m.slice(0, sepPos + 1);
+            var sepPos = m.indexOf("]");
+            var header = m.slice(0, sepPos + 2);
             var body = m.slice(header.length);
             if(m.indexOf("[INFO]") > -1){
                 color = "#006400";
