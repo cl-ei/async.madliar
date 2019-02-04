@@ -125,24 +125,20 @@ $(function(){
         var msgs = evnt.data.split("\n");
         for (var i = 0; i < msgs.length; i++){
             var m = msgs[i];
-            if (m.length > 10 && m.indexOf("stdout output") < 0){
-                var color = "#006400";
-                if(m.indexOf("[INFO]") > -1){
-                    color = "#006400";
-                }else if(m.indexOf("[ERROR]") > -1){
-                    color = "#B64955";
-                }else if(m.indexOf("[WARN]") > -1){
-                    color = "#FFB900";
-                }else if(m.indexOf("[DEBUG]") > -1){
-                    color = "#00CDCD";
-                }
-                m = m.replace(/.\[\d+m/g, "###").split("###");
-                if (m.length === 1){
-                    printToConsole(m[0])
-                }else if (m.length === 3){
-                    printToConsole('<span style="color: ' + color + ';">' + m[1] + '</span>' + m[2]);
-                }
+            var color = "#006400";
+            var sepPos = m.indexOf(":");
+            var header = m.slice(0, sepPos + 1);
+            var body = m.slice(header.length);
+            if(m.indexOf("[INFO]") > -1){
+                color = "#006400";
+            }else if(m.indexOf("[ERROR]") > -1){
+                color = "#B64955";
+            }else if(m.indexOf("[WARNING]") > -1){
+                color = "#FFB900";
+            }else if(m.indexOf("[DEBUG]") > -1){
+                color = "#00CDCD";
             }
+            printToConsole('<span style="color: ' + color + ';">' + header + '</span>' + body);
         }
     };
     ws.onerror = function (evnt) {
