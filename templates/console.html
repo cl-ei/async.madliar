@@ -125,6 +125,9 @@ $(function(){
         var msgs = evnt.data.split("\n");
         for (var i = 0; i < msgs.length; i++){
             var m = msgs[i];
+            if(m.trim().length < 1){
+                continue
+            }
             var color = "#006400";
             var sepPos = m.indexOf(":");
             var header = m.slice(0, sepPos + 1);
