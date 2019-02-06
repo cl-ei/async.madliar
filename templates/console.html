@@ -145,6 +145,8 @@ $(function(){
                 color = "#FFB900";
             }else if(m.indexOf("[DEBUG]") > -1){
                 color = "#00CDCD";
+            }else if(m.indexOf("[CRITICAL]") > -1){
+                color = "#cd6000";
             }
             printToConsole('<span style="color: ' + color + ';">' + header + '</span>' + body);
         }
