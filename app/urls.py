@@ -5,6 +5,7 @@ from app.handler import (
     record_response,
     music_response,
     console_response,
+    delay_response,
 )
 
 
@@ -14,6 +15,8 @@ user_url_map = (
     ("get", r"/record", record_response),
     ("get", r"/music", music_response),
     ("get", r"/console", console_response),
+    ("get", r"/delay", delay_response),
+    ("post", r"/delay", delay_response),
 )
 
 static_url_map = (

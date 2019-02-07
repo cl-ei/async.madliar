@@ -1,5 +1,6 @@
 import os
 import json
+import asyncio
 from app.http import HttpResponse, render_to_response
 from etc import (
     PROJECT_ROOT,
@@ -24,6 +25,15 @@ async def robots_response(request):
 
 async def record_response(req):
     return HttpResponse("")
+
+
+async def delay_response(request):
+    delay = int(request.query.get("delay", 0))
+    await asyncio.sleep(delay)
+    if request.query.get("json"):
+        return HttpResponse('{"code": 0, "msg": "OK"}')
+    else:
+        return HttpResponse('response "ok!"')
 
 
 async def index(req):
