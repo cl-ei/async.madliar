@@ -147,7 +147,8 @@ p {
             // in opera + safari, the event.target is unpredictable.
             // for example: 'keydown' might be associated with HtmlBodyElement
             // or the element where you last clicked with your mouse.
-            if (jQuery.browser.opera || jQuery.browser.safari || opt.checkParent){
+			var bro = jQuery.browser || {};
+            if (bro.opera || bro.safari || opt.checkParent){
                 while (!that.all[element] && element.parentNode){
                     element = element.parentNode;
                 }
