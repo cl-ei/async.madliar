@@ -555,10 +555,7 @@ function new_mg() {
 	var w = 10,
 		h = 10;
 	mg.set({width: w, height: h}).create().show();
-}
-
-function mark(h, ob) {
-	mg.me.setMark(h, ob.checked);
+	mg.me.setMark(1, true);
 }
 
 var mg = new MG("mg");
