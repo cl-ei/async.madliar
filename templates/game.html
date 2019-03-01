@@ -43,7 +43,7 @@ body {
 	bottom: 20px;
 	padding-bottom: 4px;
 	left: -5px;
-	background: transparent url(img/sInform_arrow.gif) no-repeat 11px 100%;
+	background: transparent url(https://statics.madliar.com/static/img/head_3.png) no-repeat 11px 100%;
 	display: none;
 	opacity: 0.75;
 	filter: alpha(opacity=75);
@@ -575,21 +575,11 @@ MG_Me.prototype = {
 
 <script type="text/javascript">
 function new_mg() {
-	var w = parseInt(document.getElementById("mg_width").value) || 20,
-		h = parseInt(document.getElementById("mg_height").value) || 20;
+	var w = parseInt(document.getElementById("mg_width").value) || 30,
+		h = parseInt(document.getElementById("mg_height").value) || 90;
 	mg.set({width: w, height: h}).create().show();
 	document.getElementById("mg_width").value = w;
 	document.getElementById("mg_height").value = h;
-	count();
-}
-function count() {
-	$.get("stat/count.py", {
-			r: Math.random()
-		}, function (r) {
-			r = r.replace(/[\r\n\s]/g, "");
-			if (r.match(/^\d+$/))
-				$("#count").html(r);
-		});
 }
 
 function mark(h, ob) {
