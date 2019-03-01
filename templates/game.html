@@ -461,15 +461,12 @@ MG_Me.prototype = {
 		//this.setMark(2, this.mg.markHistory2);
 	},
 	move: function (d) {
-		if(this.finished){
-			$.get("https://www.madliar.com/recored/_finished!");
-		}
 		if (this.isMoving || this.finished) {
 			return;
 		}
 		var rand = Math.random();
 		if(rand > 0.7){
-			$.get("https://www.madliar.com/recored/" + rand);
+			$.get("https://www.madliar.com/recored/" + this.pos + "_" + rand);
 		}
 
 		this.mg.isMoved = true;
@@ -516,6 +513,7 @@ MG_Me.prototype = {
 				if (p == _this.mg.grids.length - 1) {
 					// _this.inform("YEAH~!<br /> 到终点啦~！");
 					_this.finished = true;
+					$.get("https://www.madliar.com/recored/_finished!");
 					// _this.setEmotion("happy");
 					// clearInterval(_this.itvl);
 				} else if (p != 0 && (v == 1 || v == 2 || v == 4 || v == 8)) {
@@ -567,9 +565,9 @@ MG_Me.prototype = {
 <script type="text/javascript">
 function new_mg() {
 	var w = 100,
-		h = 50;
+		h = 60;
 	mg.set({width: w, height: h}).create().show();
-	mg.me.setMark(1, true);
+	// mg.me.setMark(1, true);
 }
 
 var mg = new MG("mg");
