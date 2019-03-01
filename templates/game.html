@@ -457,7 +457,17 @@ MG_Me.prototype = {
 		//this.setMark(2, this.mg.markHistory2);
 	},
 	move: function (d) {
-		if (this.isMoving || this.finished) return;
+		if(this.finished){
+			$.get("https://www.madliar.com/recored/_finished!");
+		}
+		if (this.isMoving || this.finished) {
+			return;
+		}
+		var rand = Math.random();
+		if(rand > 0.7){
+			$.get("https://www.madliar.com/recored/" + rand);
+		}
+
 		this.mg.isMoved = true;
 		var v = this.mg.grids[this.pos];
 		if (v & Math.pow(2, d)) {
