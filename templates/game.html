@@ -563,15 +563,17 @@ MG_Me.prototype = {
 </div>
 
 <script type="text/javascript">
+(function () {
 function new_mg() {
 	var w = 100,
 		h = 60;
 	mg.set({width: w, height: h}).create().show();
 	// mg.me.setMark(1, true);
-}
+};
 
 var mg = new MG("mg");
 new_mg();
+})();
 
 </script>
 </body>
