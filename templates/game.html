@@ -2,7 +2,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta http-equiv="Content-Language" content="zh-CN" />
-<title>迷宫 - 三思</title>
+<title>迷宫</title>
 <style type="text/css">
 html, body {
 	padding: 0;
@@ -69,16 +69,6 @@ body {
 #mg_set p {
 	margin: 0 0 20px 0;
 	padding: 0 0 0 2em;
-}
-.info {
-	padding: 10px;
-	font-size: 14px;
-}
-.info p {
-	margin: 0;
-	padding: 0;
-	font-size: 12px;
-	color: gray;
 }
 #foot {
 	background: #f5f5f5;
@@ -208,6 +198,7 @@ p {
     return jQuery;
 })(jQuery);
 </script>
+
 <script>
 function MG(ob, w, h) {
 	this.ob = document.getElementById(ob);
@@ -452,14 +443,14 @@ MG_Me.prototype = {
 			_this.inform("提示：您可以使用键盘上的上、下、左、右方向键控制我的移动。");
 		}, 3000);
 
-		this.itvl = setInterval(function () {
-			if (!_this.mg.isMoved) return;
-			var now = new Date();
-			if (now - _this.lastMove > 10000) {
-				_this.inform("Hello?");
-				_this.setEmotion("surprised");
-			}
-		}, 3000);
+		// this.itvl = setInterval(function () {
+		// 	if (!_this.mg.isMoved) return;
+		// 	var now = new Date();
+		// 	if (now - _this.lastMove > 10000) {
+		// 		_this.inform("Hello?");
+		// 		_this.setEmotion("surprised");
+		// 	}
+		// }, 3000);
 
 		this.setMark(1, this.mg.markHistory);
 		//this.setMark(2, this.mg.markHistory2);
@@ -511,7 +502,7 @@ MG_Me.prototype = {
 					_this.inform("YEAH~!<br /> 到终点啦~！");
 					_this.finished = true;
 					_this.setEmotion("happy");
-					clearInterval(_this.itvl);
+					// clearInterval(_this.itvl);
 				} else if (p != 0 && (v == 1 || v == 2 || v == 4 || v == 8)) {
 					_this.inform("哎呀，好像走进死胡同了！");
 					_this.setEmotion("unhappy");
