@@ -555,13 +555,6 @@ MG_Me.prototype = {
 
 <body id="sansi-toy-mg">
 <div id="wrapper">
-	<div id="project_info">
-		<strong>项目信息：</strong>
-		<p>项目地址：<a href="http://code.google.com/p/sansi/" target="_blank">http://code.google.com/p/sansi/</a><br />下载链接：<a href="http://code.google.com/p/sansi/downloads/list" target="_blank">http://code.google.com/p/sansi/downloads/list</a></p>
-	</div>
-	<div id="logo">
-		<img src="img/logo_mg.gif" alt="三思迷宫" />
-	</div>
 	<div class="info">当前总第 <span id="count" class="num">-</span> 局
 		<p>规则：从左上角出发，终点为右下角红旗处。</p>
 	</div>
@@ -579,9 +572,6 @@ MG_Me.prototype = {
 		<input type="button" value=" 生成新迷宫 " onclick="new_mg();" />
 	</div>
 </div>
-<div id="foot">
-	Sansi.Org (c) 2008, <a href="http://www.sansi.org/">三思</a>
-</div>
 
 <script type="text/javascript">
 function new_mg() {
@@ -592,7 +582,6 @@ function new_mg() {
 	document.getElementById("mg_height").value = h;
 	count();
 }
-
 function count() {
 	$.get("stat/count.py", {
 			r: Math.random()
