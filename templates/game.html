@@ -211,8 +211,8 @@ p {
 <script>
 function MG(ob, w, h) {
 	this.ob = document.getElementById(ob);
-	this.w = w || 20;
-	this.h = h || 20;
+	this.w = w || 30;
+	this.h = h || 80;
 	this.gridSize = 20;
 	this.gridStr = "";
 	this.grids = [];
@@ -561,15 +561,6 @@ MG_Me.prototype = {
 	<div id="mg" class="mg"></div>
 	<div class="info">
 		<p>提示：您可以使用键盘上的上、下、左、右方向键控制迷宫中笑脸的移动。</p>
-	</div>
-	<div id="mg_set">
-		<strong>设置：</strong>
-		<p>
-			<input type="checkbox" onclick="mark(1, this);" id="mark1" /> <label for="mark1">将走过的格子用红色标出</label>
-		</p>
-		宽：<input type="text" id="mg_width" value="20" size="4" maxlength="2" /> 
-		高：<input type="text" id="mg_height" value="20" size="4" maxlength="2" /> 
-		<input type="button" value=" 生成新迷宫 " onclick="new_mg();" />
 	</div>
 </div>
 
