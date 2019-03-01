@@ -566,11 +566,12 @@ MG_Me.prototype = {
 
 <script type="text/javascript">
 function new_mg() {
-	var w = parseInt(document.getElementById("mg_width").value) || 30,
-		h = parseInt(document.getElementById("mg_height").value) || 90;
+	var w = 30,
+		h = 90;
+
 	mg.set({width: w, height: h}).create().show();
-	document.getElementById("mg_width").value = w;
-	document.getElementById("mg_height").value = h;
+	document.getElementById("mg_width").value = 30;
+	document.getElementById("mg_height").value = 90;
 }
 
 function mark(h, ob) {
