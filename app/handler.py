@@ -128,8 +128,10 @@ def _download_deficiency_face(uid):
             f.write(r.content)
     except Exception as e:
         logging.error(f"Cannot save face, e: {e}, {uid} -> {face}")
-    else:
-        logging.info(f"User face saved, {uid} -> {face}")
+        return
+
+    logging.info(f"User face saved, {uid} -> {face}")
+    return True
 
 
 async def get_gift_list(req):
@@ -165,10 +167,12 @@ async def get_gift_list(req):
             if str(uid) in existed_uid_list:
                 face = f"https://statics.madliar.com/static/face/{uid}"
             else:
-                deficiency_face = True
-                face = f"https://statics.madliar.com/static/face/default"
-                if time.time() - download_deficiency_face_start_time < 40:
-                    _download_deficiency_face(uid)
+                cost_time = time.time() - download_deficiency_face_start_time
+                if cost_time < 40 and _download_deficiency_face(uid) is True:
+                    face = f"https://statics.madliar.com/static/face/{uid}"
+                else:
+                    face = f"https://statics.madliar.com/static/face/default"
+                    deficiency_face = True
 
             gift_img = f"https://statics.madliar.com/static/gift/{data['gift_name']}"
 
