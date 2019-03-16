@@ -4,6 +4,7 @@ import copy
 import datetime
 import asyncio
 import random
+import requests
 from app.http import HttpResponse, render_to_response
 from etc import (
     PROJECT_ROOT,
@@ -90,8 +91,30 @@ async def thank(req):
     return render_to_response("templates/thank_v.html", context=context)
 
 
-async def _download_deficiency_face(uid):
-    pass
+def _download_deficiency_face(uid):
+    req_url = f"https://api.bilibili.com/x/space/acc/info?jsonp=jsonp&mid={uid}"
+    headers = {
+        "Accept": (
+            "text/html,application/xhtml+xml,application/xml;"
+            "q=0.9,image/webp,image/apng,*/*;q=0.8"
+        ),
+        "User-Agent": (
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) "
+            "Chrome/70.0.3538.110 Safari/537.36"
+        ),
+    }
+    try:
+        r = requests.get(req_url, headers=headers, timeout=10)
+        face = json.loads(r.text).get("data", {}).get("face", "") or ""
+        if not face:
+            raise RuntimeError("Bad face url")
+    except Exception as e:
+        return
+    print(face)
+
+
+_download_deficiency_face(731556)
 
 
 async def get_gift_list(req):
@@ -131,7 +154,7 @@ async def get_gift_list(req):
                 face = f"https://statics.madliar.com/static/face/default"
                 if download_deficiency_face_count < 2:
                     download_deficiency_face_count += 1
-                    await _download_deficiency_face(uid)
+                    _download_deficiency_face(uid)
 
             gift_img = f"https://statics.madliar.com/static/gift/{data['gift_name']}"
 
