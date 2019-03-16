@@ -1,5 +1,5 @@
 import os
-
+import sys
 from etc.config import LOG_PATH
 
 __all__ = ("logging", )
@@ -24,9 +24,13 @@ def __make_logger(name, log_file_name, level="DEBUG", log_format=None):
         log_format = '%(levelname)s %(asctime)s %(filename)s:%(lineno)d:%(funcName)s %(message)s'
     fh.setFormatter(logging.Formatter(log_format))
 
+    console = logging.StreamHandler(sys.stdout)
+    console.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s]: %(message)s"))
+
     logger = logging.getLogger(name)
     logger.setLevel(level_names.get(level.upper(), logging.DEBUG))
     logger.addHandler(fh)
+    logger.addHandler(console)
     return logger
 
 
