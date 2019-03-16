@@ -3,6 +3,7 @@ import json
 import copy
 import datetime
 import asyncio
+import random
 from app.http import HttpResponse, render_to_response
 from etc import (
     PROJECT_ROOT,
@@ -85,6 +86,10 @@ async def thank(req):
     return render_to_response("templates/thank_v.html", context=context)
 
 
+async def _download_deficiency_face(uid):
+    pass
+
+
 async def get_gift_list(req):
     HISTORY_DISPLAY_GIFTS = ("小电视飞船", "花之少女", "DokiDoki", "摩天大楼", "天空之翼", "节奏风暴")
 
@@ -96,9 +101,16 @@ async def get_gift_list(req):
     with open(file_name, "r", encoding="utf-8") as f:
         gift_list = f.readlines()
 
+    try:
+        existed_uid_list = os.listdir("/home/wwwroot/statics/static/face")
+    except Exception:
+        existed_uid_list = []
+
     history = []
     today = []
     today_str = str(datetime.datetime.now())[:10]
+    deficiency_face = False
+    download_deficiency_face_count = 0
     for line in gift_list:
         try:
             data = json.loads(line)
@@ -108,7 +120,15 @@ async def get_gift_list(req):
             sender = data["sender"]
             gift_name = data["gift_name"]
             count = data["count"]
-            face = f"https://statics.madliar.com/static/face/{uid}"
+            if str(uid) in existed_uid_list:
+                face = f"https://statics.madliar.com/static/face/{uid}"
+            else:
+                deficiency_face = True
+                face = f"https://statics.madliar.com/static/face/default"
+                if download_deficiency_face_count < 2:
+                    download_deficiency_face_count += 1
+                    await _download_deficiency_face(uid)
+
             gift_img = f"https://statics.madliar.com/static/gift/{data['gift_name']}"
 
             if created_time[:10] == today_str:
@@ -152,11 +172,16 @@ async def get_gift_list(req):
             packaged_history.append(copy.deepcopy(g))
 
     if not packaged_history:
-        packaged_history = copy.deepcopy(today)
+        packaged_history = [{
+            "sender": "管珩心",
+            "face": "https://statics.madliar.com/static/face/65568410",
+            "gift_name": "不负你的深情",
+        }]
     else:
-        packaged_history = sorted(packaged_history,
-                                  key=lambda x: (HISTORY_DISPLAY_GIFTS.index(x["gift_name"]), -x["count"]))
+        packaged_history.sort(key=lambda x: (HISTORY_DISPLAY_GIFTS.index(x["gift_name"]), -x["count"]))
 
+    if deficiency_face:
+        version += str(random.random())[:10]
     data = {
         "history": packaged_history,
         "today": today,
