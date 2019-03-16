@@ -6,6 +6,7 @@ import datetime
 import asyncio
 import random
 import requests
+import time
 from app.http import HttpResponse, render_to_response
 from etc import (
     PROJECT_ROOT,
@@ -151,7 +152,7 @@ async def get_gift_list(req):
     today = []
     today_str = str(datetime.datetime.now())[:10]
     deficiency_face = False
-    download_deficiency_face_count = 0
+    download_deficiency_face_start_time = time.time()
     for line in gift_list:
         try:
             data = json.loads(line)
@@ -166,8 +167,7 @@ async def get_gift_list(req):
             else:
                 deficiency_face = True
                 face = f"https://statics.madliar.com/static/face/default"
-                if download_deficiency_face_count < 2:
-                    download_deficiency_face_count += 1
+                if time.time() - download_deficiency_face_start_time < 40:
                     _download_deficiency_face(uid)
 
             gift_img = f"https://statics.madliar.com/static/gift/{data['gift_name']}"
