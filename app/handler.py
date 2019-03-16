@@ -1,4 +1,5 @@
 import os
+import sys
 import json
 import copy
 import datetime
@@ -13,6 +14,7 @@ from etc import (
     MUSIC_FOLDER,
     DEBUG,
 )
+from etc.log4 import logging
 
 
 async def robots_response(request):
@@ -110,11 +112,23 @@ def _download_deficiency_face(uid):
         if not face:
             raise RuntimeError("Bad face url")
     except Exception as e:
+        logging.error(f"Cannot get user face, uid -> {uid}, e: {e}")
         return
-    print(face)
 
-
-_download_deficiency_face(731556)
+    try:
+        r = requests.get(face, timeout=30)
+        if r.status_code != 200:
+            raise Exception("Request error when get face!")
+        if "linux" in sys.platform:
+            filename = f"/home/wwwroot/statics/static/face/{uid}"
+        else:
+            filename = f"./temp_data/{uid}"
+        with open(filename, "wb") as f:
+            f.write(r.content)
+    except Exception as e:
+        logging.error(f"Cannot save face, e: {e}, {uid} -> {face}")
+    else:
+        logging.info(f"User face saved, {uid} -> {face}")
 
 
 async def get_gift_list(req):
