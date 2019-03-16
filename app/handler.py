@@ -1,5 +1,7 @@
 import os
 import json
+import copy
+import datetime
 import asyncio
 from app.http import HttpResponse, render_to_response
 from etc import (
@@ -59,6 +61,108 @@ async def index(req):
         "templates/index.html",
         context=context
     )
+
+
+async def thank(req):
+    get_list = req.query.get("get_gift_list")
+    if get_list:
+        return await get_gift_list(req)
+
+    bg_color = req.query.get("bg_color")
+    today_lines = req.query.get("today_lines", 3)
+    demo = int(req.query.get("demo", 0))
+    scale = float(req.query.get("scale", 0.65))
+    margin_top = int(525 / 2 * (1 - scale))
+    margin_left = int(522 / 2 * (1 - scale))
+    context = {
+        "today_lines": today_lines,
+        "bg_color": bg_color,
+        "demo": demo,
+        "scale": "%.2f" % scale,
+        "margin_top": margin_top,
+        "margin_left": margin_left,
+    }
+    return render_to_response("templates/thank_v.html", context=context)
+
+
+async def get_gift_list(req):
+    HISTORY_DISPLAY_GIFTS = ("小电视飞船", "花之少女", "DokiDoki", "摩天大楼", "天空之翼", "节奏风暴")
+
+    file_name = "./temp_data/gift_list.txt"
+    version = str(os.path.getmtime(file_name))
+    if version == req.query.get("version"):
+        return HttpResponse(json.dumps({"version": version}))
+
+    with open(file_name, "r", encoding="utf-8") as f:
+        gift_list = f.readlines()
+
+    history = []
+    today = []
+    today_str = str(datetime.datetime.now())[:10]
+    for line in gift_list:
+        try:
+            data = json.loads(line)
+            created_time = data["created_time"]
+
+            uid = data["uid"]
+            sender = data["sender"]
+            gift_name = data["gift_name"]
+            count = data["count"]
+            face = f"https://statics.madliar.com/static/face/{uid}"
+            gift_img = f"https://statics.madliar.com/static/gift/{data['gift_name']}"
+
+            if created_time[:10] == today_str:
+                today.append({
+                    "sender": sender,
+                    "face": face,
+                    "count": count,
+                    "send_text": "赠送",
+                    "gift_name": gift_name,
+                    "gift_img": gift_img,
+                })
+            elif created_time[:7] == today_str[:7]:
+                history.append({
+                    "sender": sender,
+                    "face": face,
+                    "count": count,
+                    "send_text": "赠送",
+                    "gift_name": gift_name,
+                    "gift_img": gift_img,
+                })
+        except Exception as e:
+            pass
+
+    if not today:
+        today.append({
+            "sender": "管珩心",
+            "face": "https://statics.madliar.com/static/face/65568410",
+            "gift_name": "不负你的深情",
+        })
+
+    packaged_history = []
+    for g in history:
+        if g["gift_name"] not in HISTORY_DISPLAY_GIFTS:
+            continue
+
+        for d in packaged_history:
+            if d["sender"] == g["sender"] and d["gift_name"] == g["gift_name"]:
+                d["count"] += g["count"]
+                break
+        else:
+            packaged_history.append(copy.deepcopy(g))
+
+    if not packaged_history:
+        packaged_history = copy.deepcopy(today)
+    else:
+        packaged_history = sorted(packaged_history,
+                                  key=lambda x: (HISTORY_DISPLAY_GIFTS.index(x["gift_name"]), -x["count"]))
+
+    data = {
+        "history": packaged_history,
+        "today": today,
+        "version": version,
+    }
+    return HttpResponse(json.dumps(data))
 
 
 async def music_response(request):
