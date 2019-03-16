@@ -7,12 +7,14 @@ from app.handler import (
     music_response,
     console_response,
     delay_response,
+    game_response,
 )
 
 
 user_url_map = (
     ("get", r"/", index),
     ("get", r"/thank", thank),
+    ("get", r"/game", game_response),
     ("get", r"/robots.txt", robots_response),
     ("get", r"/record", record_response),
     ("get", r"/music", music_response),

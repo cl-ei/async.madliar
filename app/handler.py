@@ -39,6 +39,10 @@ async def delay_response(request):
         return HttpResponse('response "ok!"')
 
 
+async def game_response(rq):
+    return render_to_response("templates/game.html")
+
+
 async def index(req):
     article_js_file_name = ""
     for f in os.listdir(DIST_ARTICLE_PATH):
