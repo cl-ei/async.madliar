@@ -140,7 +140,7 @@ def _download_deficiency_face(uid):
 
 
 async def get_gift_list(req):
-    HISTORY_DISPLAY_GIFTS = ("小电视飞船", "花之少女", "DokiDoki", "摩天大楼", "天空之翼", "节奏风暴")
+    HISTORY_DISPLAY_GIFTS = ("小电视飞船", "花之少女", "DokiDoki", "C位光环", "摩天大楼", "天空之翼", "节奏风暴")
 
     file_name = "./temp_data/gift_list.txt"
     version = str(os.path.getmtime(file_name))
