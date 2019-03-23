@@ -83,6 +83,10 @@ async def thank(req):
     scale = float(req.query.get("scale", 0.65))
     margin_top = int(525 / 2 * (1 - scale))
     margin_left = int(522 / 2 * (1 - scale))
+
+    with open("/home/wwwroot/async.madliar/temp_data/guard_list.txt", "rb") as f:
+        guard_text = f.read().decode("utf-8")
+
     context = {
         "today_lines": today_lines,
         "bg_color": bg_color,
@@ -90,6 +94,7 @@ async def thank(req):
         "scale": "%.2f" % scale,
         "margin_top": margin_top,
         "margin_left": margin_left,
+        "guard_text": guard_text,
     }
     return render_to_response("templates/thank_v.html", context=context)
 
