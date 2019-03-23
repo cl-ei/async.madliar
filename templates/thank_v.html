@@ -130,6 +130,12 @@
             font-size: 30px;
             margin: 5px 0 6px 10px;
         }
+        #guard-text{
+            width: 400px;
+            border: 1px solid #ccc;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+        }
     </style>
 </head>
 <body>
@@ -141,7 +147,7 @@
     <div id="today"></div>
 </div>
 
-<div><pre>{{ guard_text }}</pre></div>
+<div><pre id="guard-text">{{ guard_text }}</pre></div>
 <div>上面的框为当月感谢，下面的框为今日感谢</div>
 <div>如果想改变「今日感谢框」的行数，比如改为5行，在url后拼接 「<span style="color: red">&today_lines=5</span>」即可</div>
 {% if demo %}
