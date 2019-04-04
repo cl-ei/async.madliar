@@ -146,17 +146,7 @@
     <div id="today-thank">❤ 今日感谢 ❤ </div>
     <div id="today"></div>
 </div>
-
 <div><pre id="guard-text">{{ guard_text }}</pre></div>
-<div>上面的框为当月感谢，下面的框为今日感谢</div>
-<div>如果想改变「今日感谢框」的行数，比如改为5行，在url后拼接 「<span style="color: red">&today_lines=5</span>」即可</div>
-{% if demo %}
-<div>返回正式页面，请删除url中的<span style="color: red">&demo=1</span>，或<a href="/?bg_color={{ bg_color }}">点击这里</a>。</div>
-{% else %}
-<div>查看demo效果，请在url后拼接<span style="color: red">&demo=1</span>，或<a href="/?bg_color={{ bg_color }}&demo=1">点击这里</a>。</div>
-{% endif %}
-<div>修改url中「?bg_color=<span style="color: red">{{ bg_color }}</span>」的值，即可修改背景颜色。它是24位RGB颜色值的十六进制数，如：7a5c3e或555等</div>
-
 <script src="https://statics.madliar.com/static/js/jquery.min.js"></script>
 <script>
 window.giftList = {"history": [], "today": []};
@@ -251,7 +241,6 @@ $(() => {
         };
         render()
     };
-    startHistoryRender();
     let RenderToday = () => {
         let todayGiftListHtml = "";
         let todayList = window.giftList.today || [];
@@ -303,6 +292,7 @@ $(() => {
             }else{
                 console.log("Need not update!");
             }
+            startHistoryRender();
         }});
     };
     CheckGift();
