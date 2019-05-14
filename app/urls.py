@@ -11,6 +11,11 @@ from app.handler import (
 )
 
 
+async def lt_response(rq):
+    from app.http import HttpResponse
+    return HttpResponse("", status=302, headers={"Location": "http://129.204.43.2:1024"})
+
+
 user_url_map = (
     ("get", r"/", index),
     ("get", r"/thank", thank),
@@ -21,6 +26,7 @@ user_url_map = (
     ("get", r"/console", console_response),
     ("get", r"/delay", delay_response),
     ("post", r"/delay", delay_response),
+    ("get", r"/lt", lt_response),
 )
 
 static_url_map = (
