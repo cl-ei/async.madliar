@@ -12,7 +12,7 @@ from app.handler import (
 
 async def lt_response(rq):
     from app.http import HttpResponse
-    return HttpResponse("", status=302, headers={"Location": "http://http://49.234.17.23:1024"})
+    return HttpResponse("", status=302, headers={"Location": "http://49.234.17.23:1024"})
 
 
 user_url_map = (
