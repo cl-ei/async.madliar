@@ -9,7 +9,6 @@ import requests
 import time
 from app.http import HttpResponse, render_to_response
 from etc import (
-    PROJECT_ROOT,
     DIST_ARTICLE_PATH,
     CDN_URL,
     MUSIC_FOLDER,
@@ -30,7 +29,7 @@ async def robots_response(request):
     return response
 
 
-async def record_response(req):
+async def record_response(request):
     return HttpResponse("")
 
 
@@ -43,11 +42,11 @@ async def delay_response(request):
         return HttpResponse('response "ok!"')
 
 
-async def game_response(rq):
+async def game_response(request):
     return render_to_response("templates/game.html")
 
 
-async def index(req):
+async def index(request):
     article_js_file_name = ""
     for f in os.listdir(DIST_ARTICLE_PATH):
         if f.lower().endswith(".js"):
@@ -139,11 +138,18 @@ def _download_deficiency_face(uid):
     return True
 
 
+HISTORY_DISPLAY_GIFTS = (
+    "王冠小电视", "小电视飞船",
+    "幻乐之声", "花之少女", "DokiDoki", "C位光环", "摩天大楼",
+    "琴语", "天空之翼",
+    "节奏风暴",
+)
+
+
 async def get_gift_list(req):
-    HISTORY_DISPLAY_GIFTS = ("王冠小电视", "小电视飞船", "花之少女", "DokiDoki", "C位光环", "摩天大楼", "天空之翼", "节奏风暴")
 
     file_name = "./temp_data/gift_list.txt"
-    version = str(os.path.getmtime(file_name))
+    version = f"{datetime.date.today()}-{str(os.path.getmtime(file_name))}"
     if version == req.query.get("version"):
         return HttpResponse(json.dumps({"version": version}))
 
@@ -157,7 +163,7 @@ async def get_gift_list(req):
 
     history = []
     today = []
-    today_str = str(datetime.datetime.now())[:10]
+    today_str = f"{datetime.date.today()}"
     deficiency_face = False
     download_deficiency_face_start_time = time.time()
     for line in gift_list:
@@ -255,13 +261,5 @@ async def music_response(request):
     view_data["CDN_URL"] = CDN_URL
     return render_to_response(
         "templates/music/index.html",
-        context=view_data
-    )
-
-
-async def console_response(request):
-    view_data = {"CDN_URL": CDN_URL}
-    return render_to_response(
-        "templates/console.html",
         context=view_data
     )

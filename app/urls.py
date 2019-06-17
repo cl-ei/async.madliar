@@ -5,7 +5,6 @@ from app.handler import (
     robots_response,
     record_response,
     music_response,
-    console_response,
     delay_response,
     game_response,
 )
@@ -13,7 +12,7 @@ from app.handler import (
 
 async def lt_response(rq):
     from app.http import HttpResponse
-    return HttpResponse("", status=302, headers={"Location": "http://129.204.43.2:1024"})
+    return HttpResponse("", status=302, headers={"Location": "http://http://49.234.17.23:1024"})
 
 
 user_url_map = (
@@ -23,7 +22,6 @@ user_url_map = (
     ("get", r"/robots.txt", robots_response),
     ("get", r"/record", record_response),
     ("get", r"/music", music_response),
-    ("get", r"/console", console_response),
     ("get", r"/delay", delay_response),
     ("post", r"/delay", delay_response),
     ("get", r"/lt", lt_response),
