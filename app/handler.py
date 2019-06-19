@@ -6,35 +6,6 @@ from etc import DIST_ARTICLE_PATH, CDN_URL, MUSIC_FOLDER, DEBUG
 from app.lt import LtOperations
 
 
-async def robots_response(request):
-    response = HttpResponse(
-        content=(
-            "User-agent:  *\n"
-            "Disallow:  /static/\n"
-        ),
-        content_type="text/plain",
-        charset="utf-8"
-    )
-    return response
-
-
-async def record_response(request):
-    return HttpResponse("")
-
-
-async def delay_response(request):
-    delay = int(request.query.get("delay", 0))
-    await asyncio.sleep(delay)
-    if request.query.get("json"):
-        return HttpResponse('{"code": 0, "msg": "OK"}')
-    else:
-        return HttpResponse('response "ok!"')
-
-
-async def game_response(request):
-    return render_to_response("templates/game.html")
-
-
 async def index(request):
     article_js_file_name = ""
     for f in os.listdir(DIST_ARTICLE_PATH):
@@ -56,30 +27,46 @@ async def index(request):
         },
         "CDN_URL": CDN_URL,
     }
-    return render_to_response(
-        "templates/index.html",
-        context=context
+    return render_to_response("templates/index.html", context=context)
+
+
+async def robots(request):
+    response = HttpResponse(
+        content=(
+            "User-agent:  *\n"
+            "Disallow:  /static/\n"
+        ),
+        content_type="text/plain",
+        charset="utf-8"
     )
+    return response
 
 
-async def thank(request):
-    return await LtOperations.thank(request)
+async def record(request):
+    return HttpResponse("")
 
 
-async def music_response(request):
+async def music(request):
     if request.query.get("ref"):
-        if not os.path.exists(MUSIC_FOLDER):
-            os.mkdir(MUSIC_FOLDER)
-
-        view_data = {
+        context = {
             "ref": True,
             "music_list": json.dumps(os.listdir(MUSIC_FOLDER), ensure_ascii=False)
         }
     else:
-        view_data = {"ref": False}
+        context = {"ref": False}
 
-    view_data["CDN_URL"] = CDN_URL
-    return render_to_response(
-        "templates/music/index.html",
-        context=view_data
-    )
+    context["CDN_URL"] = CDN_URL
+    return render_to_response("templates/music/index.html", context=context)
+
+
+async def game(request):
+    return render_to_response("templates/game.html")
+
+
+async def lt(request):
+    from app.http import HttpResponse
+    return HttpResponse("", status=302, headers={"Location": "http://49.234.17.23:1024"})
+
+
+async def thank(request):
+    return await LtOperations.thank(request)
