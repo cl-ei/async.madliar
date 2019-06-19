@@ -83,7 +83,7 @@ async def thank(req):
     margin_top = int(525 / 2 * (1 - scale))
     margin_left = int(522 / 2 * (1 - scale))
 
-    with open("data/guard_list.txt", "rb") as f:
+    with open("../stormgift/data/guard_list.txt", "rb") as f:
         guard_text = f.read().decode("utf-8")
 
     context = {
@@ -147,8 +147,7 @@ HISTORY_DISPLAY_GIFTS = (
 
 
 async def get_gift_list(req):
-
-    file_name = "data/gift_list.txt"
+    file_name = "../stormgift/data/gift_list.txt"
     version = f"{datetime.date.today()}-{str(os.path.getmtime(file_name))}"
     if version == req.query.get("version"):
         return HttpResponse(json.dumps({"version": version}))
