@@ -235,8 +235,10 @@ async def get_gift_list(req):
     else:
         packaged_history.sort(key=lambda x: (HISTORY_DISPLAY_GIFTS.index(x["gift_name"]), -x["count"]))
 
-    if deficiency_face:
-        version += str(random.random())[:10]
+    # Do not force update.
+    # if deficiency_face:
+    #     version += str(random.random())[:10]
+
     data = {
         "history": packaged_history,
         "today": today,
