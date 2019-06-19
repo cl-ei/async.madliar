@@ -30,7 +30,7 @@ class LtOperations(object):
     )
 
     HANSY_GIFT_LIST_FILE = "../stormgift/data/hansy_gift_list.txt"
-    HANSY_GUARD_LIST_FILE = "../stormgift/data/hansy_gift_list.txt"
+    HANSY_GUARD_LIST_FILE = "../stormgift/data/hansy_guard_list.txt"
 
     FACES_DIR = "../statics/static/face"
 
