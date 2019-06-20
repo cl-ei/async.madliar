@@ -7,12 +7,12 @@
     <meta name="HandheldFriendly" content="True" />
     <meta name="MobileOptimized" content="480" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <link rel="stylesheet" href="https://statics.madliar.com/static/css/animate.min.css" />
+    <link rel="stylesheet" href="{{ CDN_URL }}/static/css/animate.min.css" />
     <style id="dynamic-style"></style>
     <style>
         @font-face {
             font-family: 'hansy';
-            url(https://statics.madliar.com/static/hansy.ttf) format('truetype'); /*non-IE*/
+            url({{ CDN_URL }}/static/hansy.ttf) format('truetype'); /*non-IE*/
         }
         html, body{
             padding: 0;
@@ -26,7 +26,7 @@
             padding: 0 10px;
             margin: 0;
             overflow: hidden;
-            background: url(https://statics.madliar.com/static/img/sky2.jpg);
+            background: url({{ CDN_URL }}/static/img/sky2.jpg);
             background-size: cover;
             {% if bg_color != None %}
             background: #{{ bg_color }};
@@ -107,7 +107,7 @@
             transform: scale(1, 1.5);
         }
         #bg{
-            background: url(https://statics.madliar.com/static/preview2.jpg);
+            background: url({{ CDN_URL }}/static/preview2.jpg);
             /*filter: blur(10px);*/
             width: 570px;
             height: 670px;
@@ -147,7 +147,7 @@
     <div id="today"></div>
 </div>
 <div><pre id="guard-text">{{ guard_text }}</pre></div>
-<script src="https://statics.madliar.com/static/js/jquery.min.js"></script>
+<script src="{{ CDN_URL }}/static/js/jquery.min.js"></script>
 <script>
 window.giftList = {"history": [], "today": []};
 window.giftHtml =  [
@@ -200,7 +200,7 @@ $(() => {
                 .replace("{face}", domInfo.face)
                 .replace("{gift_name}", domInfo.gift_name)
                 .replace("{send_text}", domInfo.send_text ? '<div class="send-text">' + domInfo.send_text + '</div>' : "")
-                .replace("{gift_img}", domInfo.gift_img || "https://statics.madliar.com/static/gift/比心")
+                .replace("{gift_img}", domInfo.gift_img || "{{ CDN_URL }}/static/gift/比心")
                 .replace("{count}", domInfo.count)
                 .replace("{gift_img_display_attr}", gift_img_display_attr)
                 .replace("{gift_img_display_attr_end}", gift_img_display_attr_end);
@@ -257,7 +257,7 @@ $(() => {
                 .replace("{face}", domInfo.face)
                 .replace("{gift_name}", domInfo.gift_name)
                 .replace("{send_text}", domInfo.send_text ? '<div class="send-text">' + domInfo.send_text + '</div>' : "")
-                .replace("{gift_img}", domInfo.gift_img || "https://statics.madliar.com/static/gift/比心")
+                .replace("{gift_img}", domInfo.gift_img || "{{ CDN_URL }}/static/gift/比心")
                 .replace("{count}", domInfo.count)
                 .replace("{gift_img_display_attr}", gift_img_display_attr)
                 .replace("{gift_img_display_attr_end}", gift_img_display_attr_end);
