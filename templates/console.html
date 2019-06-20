@@ -152,7 +152,7 @@ $(function(){
     };
     ws.onmessage = function (evnt) {
         for (var i = 0; i < evnt.data.length; i++){
-            if (evnt.data[i] === "\n"){
+            if (evnt.data[i] === "\n" || evnt.data[i] === "\r"){
                 ProcessOneMessage(window.messagesBuffer.join(""));
                 window.messagesBuffer = [];
             }else{
