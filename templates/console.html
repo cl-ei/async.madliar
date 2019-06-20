@@ -143,7 +143,7 @@ $(function(){
     }
     var t1 = 0;
     var socketStatus = false;
-    var ws = new ReconnectingWebSocket("/console_wss");
+    var ws = new ReconnectingWebSocket("wss://" + window.location.host + "/console_wss");
     ws.onopen = function (evnt) {
         socketStatus = true;
         clearInterval(t1);
