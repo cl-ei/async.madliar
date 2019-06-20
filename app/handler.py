@@ -1,12 +1,15 @@
 import os
 import json
 import asyncio
+from aiohttp.web import HTTPNotFound
 from app.http import HttpResponse, render_to_response
 from etc import DIST_ARTICLE_PATH, CDN_URL, MUSIC_FOLDER, DEBUG
 from app.lt import LtOperations
 
 
 async def index(request):
+    return HTTPNotFound()
+
     article_js_file_name = ""
     for f in os.listdir(DIST_ARTICLE_PATH):
         if f.lower().endswith(".js"):
