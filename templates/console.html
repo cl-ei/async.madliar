@@ -104,6 +104,8 @@
 
 $(function(){
     window.consoleLinesLimit = 1000;
+    window.messagesBuffer = "";
+
     function printToConsole(msg){
         var thisLine = msg.replace("\n", "<br \>");
         $("#console").append("<span>" + thisLine + "<br /></span>");
@@ -111,6 +113,33 @@ $(function(){
             $("#console").children().eq(0).remove();
         }
         $("#console").scrollTop(10000000000);
+    }
+    function ProcessOneMessage(msg) {
+        var m = msg;
+        if(m.trim().length < 1){
+            return;
+        }
+        var color = "#006400";
+        var sepPos = m.indexOf("]");
+        if (sepPos < 0) {
+            printToConsole(m);
+            return;
+        }
+        var header = m.slice(0, sepPos + 2);
+        var body = m.slice(header.length);
+
+        if(m.indexOf("[INFO]") > -1){
+            color = "#006400";
+        }else if(m.indexOf("[ERROR]") > -1){
+            color = "#B64955";
+        }else if(m.indexOf("[WARNING]") > -1){
+            color = "#FFB900";
+        }else if(m.indexOf("[DEBUG]") > -1){
+            color = "#00CDCD";
+        }else if(m.indexOf("[CRITICAL]") > -1){
+            color = "#cd6000";
+        }
+        printToConsole('<span style="color: ' + color + ';">' + header + '</span>' + body);
     }
     var t1 = 0;
     var socketStatus = false;
@@ -122,34 +151,18 @@ $(function(){
         console.log("Websocket connected! t1: ", t1);
     };
     ws.onmessage = function (evnt) {
-        var msgs = evnt.data.split("\n");
-        for (var i = 0; i < msgs.length; i++){
-            var m = msgs[i];
-            if(m.trim().length < 1){
-                continue
-            }
-            var color = "#006400";
-            var sepPos = m.indexOf("]");
-            if (sepPos < 0) {
-                printToConsole(m);
-                return;
-            }
-            var header = m.slice(0, sepPos + 2);
-            var body = m.slice(header.length);
+        window.messagesBuffer += evnt.data;
 
-            if(m.indexOf("[INFO]") > -1){
-                color = "#006400";
-            }else if(m.indexOf("[ERROR]") > -1){
-                color = "#B64955";
-            }else if(m.indexOf("[WARNING]") > -1){
-                color = "#FFB900";
-            }else if(m.indexOf("[DEBUG]") > -1){
-                color = "#00CDCD";
-            }else if(m.indexOf("[CRITICAL]") > -1){
-                color = "#cd6000";
+        var thisMsg = "";
+        for (var c in window.messagesBuffer){
+            if (c === "\n"){
+                ProcessOneMessage(thisMsg);
+                thisMsg = "";
+            }else{
+                thisMsg += c;
             }
-            printToConsole('<span style="color: ' + color + ';">' + header + '</span>' + body);
         }
+        window.messagesBuffer = thisMsg;
     };
     ws.onerror = function (evnt) {
         socketStatus=false;
@@ -161,7 +174,10 @@ $(function(){
     };
     document.onkeydown=function(event){
         var e = event || window.event || arguments.callee.caller.arguments[0];
-        if(e && e.keyCode==13){printToConsole("");}
+        if(e && e.keyCode==13){
+            printToConsole(window.messagesBuffer);
+            window.messagesBuffer = "";
+        }
     };
 })
 </script>
