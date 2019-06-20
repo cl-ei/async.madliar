@@ -7,6 +7,7 @@ from app.handler import (
     game,
     lt,
     thank,
+    console,
 )
 
 
@@ -18,6 +19,7 @@ user_url_map = (
     ("get", r"/record", record),
     ("get", r"/music", music),
     ("get", r"/lt", lt),
+    ("get", r"/console", console),
 )
 
 static_url_map = (

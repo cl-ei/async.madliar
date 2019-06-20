@@ -71,3 +71,11 @@ async def lt(request):
 
 async def thank(request):
     return await LtOperations.thank(request)
+
+
+async def console(request):
+    context = {
+        "title": "log",
+        "CDN_URL": CDN_URL,
+    }
+    return render_to_response("templates/console.html", context=context)
