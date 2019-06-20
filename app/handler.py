@@ -8,8 +8,6 @@ from app.lt import LtOperations
 
 
 async def index(request):
-    return HTTPNotFound()
-
     article_js_file_name = ""
     for f in os.listdir(DIST_ARTICLE_PATH):
         if f.lower().endswith(".js"):

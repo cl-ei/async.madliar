@@ -28,10 +28,12 @@
             <div class="clearfix right-menu">
                 <ul class="clearfix navi">
                     <li><a id="home-view" class="current" href="javascript:void(0)">首页</a></li>
+                    {% if CDN_URL == 1 %}
                     <li><a id="list-view" href="javascript:void(0)">列表</a></li>
                     <li><a href="/notebook" target="_blank">记录</a></li>
                     <li><a href="/music" target="_blank">音乐</a></li>
                     <li><a id="about-view" href="javascript:void(0)">关于</a></li>
+                    {% endif %}
                 </ul>
             </div>
         </div>
@@ -102,6 +104,9 @@
         </div>
     </section>
     <img id="background" src=""/>
+    <div style="display: block;position: absolute;bottom: 0px;z-index: 999999;color: white;margin: auto;width: 100%;text-align: center;font-size:30px;">
+        <a target="_blank" style="color: white" href="http://www.beian.miit.gov.cn"> 陕ICP备16003242号</a>
+    </div>
     <script>
         window.CDN_URL = "{{ CDN_URL }}";
     </script>
