@@ -104,7 +104,7 @@
 
 $(function(){
     window.consoleLinesLimit = 1000;
-    window.messagesBuffer = "";
+    window.messagesBuffer = [];
 
     function printToConsole(msg){
         var thisLine = msg.replace("\n", "<br \>");
@@ -151,18 +151,14 @@ $(function(){
         console.log("Websocket connected! t1: ", t1);
     };
     ws.onmessage = function (evnt) {
-        window.messagesBuffer += evnt.data;
-
-        var thisMsg = "";
-        for (var c in window.messagesBuffer){
-            if (c === "\n"){
-                ProcessOneMessage(thisMsg);
-                thisMsg = "";
+        for (var i = 0; i < evnt.data.length; i++){
+            if (evnt.data[i] === "\n"){
+                ProcessOneMessage(window.messagesBuffer.join(""));
+                window.messagesBuffer = [];
             }else{
-                thisMsg += c;
+                window.messagesBuffer.push(evnt.data[i]);
             }
         }
-        window.messagesBuffer = thisMsg;
     };
     ws.onerror = function (evnt) {
         socketStatus=false;
