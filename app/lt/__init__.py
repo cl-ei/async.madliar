@@ -191,7 +191,7 @@ class LtOperations(object):
                 gift_dict[gift_name][uid] = count
 
         gatherd_gift_list = [[gift_name, senders] for gift_name, senders in gift_dict.items()]
-        gatherd_gift_list.sort(key=lambda x: price_dict[x[0]])
+        gatherd_gift_list.sort(key=lambda x: price_dict[x[0]], reverse=True)
 
         gift_text = ""
         for gift_name, senders in gatherd_gift_list:
