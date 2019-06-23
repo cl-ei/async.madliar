@@ -136,6 +136,12 @@
             word-wrap: break-word;
             white-space: pre-wrap;
         }
+        #guard-text{
+            width: 400px;
+            border: 1px solid #ccc;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+        }
     </style>
 </head>
 <body>
@@ -147,6 +153,8 @@
     <div id="today"></div>
 </div>
 <div><pre id="guard-text">{{ guard_text }}</pre></div>
+<div><pre id="gift-text">{{ gift_text }}</pre></div>
+
 <script src="{{ CDN_URL }}/static/js/jquery.min.js"></script>
 <script>
 window.giftList = {"history": [], "today": []};

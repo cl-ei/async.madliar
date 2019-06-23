@@ -7,6 +7,7 @@ import time
 from etc.config import CDN_URL
 from app.http import HttpResponse, render_to_response
 from etc.log4 import madliar_logger as logging
+from model.dao import HansyGiftRecords
 
 
 class LtOperations(object):
@@ -172,6 +173,31 @@ class LtOperations(object):
         with open(cls.HANSY_GUARD_LIST_FILE, "rb") as f:
             guard_text = f.read().decode("utf-8")
 
+        gift_dict = {}
+        price_dict = {}
+        uid_to_uname_map = {}
+
+        gift_list = await HansyGiftRecords.get_log()
+        for uid, uname, gift_name, coin_type, price, count, *_ in gift_list:
+            uid_to_uname_map[uid] = uname
+            price_dict[gift_name] = price
+
+            if gift_name not in gift_dict:
+                gift_dict[gift_name] = {}
+
+            if uid in gift_dict[gift_name]:
+                gift_dict[gift_name][uid] += count
+            else:
+                gift_dict[gift_name][uid] = count
+
+        gift_text = ""
+        for gift_name, senders in gift_dict.items():
+            gift_text += f"{gift_name}: <br />"
+            gift_text += ", ".join([
+                f"{uid_to_uname_map[uid]}: {count}<br />"
+                for uid, count in senders.items()
+            ])
+
         context = {
             "today_lines": today_lines,
             "bg_color": bg_color,
@@ -180,6 +206,7 @@ class LtOperations(object):
             "margin_top": margin_top,
             "margin_left": margin_left,
             "guard_text": guard_text,
+            "gift_text": gift_text,
         }
         return render_to_response("templates/thank_v.html", context=context)
 
