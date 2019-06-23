@@ -196,8 +196,8 @@ class LtOperations(object):
         gift_text = ""
         for gift_name, senders in gatherd_gift_list:
             gift_text += f"{gift_name}: <br />"
-            gift_text += ", ".join([
-                f"{uid_to_uname_map[uid]}: {count}<br />"
+            gift_text += "".join([
+                f"　　{uid_to_uname_map[uid]}: {count}<br />"
                 for uid, count in senders.items()
             ])
 
