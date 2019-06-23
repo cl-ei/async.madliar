@@ -190,8 +190,11 @@ class LtOperations(object):
             else:
                 gift_dict[gift_name][uid] = count
 
+        gatherd_gift_list = [[gift_name, senders] for gift_name, senders in gift_dict.items()]
+        gatherd_gift_list.sort(key=lambda x: price_dict[x[0]])
+
         gift_text = ""
-        for gift_name, senders in gift_dict.items():
+        for gift_name, senders in gatherd_gift_list:
             gift_text += f"{gift_name}: <br />"
             gift_text += ", ".join([
                 f"{uid_to_uname_map[uid]}: {count}<br />"
