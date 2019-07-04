@@ -70,14 +70,23 @@
             "{{ CDN_URL }}{{ mp3 }}",
             {% endfor %}
         ];
-        var music_index = 0;
+        var musicIindex = 0;
+        var flushCount = 0;
         var audioDom = $("#audio");
-        audioDom[0].src = musics[music_index];
+        audioDom[0].src = musics[musicIindex];
         audioDom[0].play();
         audioDom.bind('ended', function(){
-            music_index += 1;
-            audioDom[0].src = musics[music_index];
-            console.log("musics[music_index]: ", musics[music_index]);
+            musicIindex += 1;
+            if (musicIindex === musics.length){
+                musicIindex = 0;
+
+                flushCount += 1;
+                if (flushCount === 10){
+                    window.location.reload();
+                }
+            }
+            audioDom[0].src = musics[musicIindex];
+            console.log("musics[music_index]: ", musics[musicIindex]);
         });
     });
 </script>
