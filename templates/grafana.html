@@ -76,6 +76,7 @@
         var audioDom = $("#audio");
         audioDom[0].src = musics[musicIindex];
         audioDom[0].play();
+        $("#song-name").html(musics[musicIindex].split("/").reverse()[0].split(".")[0]);
         audioDom.bind('ended', function(){
             musicIindex += 1;
             if (musicIindex === musics.length){
@@ -88,6 +89,7 @@
             }
             audioDom[0].src = musics[musicIindex];
             $("#audio")[0].play();
+            $("#song-name").html(musics[musicIindex].split("/").reverse()[0].split(".")[0]);
             console.log("musics[music_index]: ", musics[musicIindex]);
         });
     });
