@@ -43,26 +43,25 @@
 </iframe>
 <div id="bg">
     <img src="https://www.madliar.com/static/blog/img/preview_0.jpg">
+    <img src="https://www.madliar.com/static/blog/img/preview_1.jpg">
+    <img src="https://www.madliar.com/static/blog/img/preview_2.jpg">
+    <img src="https://www.madliar.com/static/blog/img/preview_3.jpg">
+    <img src="https://www.madliar.com/static/blog/img/preview_4.jpg">
 </div>
 <script>
     $(function(){
-        var bgSrcList = [
-            "https://www.madliar.com/static/blog/img/preview_0.jpg",
-            "https://www.madliar.com/static/blog/img/preview_1.jpg",
-            "https://www.madliar.com/static/blog/img/preview_2.jpg",
-            "https://www.madliar.com/static/blog/img/preview_3.jpg",
-            "https://www.madliar.com/static/blog/img/preview_4.jpg"
-        ];
         var index = 0;
         setInterval(function () {
-            if (index === bgSrcList.length) {
+            var imgDoms = $("#bg img");
+            var totalLength = imgDoms.length;
+
+            if (index === totalLength) {
                 index = 0;
             }
-            var bgDom = $("#bg");
-            bgDom.fadeOut(1000, function(){
-                bgDom.html('<img src="' + bgSrcList[index] + '">').fadeIn(1000);
+            imgDoms.eq(index).animate({opacity: 0}, 1000, function () {
+                index += 1;
+                imgDoms.eq(index).animate({opacity: 1}, 1000)
             });
-            index += 1;
         }, 5000);
     });
 </script>
