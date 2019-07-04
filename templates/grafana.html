@@ -72,12 +72,13 @@
         ];
         var music_index = 0;
         var audioDom = $("#audio");
-        audioDom.src = musics[music_index];
         audioDom.bind('ended', function(){
             music_index += 1;
-            audioDom.src = musics[music_index];
+            audioDom[0].src = musics[music_index];
             console.log("musics[music_index]: ", musics[music_index]);
-        }).play();
+        });
+        audioDom[0].src = musics[music_index];
+        audioDom[0].play();
     });
 </script>
 </body>
