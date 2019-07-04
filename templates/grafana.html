@@ -50,6 +50,11 @@
 <script>
     $(function(){
         var index = 0;
+        var musics = [
+            {% for mp3 in background_musics %}
+            "{{ CDN_URL }}{{ mp3 }}",
+            {% endfor %}
+        ];
         setInterval(function () {
             var imgDoms = $("#bg img");
             var totalLength = imgDoms.length;
