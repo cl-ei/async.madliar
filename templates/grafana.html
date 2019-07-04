@@ -45,26 +45,26 @@
     <img src="https://www.madliar.com/static/blog/img/preview_0.jpg">
 </div>
 <script>
-    // $(function(){
-    //     var bgSrcList = [
-    //         "https://www.madliar.com/static/blog/img/preview_0.jpg",
-    //         "https://www.madliar.com/static/blog/img/preview_1.jpg",
-    //         "https://www.madliar.com/static/blog/img/preview_2.jpg",
-    //         "https://www.madliar.com/static/blog/img/preview_3.jpg",
-    //         "https://www.madliar.com/static/blog/img/preview_4.jpg"
-    //     ];
-    //     var index = 0;
-    //     setInterval(function () {
-    //         if (index === bgSrcList.length) {
-    //             index = 0;
-    //         }
-    //         var bgDom = $("#bg");
-    //         bgDom.fadeOut(1000, function(){
-    //             bgDom.html('<img src="' + bgSrcList[index] + '">').fadeIn(1000);
-    //         });
-    //         index += 1;
-    //     }, 5000);
-    // });
+    $(function(){
+        var bgSrcList = [
+            "https://www.madliar.com/static/blog/img/preview_0.jpg",
+            "https://www.madliar.com/static/blog/img/preview_1.jpg",
+            "https://www.madliar.com/static/blog/img/preview_2.jpg",
+            "https://www.madliar.com/static/blog/img/preview_3.jpg",
+            "https://www.madliar.com/static/blog/img/preview_4.jpg"
+        ];
+        var index = 0;
+        setInterval(function () {
+            if (index === bgSrcList.length) {
+                index = 0;
+            }
+            var bgDom = $("#bg");
+            bgDom.fadeOut(1000, function(){
+                bgDom.html('<img src="' + bgSrcList[index] + '">').fadeIn(1000);
+            });
+            index += 1;
+        }, 5000);
+    });
 </script>
 </body>
 </html>
