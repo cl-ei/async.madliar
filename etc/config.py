@@ -14,9 +14,22 @@ try:
 except KeyError:
     CDN_URL = "https://statics.madliar.com"
 
+REDIS_CONFIG = {}
+try:
+    REDIS_CONFIG["host"] = config["redis"]["host"]
+    REDIS_CONFIG["port"] = int(config["redis"]["port"])
+    REDIS_CONFIG["password"] = config["redis"]["password"]
+    REDIS_CONFIG["db"] = int(config["redis"]["stormgift_db"])
+except KeyError:
+    REDIS_CONFIG["host"] = "49.234.17.23"
+    REDIS_CONFIG["port"] = 19941
+    REDIS_CONFIG["password"] = "redispassword"
+    REDIS_CONFIG["db"] = 2
+
+print(REDIS_CONFIG)
 
 PROJECT_ROOT = "./" if DEBUG else "/home/wwwroot/async.madliar"
 LOG_PATH = "./log" if DEBUG else "/home/wwwroot/log/async.madliar"
 MUSIC_FOLDER = "./music" if DEBUG else "/home/wwwroot/statics/music"
 RAW_ARTICLE_PATH = "templates/_post/article"
-DIST_ARTICLE_PATH = "./dist_article" if DEBUG else "/home/wwwroot/statics/dist_article"
+DIST_ARTICLE_PATH = "./dist_article" if DEBUG else "/home/wwwroot/statics/static/article"
