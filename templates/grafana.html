@@ -42,13 +42,14 @@
             text-shadow: 1px 1px 4px #000000;
             position: absolute;
             z-index: 99999;
-            width: 400px;
             height: 30px;
             text-align: left;
             line-height: 30px;
             margin-top: -64px;
             margin-left: 50px;
-
+        }
+        #player-title:hover{
+            background: #ccc;
         }
         #cached-audio{
             display: none;
@@ -127,6 +128,8 @@
             }[progressCount % 4];
             $("#play-progress").html(char);
         }, 1000);
+
+        $("#player-title").click(function(){window.location.reload()});
     });
 </script>
 </body>
