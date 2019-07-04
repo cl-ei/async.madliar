@@ -50,6 +50,9 @@
             margin-left: 50px;
 
         }
+        #cached-audio{
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -63,6 +66,11 @@
 </div>
 <div id="player-title"><span id="play-icon">▶ </span><span id="song-name"></span> <span id="play-progress"></span></div>
 <audio id="audio" src=""></audio>
+<div id="#cached-audio">
+    {% for mp3 in background_musics %}
+    <audio src="{{ mp3 }}"></audio>
+    {% endif %}
+</div>
 <script>
     $(function(){
         var index = 0;
