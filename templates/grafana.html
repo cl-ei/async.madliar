@@ -16,7 +16,6 @@
             display: block;
             height: 720px;
             width: 1280px;
-            border: 1px solid #ccc;
             overflow: hidden;
         }
         #grafana{
@@ -44,11 +43,9 @@
         frameborder="0" scrolling="no" marginheight="0" marginwidth="0" width="1200px" height="800px">
 </iframe>
 <div id="bg">
-    <img src="https://www.madliar.com/static/blog/img/preview_0.jpg">
-    <img src="https://www.madliar.com/static/blog/img/preview_1.jpg">
-    <img src="https://www.madliar.com/static/blog/img/preview_2.jpg">
-    <img src="https://www.madliar.com/static/blog/img/preview_3.jpg">
-    <img src="https://www.madliar.com/static/blog/img/preview_4.jpg">
+    {% for img in background_images %}
+    <img src="{{ CDN_URL }}{{ img }}">
+    {% endfor %}
 </div>
 <script>
     $(function(){
