@@ -109,7 +109,7 @@
 
             var musicIindex = Math.floor(Math.random()*musicCount);
 
-            audioDom[0].src = musics[Math.floor(Math.random()*musicCount)];
+            audioDom[0].src = musics[musicIindex];
             $("#song-name").html(musics[musicIindex].split("/").reverse()[0].split(".")[0]);
             audioDom[0].play();
 
