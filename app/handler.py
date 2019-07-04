@@ -82,8 +82,10 @@ async def console(request):
 
 
 async def grafana(request):
+    image_files = os.listdir("/home/wwwroot/statics/static/grafana/img/")
     context = {
         "title": "grafana",
         "CDN_URL": CDN_URL,
+        "background_images": ["/static/grafana/img/" + img for img in image_files],
     }
     return render_to_response("templates/grafana.html", context=context)
