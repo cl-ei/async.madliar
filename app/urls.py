@@ -8,6 +8,7 @@ from app.handler import (
     lt,
     thank,
     console,
+    grafana,
 )
 
 
@@ -20,6 +21,7 @@ user_url_map = (
     ("get", r"/music", music),
     ("get", r"/lt", lt),
     ("get", r"/console", console),
+    ("get", r"/grafana", grafana),
 )
 
 static_url_map = (

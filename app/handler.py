@@ -79,3 +79,11 @@ async def console(request):
         "CDN_URL": CDN_URL,
     }
     return render_to_response("templates/console.html", context=context)
+
+
+async def grafana(request):
+    context = {
+        "title": "grafana",
+        "CDN_URL": CDN_URL,
+    }
+    return render_to_response("templates/grafana.html", context=context)
