@@ -47,14 +47,10 @@
     <img src="{{ CDN_URL }}{{ img }}">
     {% endfor %}
 </div>
+<audio id="audio" src=""></audio>
 <script>
     $(function(){
         var index = 0;
-        var musics = [
-            {% for mp3 in background_musics %}
-            "{{ CDN_URL }}{{ mp3 }}",
-            {% endfor %}
-        ];
         setInterval(function () {
             var imgDoms = $("#bg img");
             var totalLength = imgDoms.length;
@@ -68,6 +64,20 @@
                 imgDoms.eq(index).animate({opacity: 1}, 800)
             });
         }, 5000);
+
+        var musics = [
+            {% for mp3 in background_musics %}
+            "{{ CDN_URL }}{{ mp3 }}",
+            {% endfor %}
+        ];
+        var music_index = 0;
+        var audioDom = $("#audio");
+        audioDom.src = musics[music_index];
+        audioDom.bind('ended', function(){
+            music_index += 1;
+            audioDom.src = musics[music_index];
+            console.log("musics[music_index]: ", musics[music_index]);
+        }).play();
     });
 </script>
 </body>
