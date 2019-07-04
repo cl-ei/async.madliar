@@ -93,25 +93,26 @@
             "{{ CDN_URL }}{{ mp3 }}",
             {% endfor %}
         ];
-        var musicIindex = 0;
         var flushCount = 0;
+        var musicCount = musics.length;
         var audioDom = $("#audio");
+        var musicIindex = Math.floor(Math.random()*musicCount);
         audioDom[0].src = musics[musicIindex];
-        audioDom[0].play();
         $("#song-name").html(musics[musicIindex].split("/").reverse()[0].split(".")[0]);
-        audioDom.bind('ended', function(){
-            musicIindex += 1;
-            if (musicIindex === musics.length){
-                musicIindex = 0;
+        audioDom[0].play();
 
-                flushCount += 1;
-                if (flushCount === 10){
-                    window.location.reload();
-                }
+        audioDom.bind('ended', function(){
+            flushCount += 1;
+            if (flushCount === 100){
+                window.location.reload();
             }
-            audioDom[0].src = musics[musicIindex];
-            $("#audio")[0].play();
+
+            var musicIindex = Math.floor(Math.random()*musicCount);
+
+            audioDom[0].src = musics[Math.floor(Math.random()*musicCount)];
             $("#song-name").html(musics[musicIindex].split("/").reverse()[0].split(".")[0]);
+            audioDom[0].play();
+
             console.log("musics[music_index]: ", musics[musicIindex]);
         });
 
