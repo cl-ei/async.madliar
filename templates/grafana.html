@@ -49,21 +49,21 @@
     <img src="https://www.madliar.com/static/blog/img/preview_4.jpg">
 </div>
 <script>
-    $(function(){
-        var index = 0;
-        setInterval(function () {
-            var imgDoms = $("#bg img");
-            var totalLength = imgDoms.length;
-
-            if (index === totalLength) {
-                index = 0;
-            }
-            imgDoms.eq(index).animate({opacity: 0}, 1000, function () {
-                index += 1;
-                imgDoms.eq(index).animate({opacity: 1}, 1000)
-            });
-        }, 5000);
-    });
+    // $(function(){
+    //     var index = 0;
+    //     setInterval(function () {
+    //         var imgDoms = $("#bg img");
+    //         var totalLength = imgDoms.length;
+    //
+    //         if (index === totalLength) {
+    //             index = 0;
+    //         }
+    //         imgDoms.eq(index).animate({opacity: 0}, 1000, function () {
+    //             index += 1;
+    //             imgDoms.eq(index).animate({opacity: 1}, 1000)
+    //         });
+    //     }, 5000);
+    // });
 </script>
 </body>
 </html>
