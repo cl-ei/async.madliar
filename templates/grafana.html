@@ -106,7 +106,7 @@
 
         audioDom.bind('ended', function(){
             flushCount += 1;
-            if (flushCount === 100){
+            if (flushCount === musicCount){
                 window.location.reload();
             }
 
