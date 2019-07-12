@@ -19,12 +19,12 @@
             overflow: hidden;
         }
         #grafana{
-            transform: scale(0.35);
-            opacity: 0.8;
+            transform: scale(0.30);
+            opacity: 0.6;
             padding: 2px;
             position: absolute;
             z-index: 9999;
-            margin: 155px 0 0 445px;
+            margin: 185px 0 0 483px;
         }
         #bg{
             height: 100%;
@@ -42,13 +42,16 @@
             text-shadow: 1px 1px 4px #000000;
             position: absolute;
             z-index: 99999;
-            width: 400px;
             height: 30px;
             text-align: left;
             line-height: 30px;
             margin-top: -64px;
             margin-left: 50px;
-
+            cursor: pointer;
+            transition: all 0.3s ease-out;
+        }
+        #player-title:hover{
+            background: #ccc;
         }
         #cached-audio{
             display: none;
@@ -103,7 +106,7 @@
 
         audioDom.bind('ended', function(){
             flushCount += 1;
-            if (flushCount === 100){
+            if (flushCount === musicCount){
                 window.location.reload();
             }
 
@@ -127,6 +130,8 @@
             }[progressCount % 4];
             $("#play-progress").html(char);
         }, 1000);
+
+        $("#player-title").click(function(){window.location.reload()});
     });
 </script>
 </body>
