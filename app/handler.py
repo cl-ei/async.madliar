@@ -96,5 +96,6 @@ async def grafana(request):
 
 async def log(request):
     post_data = await request.post()
-    logging.info(post_data["msg"])
+    msg = post_data["msg"]
+    logging.error(f"log: \n{'-' * 80}\n{msg}\n{'-'}*80")
     return aiohttp.web.Response(status=206)
