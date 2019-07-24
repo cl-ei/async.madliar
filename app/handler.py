@@ -1,6 +1,7 @@
 import os
 import json
-import asyncio
+import aiohttp
+from etc.log4 import madliar_logger as logging
 from aiohttp.web import HTTPNotFound
 from app.http import HttpResponse, render_to_response
 from etc import DIST_ARTICLE_PATH, CDN_URL, MUSIC_FOLDER, DEBUG
@@ -91,3 +92,9 @@ async def grafana(request):
         "background_musics": ["/static/grafana/music/" + mp3 for mp3 in music_files],
     }
     return render_to_response("templates/grafana.html", context=context)
+
+
+async def log(request):
+    post_data = await request.post()
+    logging.info(post_data["msg"])
+    return aiohttp.web.Response(status=206)
