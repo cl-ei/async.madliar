@@ -1,6 +1,7 @@
 from etc.config import DEBUG
 from app.handler import (
     index,
+    old_blog,
     robots,
     record,
     music,
@@ -15,6 +16,7 @@ from app.handler import (
 
 user_url_map = (
     ("get", r"/", index),
+    ("get", r"/old_blog", old_blog),
     ("get", r"/thank", thank),
     ("get", r"/game", game),
     ("get", r"/robots.txt", robots),

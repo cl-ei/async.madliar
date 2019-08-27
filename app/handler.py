@@ -9,6 +9,10 @@ from app.lt import LtOperations
 
 
 async def index(request):
+    return aiohttp.web.HTTPFound("https://www.jianshu.com/u/44e417ef7b5d")
+
+
+async def old_blog(request):
     article_js_file_name = ""
     for f in os.listdir(DIST_ARTICLE_PATH):
         if f.lower().endswith(".js"):
@@ -34,10 +38,7 @@ async def index(request):
 
 async def robots(request):
     response = HttpResponse(
-        content=(
-            "User-agent:  *\n"
-            "Disallow:  /static/\n"
-        ),
+        content="User-agent:  *\nDisallow:  /static/\n",
         content_type="text/plain",
         charset="utf-8"
     )
