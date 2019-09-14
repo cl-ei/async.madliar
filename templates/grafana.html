@@ -78,7 +78,7 @@
 <audio id="audio" src=""></audio>
 <div id="#cached-audio">
     {% for mp3 in background_musics %}
-    <audio src="{{ mp3 }}"></audio>
+    <audio src="{{ CDN_URL }}{{ mp3 }}"></audio>
     {% endfor %}
 </div>
 <script>
