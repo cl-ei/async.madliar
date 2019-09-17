@@ -6,7 +6,7 @@ import requests
 import time
 from etc.config import CDN_URL
 from app.http import HttpResponse, render_to_response
-from etc.log4 import madliar_logger as logging
+from etc.log4 import website_logger as logging
 from model.dao import HansyGiftRecords
 
 

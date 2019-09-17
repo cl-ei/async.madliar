@@ -1,7 +1,8 @@
 import os
 import json
 import aiohttp
-from etc.log4 import madliar_logger as logging
+import datetime
+from etc.log4 import http_logger as http_logging
 from aiohttp.web import HTTPNotFound
 from app.http import HttpResponse, render_to_response
 from etc import DIST_ARTICLE_PATH, CDN_URL, MUSIC_FOLDER, DEBUG
@@ -97,6 +98,8 @@ async def grafana(request):
 
 async def log(request):
     post_data = await request.post()
-    msg = post_data["msg"]
-    logging.info(f"log: \n{'-' * 80}\n{msg}\n{'-' * 80}")
+    message = "\n".join([v for k, v in post_data.items() if k != "_raw"])
+    if "_raw" not in post_data:
+        message = f"{str(datetime.datetime.now()[5:-3])}: {message}"
+    http_logging.info(message)
     return aiohttp.web.Response(status=206)
