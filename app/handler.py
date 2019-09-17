@@ -101,7 +101,7 @@ async def log(request):
     try:
         message = "\n".join([v for k, v in post_data.items() if k != "_raw"])
         if "_raw" not in post_data:
-            message = f"{str(datetime.datetime.now()[5:-3])}: {message}"
+            message = f"{str(datetime.datetime.now())[5:-3]}: {message}"
         http_logging.info(message)
     except Exception as e:
         import traceback
