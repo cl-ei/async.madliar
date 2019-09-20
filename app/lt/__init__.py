@@ -31,8 +31,6 @@ class LtOperations(object):
     )
 
     HANSY_GIFT_LIST_FILE = "../stormgift/data/hansy_gift_list.txt"
-    HANSY_GUARD_LIST_FILE = "../stormgift/data/hansy_guard_list.txt"
-
     FACES_DIR = "../statics/static/face"
 
     @classmethod
@@ -170,9 +168,6 @@ class LtOperations(object):
         margin_top = int(525 / 2 * (1 - scale))
         margin_left = int(522 / 2 * (1 - scale))
 
-        with open(cls.HANSY_GUARD_LIST_FILE, "rb") as f:
-            guard_text = f.read().decode("utf-8")
-
         gift_dict = {}
         price_dict = {}
         uid_to_uname_map = {}
@@ -210,7 +205,7 @@ class LtOperations(object):
             "scale": "%.2f" % scale,
             "margin_top": margin_top,
             "margin_left": margin_left,
-            "guard_text": guard_text,
+            "guard_text": "",
             "gift_text": gift_text,
         }
         return render_to_response("templates/thank_v.html", context=context)
