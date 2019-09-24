@@ -112,18 +112,11 @@ async def log(request):
 
 
 async def register_clserver(request):
-    remote = request.headers.get("X-Real-IP")
+    remote = request.headers.get("X-Real-IP", "")
     if remote:
         data = await request.post()
         if data.get("token") == CLSERVER_TOKEN:
-            key = f"ASYNC_CLSERVER_REMOTE_ADDR"
-            await redis_cache.set(key=key, value=remote)
+            with open("clserver.remote.txt", "w") as f:
+                f.write(remote.strip())
             return aiohttp.web.Response(text="OK")
     return aiohttp.web.Response(status=403)
-
-
-async def cls_server(request):
-    key = f"ASYNC_CLSERVER_REMOTE_ADDR"
-    remote = await redis_cache.get(key=key)
-    return aiohttp.web.HTTPFound(location=f"http://{remote}")
-
