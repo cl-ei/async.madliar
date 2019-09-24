@@ -110,7 +110,8 @@ async def log(request):
 
 
 async def register_clserver(request):
-    remote = request.remote
+    remote = request.headers["X-Real-IP"]
+
     print(f"register_clserver: {remote}")
 
     data = await request.post()
