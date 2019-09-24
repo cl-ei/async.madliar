@@ -107,3 +107,11 @@ async def log(request):
         import traceback
         http_logging.exception(f"E: {e}, {traceback.format_exc()}")
     return aiohttp.web.Response(status=206)
+
+
+async def register_clserver(request):
+    remote = request.remote
+    print(f"register_clserver: {remote}")
+
+    data = await request.post()
+    return aiohttp.web.Response(status=206)
