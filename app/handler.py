@@ -111,8 +111,9 @@ async def log(request):
 
 async def register_clserver(request):
     remote = request.headers["X-Real-IP"]
+    remote2 = request.headers.get("X-Real-IP__90")
 
-    print(f"register_clserver: {remote}")
+    print(f"register_clserver: {remote}, {remote2}")
 
     data = await request.post()
     return aiohttp.web.Response(status=206)
