@@ -125,5 +125,5 @@ async def register_clserver(request):
 async def cls_server(request):
     key = f"ASYNC_CLSERVER_REMOTE_ADDR"
     remote = await redis_cache.get(key=key)
-    return aiohttp.web.HTTPFound(location=remote)
+    return aiohttp.web.HTTPFound(location=f"http://{remote}")
 
