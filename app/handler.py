@@ -2,11 +2,13 @@ import os
 import json
 import aiohttp
 import datetime
+from etc.config import CLSERVER_TOKEN
 from etc.log4 import http_logger as http_logging
 from aiohttp.web import HTTPNotFound
 from app.http import HttpResponse, render_to_response
 from etc import DIST_ARTICLE_PATH, CDN_URL, MUSIC_FOLDER, DEBUG
 from app.lt import LtOperations
+from model.dao import redis_cache
 
 
 async def index(request):
@@ -110,10 +112,18 @@ async def log(request):
 
 
 async def register_clserver(request):
-    remote = request.headers["X-Real-IP"]
-    remote2 = request.headers.get("X-Real-IP__90")
+    remote = request.headers.get("X-Real-IP")
+    if remote:
+        data = await request.post()
+        if data.get("token") == CLSERVER_TOKEN:
+            key = f"ASYNC_CLSERVER_REMOTE_ADDR"
+            await redis_cache.set(key=key, value=remote)
+            return aiohttp.web.Response(text="OK")
+    return aiohttp.web.Response(status=403)
 
-    print(f"register_clserver: {remote}, {remote2}")
 
-    data = await request.post()
-    return aiohttp.web.Response(status=206)
+async def cls_server(request):
+    key = f"ASYNC_CLSERVER_REMOTE_ADDR"
+    remote = await redis_cache.get(key=key)
+    return aiohttp.web.HTTPFound(location=remote)
+

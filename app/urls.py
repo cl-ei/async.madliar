@@ -12,6 +12,7 @@ from app.handler import (
     grafana,
     log,
     register_clserver,
+    cls_server,
 )
 
 
@@ -27,7 +28,8 @@ user_url_map = (
     ("get", r"/console", console),
     ("get", r"/grafana", grafana),
     ("post", r"/log", log),
-    ("*", r"/register_clserver", register_clserver),
+    ("post", r"/register_clserver", register_clserver),
+    ("get", r"/cls_server", cls_server),
 )
 
 static_url_map = (
