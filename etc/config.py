@@ -14,6 +14,11 @@ try:
 except KeyError:
     CDN_URL = "https://statics.madliar.com"
 
+try:
+    CLSERVER_TOKEN = config["default"]["CLSERVER_TOKEN"]
+except KeyError:
+    CLSERVER_TOKEN = ""
+
 REDIS_CONFIG = {}
 try:
     REDIS_CONFIG["host"] = config["redis"]["host"]
