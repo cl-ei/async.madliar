@@ -100,7 +100,8 @@
         audioDom[0].src = musics[window.musicIindex];
         $("#song-name").html(musics[window.musicIindex].split("/").reverse()[0].split(".")[0]);
 
-        audioDom[0].play().bind('ended', function(){
+        audioDom[0].play();
+        audioDom.eq(0).bind('ended', function(){
             window.musicIindex += 1;
             if (window.musicIindex >= musicCount){
                 window.musicIindex = 0;
