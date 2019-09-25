@@ -135,7 +135,7 @@ let index = 0;
     function audioStatusNotReady(){
         let audios = $(".cached-audio-item");
         for (let i = 0; i < audios.length; i++){
-            if (audios.eq(i).readyState !== 4){
+            if (audios.eq(i)[0].readyState !== 4){
                 return true;
             }
         }
