@@ -147,7 +147,7 @@
     $(function(){
         let cachedImgs = $(".cached-img-item");
         window.imgCount = cachedImgs.length;
-        cachedImgs.each().on("load", awaitResourcesLoad);
+        cachedImgs.on("load", awaitResourcesLoad);
         // setInterval(function(){console.log("--> ", audioStatusNotReady())}, 4000);
     });
 </script>
