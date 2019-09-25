@@ -64,7 +64,7 @@
 <body>
 <div id="bg">
 {% for img in background_images %}
-    <img src="{{ CDN_URL }}{{ img }}">
+    <img class="cached-img-item" src="{{ CDN_URL }}{{ img }}">
 {% endfor %}
 </div>
 <div id="player-title">
@@ -79,8 +79,8 @@
 {% endfor %}
 </div>
 <script>
-    function init(){
-let index = 0;
+    function start(){
+        let index = 0;
         setInterval(function () {
             let imgDoms = $("#bg img");
             let totalLength = imgDoms.length;
@@ -141,8 +141,14 @@ let index = 0;
         }
         return false;
     }
+    function awaitResourcesLoad(){
+        console.log("awaitResourcesLoad");
+    }
     $(function(){
-        setInterval(function(){console.log("--> ", audioStatusNotReady())}, 4000);
+        let cachedImgs = $(".cached-img-item");
+        window.imgCount = cachedImgs.length;
+        cachedImgs.each().on("load", awaitResourcesLoad);
+        // setInterval(function(){console.log("--> ", audioStatusNotReady())}, 4000);
     });
 </script>
 </body>
