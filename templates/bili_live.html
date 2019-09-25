@@ -79,7 +79,7 @@
 {% endfor %}
 </div>
 <script>
-    function start(){
+    $(function(){
         let index = 0;
         setInterval(function () {
             let imgDoms = $("#bg img");
@@ -131,24 +131,6 @@
         }, 1000);
 
         $("#player-title").click(function(){window.location.reload()});
-    }
-    function audioStatusNotReady(){
-        let audios = $(".cached-audio-item");
-        for (let i = 0; i < audios.length; i++){
-            if (audios.eq(i)[0].readyState !== 4){
-                return true;
-            }
-        }
-        return false;
-    }
-    function awaitResourcesLoad(){
-        console.log("awaitResourcesLoad");
-    }
-    $(function(){
-        let cachedImgs = $(".cached-img-item");
-        window.imgCount = cachedImgs.length;
-        cachedImgs.on("load", awaitResourcesLoad);
-        // setInterval(function(){console.log("--> ", audioStatusNotReady())}, 4000);
     });
 </script>
 </body>
