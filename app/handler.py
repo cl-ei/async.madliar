@@ -96,6 +96,18 @@ async def grafana(request):
     return render_to_response("templates/grafana.html", context=context)
 
 
+async def bili_live(request):
+    image_files = os.listdir("/home/wwwroot/statics/static/grafana/img/")
+    music_files = os.listdir("/home/wwwroot/statics/static/grafana/music/")
+    context = {
+        "title": "grafana",
+        "CDN_URL": CDN_URL,
+        "background_images": ["/static/grafana/img/" + img for img in image_files],
+        "background_musics": ["/static/grafana/music/" + mp3 for mp3 in music_files],
+    }
+    return render_to_response("templates/bili_live.html", context=context)
+
+
 async def log(request):
     post_data = await request.post()
     try:

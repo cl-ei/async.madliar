@@ -10,6 +10,7 @@ from app.handler import (
     thank,
     console,
     grafana,
+    bili_live,
     log,
 )
 
@@ -25,6 +26,7 @@ user_url_map = (
     ("get", r"/lt", lt),
     ("get", r"/console", console),
     ("get", r"/grafana", grafana),
+    ("get", r"/bili_live", bili_live),
     ("post", r"/log", log),
 )
 
