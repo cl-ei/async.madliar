@@ -63,7 +63,9 @@
 </head>
 <body>
 <div id="bg">
-{% for img in background_images %}<img src="{{ CDN_URL }}{{ img }}">{% endfor %}
+{% for img in background_images %}
+    <img src="{{ CDN_URL }}{{ img }}">
+{% endfor %}
 </div>
 <div id="player-title">
     <span id="music-link">歌单地址 <span style="border-bottom: 1px solid;">https://madliar.com/music </span></span><br />
@@ -72,11 +74,13 @@
 </div>
 <audio id="audio" src=""></audio>
 <div id="#cached-audio">
-{% for mp3 in background_musics %}<audio src="{{ CDN_URL }}{{ mp3 }}"></audio>{% endfor %}
+{% for mp3 in background_musics %}
+    <audio src="{{ CDN_URL }}{{ mp3 }}"></audio>
+{% endfor %}
 </div>
 <script>
-    $(function(){
-        let index = 0;
+    function init(){
+let index = 0;
         setInterval(function () {
             let imgDoms = $("#bg img");
             let totalLength = imgDoms.length;
@@ -92,7 +96,9 @@
         }, 15000);
 
         let musics = [
-            {% for mp3 in background_musics %}"{{ CDN_URL }}{{ mp3 }}",{% endfor %}
+            {% for mp3 in background_musics %}
+                "{{ CDN_URL }}{{ mp3 }}",
+            {% endfor %}
         ];
         let musicCount = musics.length;
         let audioDom = $("#audio");
@@ -125,6 +131,11 @@
         }, 1000);
 
         $("#player-title").click(function(){window.location.reload()});
+    }
+    $(function(){
+        $("audio").on("load", function (e) {
+            console.log("loaded: ", e);
+        })
     });
 </script>
 </body>
