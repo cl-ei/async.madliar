@@ -142,7 +142,7 @@ let index = 0;
         return false;
     }
     $(function(){
-        setInterval(audioStatusNotReady, 4000);
+        setInterval(function(){console.log("--> ", audioStatusNotReady())}, 4000);
     });
 </script>
 </body>
