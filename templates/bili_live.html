@@ -132,10 +132,17 @@ let index = 0;
 
         $("#player-title").click(function(){window.location.reload()});
     }
+    function audioStatusNotReady(){
+        let audios = $(".cached-audio-item");
+        for (let i = 0; i < audios.length; i++){
+            if (audios.eq(i).readyState !== 4){
+                return true;
+            }
+        }
+        return false;
+    }
     $(function(){
-        $(".cached-audio-item").on("load", function () {
-            console.log("loaded: ");
-        })
+        setInterval(audioStatusNotReady, 4000);
     });
 </script>
 </body>
