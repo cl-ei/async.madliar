@@ -144,7 +144,7 @@ $(function(){
     var t1 = 0;
     var socketStatus = false;
     var wsProtoco = window.location.protocol === "https:" ? "wss://" : "ws://";
-    var ws = new ReconnectingWebSocket(wsProtoco + window.location.host + "/console_wss");
+    var ws = new WebSocket(wsProtoco + window.location.host + "/console_wss");
     ws.onopen = function (evnt) {
         socketStatus = true;
         clearInterval(t1);
