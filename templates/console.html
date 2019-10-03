@@ -92,6 +92,18 @@
             text-overflow: ellipsis;
             overflow: hidden;
         }
+        #lock-scroll{
+            display: block;
+            position: fixed;
+            border: 1px solid #999;
+            z-index: 99999;
+            padding: 5px;
+            border-radius: 10px;
+        }
+        .lock-scroll-locked{
+            background: #888;
+        }
+
     </style>
     <style id="dynamic-line-height"></style>
 </head>
@@ -106,6 +118,7 @@
 $(function(){
     window.consoleLinesLimit = 1000;
     window.messagesBuffer = [];
+    window.scrollLock = false;
 
     function printToConsole(msg){
         var thisLine = msg.replace("\n", "<br \>");
@@ -177,6 +190,15 @@ $(function(){
             window.messagesBuffer = [];
         }
     };
+    $("#lock-scroll").click(function(){
+        if(window.scrollLock){
+            window.scrollLock = false;
+            $("#lock-scroll").removeClass("lock-scroll-locked")
+        }else{
+            window.scrollLock = true;
+            $("#lock-scroll").addClass("lock-scroll-locked")
+        }
+    })
 })
 </script>
 </body>
