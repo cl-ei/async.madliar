@@ -137,11 +137,7 @@ $(function(){
         while($("#console").children().length > window.consoleLinesLimit){
             $("#console").children().eq(0).remove();
         }
-        if(!window.scrollLock) {
-            $('html, body').animate({
-                scrollTop: $("#console").offset().bottom
-            }, 10000);
-        }
+        if(!window.scrollLock) $("#console").scrollTop(10000000000);
     }
     function ProcessOneMessage(msg) {
         var m = msg;
