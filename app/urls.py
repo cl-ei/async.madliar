@@ -28,7 +28,8 @@ user_url_map = (
     ("get", r"/console", console),
     ("get", r"/grafana", grafana),
     ("get", r"/bili_live", bili_live),
-    ("*", r"/log", log),
+    ("post", r"/log", log),
+    ("get", r"/log", log),
     ("post", r"/register_clserver", register_clserver),
 )
 
