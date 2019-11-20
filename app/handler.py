@@ -111,6 +111,16 @@ async def bili_live(request):
 
 
 async def log(request):
+    if request.method == "GET":
+        qs = []
+        for k, v in request.query.items():
+            qs.append(f"{k}:\n")
+            qs.append(f"\t{v}\n")
+
+        message = f"{str(datetime.datetime.now())[5:-3]}: Query string:\n{''.join(qs)}"
+        http_logging.info(f"➟ {message}")
+        return aiohttp.web.Response(text="OK")
+
     post_data = await request.post()
     try:
         message = "\n".join([v for k, v in post_data.items() if k != "_raw"])
