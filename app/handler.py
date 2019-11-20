@@ -114,8 +114,7 @@ async def log(request):
     if request.method == "GET":
         qs = []
         for k, v in request.query.items():
-            qs.append(f"{k}:")
-            qs.append(f"\t{v}")
+            qs.append(f"{k}:\t{v}")
         qs = '\n'.join(qs)
         http_logging.info(f"➟ {str(datetime.datetime.now())[5:-3]}: Query string:\n{qs}")
         return aiohttp.web.Response(text="OK")
