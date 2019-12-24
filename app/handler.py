@@ -1,14 +1,16 @@
 import os
+import rsa
 import json
+import base64
 import aiohttp
 import datetime
+import traceback
 from etc.config import CLSERVER_TOKEN
 from etc.log4 import http_logger as http_logging
 from aiohttp.web import HTTPNotFound
 from app.http import HttpResponse, render_to_response
 from etc import DIST_ARTICLE_PATH, CDN_URL, MUSIC_FOLDER, DEBUG
 from app.lt import LtOperations
-from model.dao import redis_cache
 
 
 async def index(request):
@@ -140,3 +142,18 @@ async def register_clserver(request):
                 f.write(remote.strip())
             return aiohttp.web.Response(text="OK")
     return aiohttp.web.Response(status=403)
+
+
+async def calc_sign(request):
+    try:
+        post_data = await request.post()
+        key = post_data["key"]
+        hash_str = post_data["hash_str"]
+        password = post_data["password"]
+
+        pubkey = rsa.PublicKey.load_pkcs1_openssl_pem(key.encode())
+        hashed_password = base64.b64encode(rsa.encrypt((hash_str + password).encode('utf-8'), pubkey))
+        return aiohttp.web.Response(body=hashed_password)
+    except Exception as e:
+        text = f"e: {e}\n{traceback.format_exc()}"
+        return aiohttp.web.Response(text=text, status=500)
