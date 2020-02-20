@@ -14,7 +14,7 @@ from app.lt import LtOperations
 
 
 async def index(request):
-    return aiohttp.web.HTTPFound("https://www.jianshu.com/u/44e417ef7b5d")
+    return render_to_response("templates/home.html", context={"CDN_URL": CDN_URL})
 
 
 async def old_blog(request):
