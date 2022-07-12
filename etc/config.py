@@ -1,10 +1,13 @@
 import sys
+import os
 import configparser
 
 print("-"*80)
 
 
-DEBUG = bool(sys.platform in ("win32", "darwin"))
+# DEBUG = bool(sys.platform in ("win32", "darwin"))
+DEBUG = True
+
 
 config = configparser.ConfigParser()
 config.read('/etc/madliar.settings.ini')
@@ -33,8 +36,9 @@ except KeyError:
 
 print(REDIS_CONFIG)
 
-PROJECT_ROOT = "./" if DEBUG else "/home/wwwroot/async.madliar"
 LOG_PATH = "./log" if DEBUG else "/home/wwwroot/log/async.madliar"
+os.makedirs(LOG_PATH, exist_ok=True)
+PROJECT_ROOT = "./" if DEBUG else "/home/wwwroot/async.madliar"
 MUSIC_FOLDER = "./music" if DEBUG else "/home/wwwroot/statics/music"
 RAW_ARTICLE_PATH = "templates/_post/article"
 DIST_ARTICLE_PATH = "./dist_article" if DEBUG else "/home/wwwroot/statics/static/article"
