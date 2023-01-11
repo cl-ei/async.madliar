@@ -13,15 +13,25 @@
 
     <link rel="icon" href="{{ CDN_URL }}/favicon.png">
     <style>
+        @font-face {
+            font-family: "Dinkie";
+            src: url("/static/fonts/DinkieBitmap-9px.woff2") format('woff');
+            font-weight: normal;
+            font-style: normal;
+        }
         html, body{
             margin: 0;
             padding: 0;
-            font-family: PingFang SC, Lantinghei SC, Microsoft Yahei, Hiragino Sans GB, Microsoft Sans Serif, WenQuanYi Micro Hei, sans;
+            font-family: Dinkie, PingFang SC, Lantinghei SC, Microsoft Yahei, Hiragino Sans GB, Microsoft Sans Serif, WenQuanYi Micro Hei, sans, serif;
+            font-smooth: never;
+            -webkit-font-smoothing : none;
+            background: #fcfcfc;
+            color: #3F3F3F;
         }
         a{
-            color: #000;
+            color: #3f3f3f;
             text-decoration: none;
-            border-bottom: 1px solid #333;
+            border-bottom: 0.1em solid #333;
             transition: ease-out .2s;
             -webkit-transition: ease-out .2s;
             -moz-transition: ease-out .2s;
@@ -33,11 +43,18 @@
             color: #ff5f5f;
             border-bottom: 1px solid #ff5f5f;
         }
+        #footer a{
+            color: #666;
+            border-bottom: 0.1em solid #666;
+        }
         li{
             margin-top: 10px;
+            list-style: none;
         }
         #header{
-            background: #ddd;
+            padding: 30px 50px;
+            background: #4ba6a1;
+            color: #ececec;
             padding: 30px 50px;
         }
         #header-title{
@@ -48,6 +65,7 @@
             margin-top: 20px;
         }
         #footer{
+            color: #666;
             width: 100%;
             background-color: #ddd;
             position: fixed;
@@ -66,11 +84,11 @@
         友情链接（外站）：
         <ul>
             <li><a href="https://www.jianshu.com/u/44e417ef7b5d">简书·偷闲一天打个盹</a></li>
-            <li><a href="https://wangyu.name/">wangyu.name</a></li>
+            <li><a href="https://wangyu.name/">WangYu's Space</a></li>
         </ul>
     </div>
     <div id="footer" class="copyright center">
-        <p><span>© 2014 - 2020 madliar.com</span>&nbsp|&nbsp<span><a href="http://beian.miit.gov.cn/" target="_blank">陕ICP备16003242号</a></span></p>
+        <p><span>© 2014 - 2023 madliar.com</span>&nbsp|&nbsp<span><a href="http://beian.miit.gov.cn/" target="_blank">陕ICP备16003242号</a></span>&nbsp|&nbsp<span><a href="/old">旧日记</a></span></p>
     </div>
 </body>
 </html>

@@ -92,15 +92,13 @@ class ArticleParser(object):
 
 def generate_cached_article_json(*args, **kwargs):
     sys.stdout.write("Start load article.\n")
-
-    article_path = os.path.join(PROJECT_ROOT, RAW_ARTICLE_PATH)
-    file_list = os.listdir(article_path)
+    file_list = os.listdir(RAW_ARTICLE_PATH)
 
     article_list = {}
     for file_name in file_list:
         if not file_name.lower().endswith("md"):
             continue
-        parser = ArticleParser(file_name=file_name, file_path=article_path)
+        parser = ArticleParser(file_name=file_name, file_path=RAW_ARTICLE_PATH)
         article_list[parser.id] = parser.article_info
 
     detail = json.dumps(
@@ -117,10 +115,10 @@ def generate_cached_article_json(*args, **kwargs):
     if not os.path.exists(DIST_ARTICLE_PATH):
         os.mkdir(DIST_ARTICLE_PATH)
     for existed_file in os.listdir(DIST_ARTICLE_PATH):
-        print(existed_file)
+        print(f"existed: {existed_file}")
         os.remove(os.path.join(DIST_ARTICLE_PATH, existed_file))
 
-    article_js_file = os.path.join(DIST_ARTICLE_PATH, randstr(64) + ".js")
+    article_js_file = os.path.join(DIST_ARTICLE_PATH, randstr(16) + ".js")
     with open(article_js_file, "wb") as f:
         f.write(total_article.encode("utf-8"))
 

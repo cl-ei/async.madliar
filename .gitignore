@@ -1,6 +1,6 @@
 log
+logs
 data
 .idea
 .DS_Store
-dist_article
-music
+__pycache__*

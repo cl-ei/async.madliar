@@ -19,7 +19,3 @@ website_logger = logging.getLogger("async.madliar")
 website_logger.setLevel(logging.DEBUG)
 website_logger.addHandler(console)
 website_logger.addHandler(file_handler)
-
-http_logger = logging.getLogger("http_logger")
-http_logger.setLevel(logging.DEBUG)
-http_logger.addHandler(http_log_handler)
