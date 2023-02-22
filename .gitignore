@@ -3,4 +3,5 @@ logs
 data
 .idea
 .DS_Store
+git_repo
 __pycache__*
