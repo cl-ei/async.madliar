@@ -13,4 +13,4 @@ RUN pip install -r requirements.txt
 
 COPY . ./
 
-CMD ["python", "run.py"]
+CMD ["bash", "run.sh"]
