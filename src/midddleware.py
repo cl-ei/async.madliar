@@ -13,9 +13,9 @@ class ErrorCatchMiddleware(BaseHTTPMiddleware):
             if response.status_code == 404:
                 raise error.NotFound
         except error.NotFound:
-            return HTMLResponse(content="<h1>404 - Not Found</h1>", status_code=404)
+            return HTMLResponse(content="<center><h1>404 - Not Found</h1></center>", status_code=404)
         except error.Forbidden:
-            return HTMLResponse(content="<h1>403 - Forbidden</h1>", status_code=403)
+            return HTMLResponse(content="<center><h1>403 - Forbidden</h1></center>", status_code=403)
         except Exception as e:  # noqa
             return HTMLResponse(content=f"internal error: {e}", status_code=500)
 

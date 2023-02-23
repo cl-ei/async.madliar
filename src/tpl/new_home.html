@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="zh-cmn-Hans">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <title>MadLiar</title>
+    <meta name="HandheldFriendly" content="True" />
+    <meta name="MobileOptimized" content="360" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="博主CL，编程爱好者。“madliar”意为“疯子”、“谎言者”，略含贬义， 但它挺适合这个博客的：博文大多只是我个人肤浅的观点，少数粗浅的学习笔记">
+    <meta name="keywords" content="MADLIAR, CL, CL's 疯言疯语, 疯言疯语, 风言风语, CL博客"/>
+    <meta name="author" content="CL">
+
+    <link rel="stylesheet" href="/static/css/font-awesome.min.css">
+    <style>
+        @font-face {
+            font-family: "Dinkie";
+            src: url("/static/fonts/DinkieBitmap-9px.woff2") format('woff');
+            font-weight: normal;
+            font-style: normal;
+        }
+        html, body{
+            margin: 0;
+            padding: 0;
+            font-family: PingFang SC, Lantinghei SC, Microsoft Yahei, Hiragino Sans GB, Microsoft Sans Serif, WenQuanYi Micro Hei, sans, serif;
+            background: #eee;
+            color: #3F3F3F;
+            min-width: 380px;
+            overflow-x: scroll;
+        }
+        .inner-body{
+            background: #fcfcfc;
+        }
+        @media (max-width:999999px){
+            .inner-body {
+                width: 1000px;
+                min-height: 100vh;
+                margin-left: calc(50% - 500px);
+                box-shadow: 0 2px 5px 0 rgb(0 0 0 / 10%);
+                -webkit-box-shadow: 0 2px 5px 0 rgb(0 0 0 / 10%);
+                -moz-box-shadow: 0 2px 5px 0 rgba(0,0,0,.1);
+                -o-box-shadow: 0 2px 5px 0 rgba(0,0,0,.1);
+            }
+        }
+        @media (max-width:1000px){
+            .inner-body {
+                margin-left: 0;
+                box-shadow: none;
+                -webkit-box-shadow: none;
+                -moz-box-shadow: none;
+                -o-box-shadow: none;
+            }
+        }
+        a{
+            color: #3f3f3f;
+            text-decoration: none;
+            border-bottom: 0.1em solid #333;
+            transition: ease-out .3s;
+            -webkit-transition: ease-out .3s;
+            -moz-transition: ease-out .3s;
+            -o-transition: ease-out .3s;
+            -ms-transition: ease-out .3s;
+            cursor: pointer;
+        }
+        a:hover{
+            color: #ff80a4;
+            border-bottom: 1px solid #ff5f5f;
+        }
+        li{
+            margin-top: 10px;
+            list-style: none;
+        }
+        #header{
+            background: #41946921;
+            color: #444;
+            padding: 30px 50px;
+            height: 120px;
+        }
+        #header-title{
+            font-size: 40px;
+            margin-bottom: -10px;
+        }
+        #page-body{
+            width: calc(100% - 100px);
+            margin-left: 50px;
+            margin-top: 60px;
+        }
+        #footer{
+            color: #656565;
+            width: 100%;
+            position: fixed;
+            bottom: 0;
+            text-align: center;
+            font-size: 14px;
+        }
+        #footer a{
+            color: #656565;
+            border-bottom: 0.1em solid #d3d3d3;
+        }
+        .pixel-font{
+            font-family: Dinkie, PingFang SC, Lantinghei SC, Microsoft Yahei, Hiragino Sans GB, Microsoft Sans Serif, WenQuanYi Micro Hei, sans, serif;
+            font-smooth: never;
+            -webkit-font-smoothing: none;
+            -moz-osx-font-smoothing: revert;
+        }
+        .nav{
+            margin: 35px 0;
+        }
+        .nav-item, .nav-item a{
+            text-decoration: none;
+            cursor: pointer;
+            border-bottom: none;
+            margin: 0 8px 0 0;
+        }
+        .nav-item i{
+            font-size: 16px;
+            margin-right: 4px;
+        }
+        .second-title{
+            border-bottom: 1px solid #ccc;
+            font-size: 20px;
+            font-weight: 500;
+            margin-bottom: 50px;
+            color: #4d4d4d;
+            padding-bottom: 6px;
+        }
+        .article-bar{
+            margin: 0;
+            padding: 14px 0;
+            border-bottom: 1px dashed #ccc;
+        }
+        .article-bar a{
+            border-bottom: none;
+        }
+        .article-date{
+            margin-right: 5%;
+            font-size: 10px;
+            color: #666;
+        }
+        .article-property{
+            margin: -45px 0 60px 0;
+            font-size: 12px;
+            color: #777;
+        }
+        .article-property-item{
+            padding: 0 40px 0 0;
+        }
+        .article-content{
+            display: none;
+        }
+        #article-show{
+            padding: 0 0 80px 0;
+        }
+        #article-show img{
+            display: block;
+            margin: auto;
+            overflow-clip-margin: content-box;
+            overflow: clip;
+        }
+    </style>
+</head>
+
+<body>
+<div class="inner-body">
+<div id="header">
+    <div class="pixel-font" id="header-title">MADL!AR</div>
+    <div class="pixel-font">Code is cheap, show me the PPT!</div>
+    <div class="nav">
+        <span class="nav-item" id="home">
+            <a href="/blog"><i class="fa fa-home" aria-hidden="true"></i>首页</a>
+        </span>
+        <span class="nav-item" id="category">
+            <a href="/blog/category"><i class="fa fa-list-alt" aria-hidden="true"></i>分类</a>
+        </span>
+        <span class="nav-item" id="Fragment">
+            <a href="baidu.com"><i class="fa fa-map-signs" aria-hidden="true"></i>Fragment</a>
+        </span>
+        <span class="nav-item" id="about">
+            <a href="/blog/about"><i class="fa fa-list-alt" aria-hidden="true"></i>关于</a>
+        </span>
+    </div>
+</div>
+<div id="page-body">
+{% if page == "home" %}
+    <div class="second-title">最近发布</div>
+    {% for article in articles %}
+        <div class="article-bar">
+            <a href="/blog/article/{{ article.identity }}" target="_blank">
+                <span class="article-date">{{ article.date }}</span>
+                <span class="article-title">{{ article.title }}</span>
+            </a>
+        </div>
+    {% endfor %}
+{% endif %}
+{% if page == "article" %}
+    <div class="second-title">{{ article.title }}</div>
+    <div class="article-property">
+
+        {% if article.category %}
+            <span class="article-property-item">分类：{{ article.category }}</span>
+        {% endif %}
+
+        {% if article.tags %}
+            <span class="article-property-item">标签：
+                {% for tag in article.tags %}
+                    <span class="article-property-tag">{{ tag }}</span>
+                {% endfor %}
+            </span>
+        {% endif %}
+
+        <span class="article-property-item">发布于: {{ article.date }}</span>
+    </div>
+    <div id="article-show"></div>
+    <div class="article-content"><textarea id="article-content-textarea" class="hidden-area">{{ article.content }}</textarea></div>
+    <script></script>
+{% endif %}
+</div>
+</div>
+<div id="footer" class="copyright center">
+    <p><span>© 2014 - 2023 madliar.com</span>&nbsp|&nbsp<span><a href="http://beian.miit.gov.cn/" target="_blank">陕ICP备16003242号</a></span>&nbsp|&nbsp<span><a href="/old">旧版</a></span></p>
+</div>
+{% if page == "article" %}
+<script type="text/javascript" src="/static/js/jquery.min.js"></script>
+<script type="text/javascript" src="/static/js/marked.js"></script>
+<script>
+$(function(){
+    $("#article-show").html(marked($("#article-content-textarea").val()));
+});
+</script>
+{% endif %}
+</body>
+</html>
+

@@ -41,8 +41,8 @@ class CachedTPL:
 
     @classmethod
     def get(cls, file_name: str) -> Template:
-        if file_name in cls.cache:
-            return cls.cache[file_name]
+        # if file_name in cls.cache:
+        #     return cls.cache[file_name]
 
         with open(file_name, "r") as tpl_f:
             content = tpl_f.read()
@@ -88,7 +88,10 @@ async def music(ref: str = Query("")) -> HTMLResponse:
 
 @router.get("/blog")
 async def blog_home() -> HTMLResponse:
-    pass
+    dist_data = CachedDistData.get()
+    ctx = {"page": "home", "articles": [a.dict() for a in dist_data.nature_list]}
+    html = CachedTPL.get("src/tpl/new_home.html").render(ctx)
+    return HTMLResponse(html)
 
 
 @router.get("/blog/category")
@@ -103,8 +106,10 @@ async def blog_article(date: str = Path(...), sub_identity: str = Path(..., )) -
     if identity not in dist_data.articles:
         raise error.NotFound()
 
-    article = dist_data.articles[identity].json(ensure_ascii=False)
-    return HTMLResponse(content=article)
+    article = dist_data.articles[identity].dict()
+    ctx = {"page": "article", "article": article}
+    html = CachedTPL.get("src/tpl/new_home.html").render(ctx)
+    return HTMLResponse(html)
 
 
 @router.post("/blog/flush")
