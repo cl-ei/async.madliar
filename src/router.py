@@ -1,11 +1,39 @@
 import os
-from fastapi import APIRouter, Query
+import json
+from fastapi import APIRouter, Query, Path, Body
 from fastapi.responses import HTMLResponse
 from jinja2 import Template
 from typing import Dict
+from .config import LAST_COMMIT_FILE, BLOG_DIST_PATH
+from .operation.build_article import DistData, ArticleRender
+from . import error
 
 
 router = APIRouter()
+
+
+class CachedDistData:
+    cache: Dict[str, DistData] = {}
+
+    @classmethod
+    def get(cls) -> DistData:
+        with open(LAST_COMMIT_FILE, "r") as f:
+            last_commit_id = f.read()
+
+        if last_commit_id in cls.cache:
+            return cls.cache[last_commit_id]
+
+        with open(os.path.join(BLOG_DIST_PATH, last_commit_id, "__dist.json"), "rb") as f:
+            content = f.read().decode("utf-8", errors="replace")
+        dist_data = DistData(**json.loads(content))
+        cls.cache[last_commit_id] = dist_data
+
+        # pop old
+        antiquated_keys = [k for k in cls.cache if k != last_commit_id]
+        for k in antiquated_keys:
+            cls.cache.pop(k)
+
+        return dist_data
 
 
 class CachedTPL:
@@ -56,3 +84,35 @@ async def old_blog() -> HTMLResponse:
 async def music(ref: str = Query("")) -> HTMLResponse:
     context = {"ref": bool(ref), "music_list": [], "CDN_URL": ""}
     return HTMLResponse(CachedTPL.get("src/tpl/music.html").render(context))
+
+
+@router.get("/blog")
+async def blog_home() -> HTMLResponse:
+    pass
+
+
+@router.get("/blog/category")
+async def blog_category() -> HTMLResponse:
+    pass
+
+
+@router.get("/blog/article/{date}/{sub_identity}")
+async def blog_article(date: str = Path(...), sub_identity: str = Path(..., )) -> HTMLResponse:
+    identity = f"{date}/{sub_identity}"
+    dist_data = CachedDistData.get()
+    if identity not in dist_data.articles:
+        raise error.NotFound()
+
+    article = dist_data.articles[identity].json(ensure_ascii=False)
+    return HTMLResponse(content=article)
+
+
+@router.post("/blog/flush")
+async def blog_flush(password: str = Body(..., embed=True)):
+    if password != "3.141592653589797":
+        raise error.Forbidden()
+    try:
+        ArticleRender().run()
+    except Exception as e:
+        raise error.InternalError(f"e: {e}")
+    return {"code": 0, "msg": "ok"}
