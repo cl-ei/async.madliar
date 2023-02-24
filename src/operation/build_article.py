@@ -1,11 +1,12 @@
 import os
 import re
 import shutil
+import subprocess
 import time
 from typing import List, Dict
 
 import git
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, validator
 from xpinyin import Pinyin
 from ..config import BLOG_REPO_ROOT, BLOG_DIST_PATH, BLOG_STATIC_PREFIX, LAST_COMMIT_FILE
 from ..log4 import website_logger as logging
@@ -66,6 +67,14 @@ class ArticleRender:
         self.identity = f"pull_{int(time.time() * 1000)}"
         self.repo_path = os.path.join(self.storage_root, self.identity)
 
+        self.remote_repo = "git@github.com:cl-ei/blog.git"
+
+    def get_remote_commit_id(self) -> str:
+        process = subprocess.Popen(["git", "ls-remote", self.remote_repo], stdout=subprocess.PIPE)
+        stdout, stderr = process.communicate()
+        sha = stdout.decode().split("HEAD")[0].split("\t")[0]
+        return sha
+
     def get_last_commit_id(self) -> str:
         try:
             with open(self.last_commit_id_file, "r") as f:
@@ -82,11 +91,7 @@ class ArticleRender:
         for try_time in range(5):
             try:
                 logging.debug("try fetch origin repo...")
-                repo = git.Repo.clone_from(
-                    url="git@github.com:cl-ei/blog.git",
-                    to_path=self.repo_path,
-                    multi_options=["--depth=1"],
-                )
+                repo = git.Repo.clone_from(url=self.remote_repo, to_path=self.repo_path, multi_options=["--depth=1"])
                 return repo
             except git.CommandError as e:
                 logging.error(f"try {try_time} cannot fetch repo: {e}")
@@ -187,13 +192,15 @@ class ArticleRender:
         return article
 
     def run(self):
+        this_commit_id = self.get_last_commit_id()
+        if this_commit_id:
+            remote_commit_id = self.get_remote_commit_id()
+            if this_commit_id == remote_commit_id:
+                logging.info(f"already generated, commit id: {this_commit_id}, skip.")
+                return
+
         repo = self.pull_repo()
         this_commit_id = repo.commit().hexsha
-        last_commit_id = self.get_last_commit_id()
-        if last_commit_id == this_commit_id:
-            logging.info(f"already generated, commit id: {this_commit_id}, skip.")
-            return
-
         dist_data = DistData(articles={}, tag_map={}, category_map={})
 
         content_root = os.path.join(self.repo_path, "content")
