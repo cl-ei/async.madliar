@@ -12,6 +12,10 @@
     <meta name="author" content="CL">
 
     <link rel="stylesheet" href="/static/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+    {% if page == "article" %}
+        <link rel="stylesheet" href="/static/css/highlight.min.css">
+    {% endif %}
     <link rel="stylesheet" href="/static/css/new_blog.css">
 </head>
 
@@ -40,7 +44,7 @@
     <div class="second-title">最近发布</div>
     {% for article in articles %}
         <div class="article-bar">
-            <a href="/blog/article/{{ article.identity }}" target="_blank">
+            <a href="/blog/article/{{ article.identity }}">
                 <span class="article-date">{{ article.date }}</span>
                 <span class="article-title">{{ article.title }}</span>
             </a>
@@ -65,7 +69,7 @@
 
         <span class="article-property-item">发布于: {{ article.date }}</span>
     </div>
-    <div id="article-show"></div>
+    <div class="article-show"></div>
     <div class="article-content"><textarea id="article-content-textarea" class="hidden-area">{{ article.content }}</textarea></div>
     <script></script>
 {% endif %}
@@ -93,9 +97,11 @@
 {% if page == "article" %}
 <script type="text/javascript" src="/static/js/jquery.min.js"></script>
 <script type="text/javascript" src="/static/js/marked.js"></script>
+<script type="text/javascript" src="/static/js/highlight.min.js"></script>
 <script>
 $(function(){
-    $("#article-show").html(marked($("#article-content-textarea").val()));
+    $(".article-show").html(marked($("#article-content-textarea").val()));
+    hljs.highlightAll();
 });
 </script>
 {% endif %}

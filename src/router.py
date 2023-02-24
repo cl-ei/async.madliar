@@ -41,8 +41,8 @@ class CachedTPL:
 
     @classmethod
     def get(cls, file_name: str) -> Template:
-        # if file_name in cls.cache:
-        #     return cls.cache[file_name]
+        if file_name in cls.cache:
+            return cls.cache[file_name]
 
         with open(file_name, "r") as tpl_f:
             content = tpl_f.read()

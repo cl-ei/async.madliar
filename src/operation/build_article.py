@@ -5,7 +5,7 @@ import time
 from typing import List, Dict
 
 import git
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, validator
 from xpinyin import Pinyin
 from ..config import BLOG_REPO_ROOT, BLOG_DIST_PATH, BLOG_STATIC_PREFIX, LAST_COMMIT_FILE
 from ..log4 import website_logger as logging
@@ -24,6 +24,17 @@ class ArticleHeader(BaseModel):
 class Article(ArticleHeader):
     identity: str
     content: str
+
+    @validator("identity", pre=True)
+    def default_datetime(cls, value: str) -> str:
+        result = []
+        valid_chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-+._ /'
+        for c in value:
+            if c in valid_chars:
+                result.append(c)
+        if len(result) == 0:
+            raise ValueError(f"Error value: {value}")
+        return "".join(result)
 
 
 class DistData(BaseModel):
