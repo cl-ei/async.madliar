@@ -17,8 +17,8 @@ class CachedDistData:
 
     @classmethod
     def get(cls) -> DistData:
-        with open(LAST_COMMIT_FILE, "r") as f:
-            last_commit_id = f.read()
+        with open(LAST_COMMIT_FILE, "rb") as f:
+            last_commit_id = f.read().decode("utf-8")
 
         if last_commit_id in cls.cache:
             return cls.cache[last_commit_id]
@@ -44,8 +44,8 @@ class CachedTPL:
         if file_name in cls.cache:
             return cls.cache[file_name]
 
-        with open(file_name, "r") as tpl_f:
-            content = tpl_f.read()
+        with open(file_name, "rb") as tpl_f:
+            content = tpl_f.read().decode("utf-8")
         cls.cache[file_name] = Template(content)
         return cls.cache[file_name]
 

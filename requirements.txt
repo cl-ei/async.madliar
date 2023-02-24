@@ -1,8 +1,6 @@
 rsa
 gitpython
 jinja2~=3.1.2
-requests
-aioredis
 fastapi~=0.92.0
 starlette~=0.25.0
 uvicorn

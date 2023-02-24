@@ -77,8 +77,8 @@ class ArticleRender:
 
     def get_last_commit_id(self) -> str:
         try:
-            with open(self.last_commit_id_file, "r") as f:
-                return f.read()
+            with open(self.last_commit_id_file, "rb") as f:
+                return f.read().decode("utf-8")
         except:  # noqa
             return ""
 
