@@ -9,4 +9,5 @@ docker run -itd \
   --restart=always \
   --name ${DOCKER_NAME} \
   --net=host \
+  -v /root/.ssh:/root/.ssh:ro \
   ${DOCKER_IMAGE}
