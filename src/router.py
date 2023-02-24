@@ -96,7 +96,16 @@ async def blog_home() -> HTMLResponse:
 
 @router.get("/blog/category")
 async def blog_category() -> HTMLResponse:
-    pass
+    ctx = {"page": "category"}
+    html = CachedTPL.get("src/tpl/new_home.html").render(ctx)
+    return HTMLResponse(html)
+
+
+@router.get("/blog/about")
+async def blog_category() -> HTMLResponse:
+    ctx = {"page": "about"}
+    html = CachedTPL.get("src/tpl/new_home.html").render(ctx)
+    return HTMLResponse(html)
 
 
 @router.get("/blog/article/{date}/{sub_identity}")
