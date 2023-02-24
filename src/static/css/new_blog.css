@@ -223,6 +223,8 @@ li{
 }
 .article-show{
     padding: 0 0 120px 0;
+    white-space: normal;
+    word-break: break-all;
 }
 .article-show p{
     font-size: 15px;
