@@ -1,4 +1,4 @@
-from src.operation.build_article import test
+from src.operation.build_article import pull_and_flush
 
 
-test()
+pull_and_flush()

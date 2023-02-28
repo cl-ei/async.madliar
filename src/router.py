@@ -4,8 +4,9 @@ from fastapi import APIRouter, Query, Path, Body
 from fastapi.responses import HTMLResponse
 from jinja2 import Template
 from typing import Dict
+from multiprocessing import Process
 from .config import LAST_COMMIT_FILE, BLOG_DIST_PATH
-from .operation.build_article import DistData, ArticleRender
+from .operation.build_article import DistData, pull_and_flush
 from . import error
 
 
@@ -125,8 +126,6 @@ async def blog_article(date: str = Path(...), sub_identity: str = Path(..., )) -
 async def blog_flush(password: str = Body(..., embed=True)):
     if password != "3.141592653589797":
         raise error.Forbidden()
-    try:
-        ArticleRender().run()
-    except Exception as e:
-        raise error.InternalError(f"e: {e}")
+    p = Process(target=pull_and_flush)
+    p.start()
     return {"code": 0, "msg": "ok"}

@@ -27,7 +27,7 @@ class Article(ArticleHeader):
     content: str
 
     @validator("identity", pre=True)
-    def default_datetime(cls, value: str) -> str:
+    def valid_identity(cls, value: str) -> str:
         result = []
         valid_chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-+._ /'
         for c in value:
@@ -70,10 +70,11 @@ class ArticleRender:
         self.remote_repo = "git@github.com:cl-ei/blog.git"
 
     def get_remote_commit_id(self) -> str:
+        """return 8 bytes"""
         process = subprocess.Popen(["git", "ls-remote", self.remote_repo], stdout=subprocess.PIPE)
         stdout, stderr = process.communicate()
         sha = stdout.decode().split("HEAD")[0].split("\t")[0]
-        return sha
+        return sha[:8]
 
     def get_last_commit_id(self) -> str:
         try:
@@ -141,7 +142,7 @@ class ArticleRender:
             with open(dist, "wb") as write_f:
                 write_f.write(read_f.read())
 
-    def parse_body(self, base: str, body: str, this_commit_id: str) -> str:
+    def parse_body(self, base: str, body: str, this_commit_id: str, date: str) -> str:
         """
         在这里处理 body，寻找图片、替换路径并移动到static文件夹
 
@@ -159,10 +160,10 @@ class ArticleRender:
             img_path = m[path_start_index:-1]
 
             origin_image_path = os.path.join(base, img_path)
-            dist_image_path = os.path.join(self.dist_path, this_commit_id, img_path)
+            dist_image_path = os.path.join(self.dist_path, this_commit_id, date, img_path)
             self.move_image(source=origin_image_path, dist=dist_image_path)
 
-            static_path = os.path.join(self.static_root, this_commit_id, img_path)
+            static_path = os.path.join(self.static_root, this_commit_id, date, img_path)
             replace = m[:path_start_index] + static_path + ")"
             replace_map[m] = replace
             logging.debug(f"img_path: {img_path}, m: {m}, static_path: {static_path}, replace: {replace}")
@@ -185,7 +186,7 @@ class ArticleRender:
             header.date = os.path.split(base.rstrip("/"))[-1]
         if not header.title:
             header.title = filename.split(".", 1)[0]
-        parsed_body = self.parse_body(base, body, this_commit_id)
+        parsed_body = self.parse_body(base, body, this_commit_id, header.date)
 
         article_id = Pinyin().get_pinyin(f"{header.date}/{header.title}")
         article = Article(identity=article_id, content=parsed_body, **header.dict())
@@ -200,7 +201,7 @@ class ArticleRender:
                 return
 
         repo = self.pull_repo()
-        this_commit_id = repo.commit().hexsha
+        this_commit_id = repo.commit().hexsha[:8]
         dist_data = DistData(articles={}, tag_map={}, category_map={})
 
         content_root = os.path.join(self.repo_path, "content")
@@ -232,8 +233,9 @@ class ArticleRender:
         # save history
         self.set_last_commit_id(this_commit_id)
         shutil.rmtree(self.storage_root)
+        logging.info("generate finished.")
 
 
-def test():
+def pull_and_flush():
     render = ArticleRender()
     render.run()

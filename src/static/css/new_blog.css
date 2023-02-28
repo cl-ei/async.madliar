@@ -135,7 +135,7 @@ html, body{
 a{
     color: #3f3f3f;
     text-decoration: none;
-    border-bottom: 0.1em solid #333;
+    border-bottom: 1px solid #333;
     transition: ease-out .3s;
     -webkit-transition: ease-out .3s;
     -moz-transition: ease-out .3s;
@@ -146,7 +146,7 @@ a{
 a:hover{
     color: #ff80a4;
     text-decoration: none;
-    border-bottom: 0.1em solid #ff5f5f;
+    border-bottom: 1px solid #ff5f5f;
 }
 p{
     font-size: 14px;
@@ -166,7 +166,6 @@ blockquote p{
 }
 li{
     margin-top: 10px;
-    font-size: 16px;
 }
 li a{
     color: #333;
@@ -248,6 +247,9 @@ li a{
     overflow-clip-margin: content-box;
     overflow: clip;
     max-width: 100%;
+}
+.article-show li{
+    font-size: 15px;
 }
 .hljs {
     background: none;
