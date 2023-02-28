@@ -188,6 +188,8 @@ class ArticleRender:
             header.date = os.path.split(base.rstrip("/"))[-1]
         if not header.title:
             header.title = filename.split(".", 1)[0]
+        if not header.category:
+            header.category = "未分类"
         parsed_body = self.parse_body(base, body, this_commit_id, header.date)
 
         article_id = Pinyin().get_pinyin(f"{header.date}/{header.title}")
@@ -222,8 +224,12 @@ class ArticleRender:
         # 整理
         filtered_tags = {}
         for tag, data in dist_data.tag_map.items():
-            filtered_tags[tag] = list(set(data))
+            filtered_tags[tag] = sorted(list(set(data)))
         dist_data.tag_map = filtered_tags
+        filtered_categories = {}
+        for category, data in dist_data.category_map.items():
+            filtered_categories[category] = sorted(data)
+        dist_data.category_map = filtered_categories
 
         # save
         dis_data = os.path.join(self.dist_path, this_commit_id, "__dist.json")

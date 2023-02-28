@@ -61,13 +61,15 @@
     <div class="article-property">
 
         {% if article.category %}
-            <span class="article-property-item">分类：{{ article.category }}</span>
+            <span class="article-property-item">分类：
+                <a href="/blog/category#{{ article.category }}">{{ article.category }}</a>
+            </span>
         {% endif %}
 
         {% if article.tags %}
             <span class="article-property-item">标签：
                 {% for tag in article.tags %}
-                    <span class="article-property-tag">{{ tag }}</span>
+                    <span class="article-property-tag">{{ tag }}</span>{% if not loop.last %}, {% endif %}
                 {% endfor %}
             </span>
         {% endif %}
@@ -79,7 +81,26 @@
     <script></script>
 {% elif page == "category" %}
     <div class="second-title">分类</div>
-    <p>等到文章多一点的时候再做这个页面吧</p>
+    <div class="category-selector">
+        <h4 class="category-group-h"><i class="fa fa-th-list" aria-hidden="true"></i>所有分类</h4>
+        <div class="category-container">
+        {% for category_name, article_list in dist_data.category_map.items()  %}
+            <a href="#{{ category_name }}">{{ category_name }}（{{ article_list | length }}）</a>
+        {% endfor %}
+        </div>
+    </div>
+
+    {% for category_name, article_list in dist_data.category_map.items() %}
+        <div class="category-group">
+        <h4 id="#{{ category_name }}" class="category-group-h"><i class="fa fa-quote-right" aria-hidden="true"></i>{{ category_name }}</h4>
+        {% for article in article_list %}
+            <div class="article-bar">
+                {{ dist_data.articles[article].date }}
+                <a href="/blog/article/{{ dist_data.articles[article].identity }}">{{ dist_data.articles[article].title }}</a>
+            </div>
+        {% endfor %}
+        </div>
+    {% endfor %}
 {% elif page == "about" %}
     <div class="second-title">关于</div>
     <p>这是我的个人博客，用来记录一些笔记和想法。</p>

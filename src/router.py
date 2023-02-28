@@ -1,10 +1,10 @@
 import os
 import json
+from multiprocessing import Process
+from typing import Dict
 from fastapi import APIRouter, Query, Path, Body
 from fastapi.responses import HTMLResponse
 from jinja2 import Template
-from typing import Dict
-from multiprocessing import Process
 from .config import LAST_COMMIT_FILE, BLOG_DIST_PATH
 from .operation.build_article import DistData, pull_and_flush
 from . import error
@@ -97,13 +97,14 @@ async def blog_home() -> HTMLResponse:
 
 @router.get("/blog/category")
 async def blog_category() -> HTMLResponse:
-    ctx = {"page": "category"}
+    dist_data = CachedDistData.get()
+    ctx = {"page": "category", "dist_data": dist_data}
     html = CachedTPL.get("src/tpl/new_home.html").render(ctx)
     return HTMLResponse(html)
 
 
 @router.get("/blog/about")
-async def blog_category() -> HTMLResponse:
+async def blog_about() -> HTMLResponse:
     ctx = {"page": "about"}
     html = CachedTPL.get("src/tpl/new_home.html").render(ctx)
     return HTMLResponse(html)
