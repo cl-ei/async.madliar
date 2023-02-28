@@ -156,7 +156,7 @@ p{
 }
 pre{
     border: none;
-    border-radius: 0px;
+    border-radius: 0;
 }
 blockquote {
     font-size: 14px;
@@ -166,6 +166,10 @@ blockquote p{
 }
 li{
     margin-top: 10px;
+    font-size: 16px;
+}
+li a{
+    color: #333;
 }
 #header {
     background: #41946921;
@@ -237,7 +241,6 @@ li{
     font-size: 15px;
     line-height: 1.8em;
     margin: 1em 0;
-    color: #000;
 }
 .article-show img{
     display: block;
