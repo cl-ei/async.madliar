@@ -131,6 +131,8 @@ class ArticleRender:
             value = kv[1].strip(" ")
             if key == "tags":
                 value = [v.strip() for v in value.split(",")]
+            if key == "description":
+                value = value.replace("\"", "")
             create_param[key] = value
         return ArticleHeader(**create_param)
 

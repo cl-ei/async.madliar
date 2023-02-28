@@ -7,17 +7,21 @@
     <meta name="HandheldFriendly" content="True" />
     <meta name="MobileOptimized" content="320" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="description" content="博主CL，编程爱好者。“madliar”意为“疯子”、“谎言者”，略含贬义， 但它挺适合这个博客的：博文大多只是我个人肤浅的观点，少数粗浅的学习笔记">
-    <meta name="keywords" content="MADLIAR, CL, CL's 疯言疯语, 疯言疯语, 风言风语, CL博客"/>
+{% if page == "article"%}
+    <meta name="description" content="{% if article.description %}{{ article.description }}{% else %}{{ article.title }}{% endif %}">
+{% else %}
+    <meta name="description" content="博主CL，一个编程爱好者。这是我的博客，记录学习笔记和灵感">
+{% endif %}
+    <meta name="keywords" content="MADLIAR, CL, 技术博客, 编程笔记"/>
     <meta name="author" content="CL">
     <meta http-equiv="Cache-Control" content="no-transform" />
     <meta http-equiv="Cache-Control" content="no-siteapp" />
 
     <link rel="stylesheet" href="/static/css/font-awesome.min.css">
     <link rel="stylesheet" href="/static/css/bootstrap.min.css">
-    {% if page == "article" %}
-        <link rel="stylesheet" href="/static/css/highlight.min.css">
-    {% endif %}
+{% if page == "article" %}
+    <link rel="stylesheet" href="/static/css/highlight.min.css">
+{% endif %}
     <link rel="stylesheet" href="/static/css/new_blog.css">
 </head>
 
@@ -52,8 +56,7 @@
             </a>
         </div>
     {% endfor %}
-{% endif %}
-{% if page == "article" %}
+{% elif page == "article" %}
     <div class="second-title">{{ article.title }}</div>
     <div class="article-property">
 
@@ -74,12 +77,10 @@
     <div class="article-show"></div>
     <div class="article-content"><textarea id="article-content-textarea" class="hidden-area">{{ article.content }}</textarea></div>
     <script></script>
-{% endif %}
-{% if page == "category" %}
+{% elif page == "category" %}
     <div class="second-title">分类</div>
     <p>等到文章多一点的时候再做这个页面吧</p>
-{% endif %}
-{% if page == "about" %}
+{% elif page == "about" %}
     <div class="second-title">关于</div>
     <p>这是我的个人博客，用来记录一些笔记和想法。</p>
     <p>友情链接：
