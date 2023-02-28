@@ -224,11 +224,11 @@ class ArticleRender:
         # 整理
         filtered_tags = {}
         for tag, data in dist_data.tag_map.items():
-            filtered_tags[tag] = sorted(list(set(data)))
+            filtered_tags[tag] = sorted(list(set(data)), reverse=True)
         dist_data.tag_map = filtered_tags
         filtered_categories = {}
         for category, data in dist_data.category_map.items():
-            filtered_categories[category] = sorted(data)
+            filtered_categories[category] = sorted(data, reverse=True)
         dist_data.category_map = filtered_categories
 
         # save

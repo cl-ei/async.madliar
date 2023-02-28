@@ -95,7 +95,7 @@
         <h4 id="#{{ category_name }}" class="category-group-h"><i class="fa fa-quote-right" aria-hidden="true"></i>{{ category_name }}</h4>
         {% for article in article_list %}
             <div class="article-bar">
-                {{ dist_data.articles[article].date }}
+                <span class="article-date">{{ dist_data.articles[article].date }}</span>
                 <a href="/blog/article/{{ dist_data.articles[article].identity }}">{{ dist_data.articles[article].title }}</a>
             </div>
         {% endfor %}
