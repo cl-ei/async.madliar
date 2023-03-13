@@ -28,11 +28,11 @@ a{
     color: #3f3f3f;
     text-decoration: none;
     border-bottom: 1px solid #3f3f3f;
-    transition: ease-out .2s;
-    -webkit-transition: ease-out .2s;
-    -moz-transition: ease-out .2s;
-    -o-transition: ease-out .2s;
-    -ms-transition: ease-out .2s;
+    transition: ease-out .3s;
+    -webkit-transition: ease-in-out .3s;
+    -moz-transition: ease-in-out .3s;
+    -o-transition: ease-in-out .3s;
+    -ms-transition: ease-in-out .3s;
     cursor: pointer;
 }
 a:hover{
@@ -42,6 +42,13 @@ a:hover{
 .inner-body{
     background: #fcfcfc;
     padding-bottom: 0;
+}
+.preload * {
+    transition: none !important;
+    -webkit-transition: none !important;
+    -moz-transition: none !important;
+    -ms-transition: none !important;
+    -o-transition: none !important;
 }
 #page-body{
     padding-bottom: 3rem;
