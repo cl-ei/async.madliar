@@ -91,7 +91,7 @@
 
     {% for category_name, article_list in dist_data.category_map.items() %}
         <div class="category-group">
-        <h4 id="#{{ category_name }}" class="category-group-h"><i class="fa fa-quote-right" aria-hidden="true"></i>{{ category_name }}</h4>
+        <h4 id="{{ category_name }}" class="category-group-h"><i class="fa fa-quote-right" aria-hidden="true"></i>{{ category_name }}</h4>
         {% for article in article_list %}
             <div class="article-bar">
                 <span class="article-date">{{ dist_data.articles[article].date }}</span>
