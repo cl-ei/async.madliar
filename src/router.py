@@ -3,7 +3,7 @@ import json
 from multiprocessing import Process
 from typing import Dict
 from fastapi import APIRouter, Query, Path, Body
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from jinja2 import Template
 from .config import LAST_COMMIT_FILE, BLOG_DIST_PATH
 from .operation.build_article import DistData, pull_and_flush
@@ -53,8 +53,7 @@ class CachedTPL:
 
 @router.get("/")
 async def home_page() -> HTMLResponse:
-    html = CachedTPL.get("src/tpl/home.html").render({"CDN_URL": ""})
-    return HTMLResponse(content=html)
+    return RedirectResponse(url="/blog")
 
 
 @router.get("/old")
