@@ -310,6 +310,7 @@ li a{
     text-decoration: none;
     color: #3f3f3f;
     margin-right: 10px;
+    margin-top: 10px;
 }
 .category-selector a:hover{
     color: #e0e0e0;
