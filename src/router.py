@@ -53,7 +53,7 @@ class CachedTPL:
 
 @router.get("/")
 async def home_page() -> RedirectResponse:
-    return RedirectResponse(url="/blog")
+    return RedirectResponse(url="/notebook/publish/i/caoliang.net/index.html")
 
 
 @router.get("/old")
