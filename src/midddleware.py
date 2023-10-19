@@ -1,4 +1,7 @@
+import datetime
+
 import starlette
+from starlette.requests import Request
 from typing import Optional
 from starlette.middleware.base import BaseHTTPMiddleware
 from . import error
@@ -6,7 +9,24 @@ from fastapi.responses import JSONResponse, Response, HTMLResponse
 
 
 class ErrorCatchMiddleware(BaseHTTPMiddleware):
-    async def dispatch(self, request, call_next):
+    async def dispatch(self, request: Request, call_next):
+        if request.url.path == "/show_314":
+            print(
+                "receive show req: \n"
+                f"\t{request.method}: {request.url.path}\n"
+                f"\tQuery: {request.query_params}\n"
+                f"\tHeaders: ",
+                end=""
+            )
+            for key, value in request.headers.items():
+                print(f"\n\t\t{key}: {value}", end="")
+
+            print(
+                f"\n\tBody: {await request.body()}\n\n"
+                f"<- {datetime.datetime.now()}\n"
+            )
+            return JSONResponse({"code": 0, "msg": "ok", "data": None})
+
         stream_resp_t = starlette.middleware.base._StreamingResponse  # noqa
         try:
             response: Optional[stream_resp_t, Response] = await call_next(request)
