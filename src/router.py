@@ -129,3 +129,9 @@ async def blog_flush(password: str = Body(..., embed=True)):
     p = Process(target=pull_and_flush)
     p.start()
     return {"code": 0, "msg": "ok"}
+
+
+@router.get("/fake")
+async def fake_img():
+    html = CachedTPL.get("src/tpl/fake.html").render({})
+    return HTMLResponse(html)
