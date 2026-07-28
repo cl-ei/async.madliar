@@ -6,12 +6,7 @@ DEBUG = bool(sys.platform == "win32")
 if DEBUG:
     print("The app is running in DEBUG mode.")
 
-if DEBUG:
-    LOG_FILE = str(Path.home() / "async.log")
-else:
-    LOG_FILE = os.environ.get("LOG_FILE")
-    if not LOG_FILE:
-        LOG_FILE = "/var/logs/async.log"
+LOG_FILE = str(Path.home() / "async.log")
 print(f"APP log will be written to this file: {LOG_FILE}")
 
 LOG_PATH = "logs/"
