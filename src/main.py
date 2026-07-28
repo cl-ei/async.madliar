@@ -39,8 +39,8 @@ def get_application() -> FastAPI:
     application.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],
-        allow_credentials=True,
-        allow_methods=["*"],
+        allow_credentials=False,
+        allow_methods=["GET", "HEAD", "OPTIONS"],
         allow_headers=["*"],
     )
     application.add_middleware(ErrorCatchMiddleware)
