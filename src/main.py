@@ -1,9 +1,23 @@
+import sys
+import logging
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.cors import CORSMiddleware
-
+from src.config import LOG_FILE
 from src.midddleware import ErrorCatchMiddleware
 from src.router import router as main_router
+
+
+logging.basicConfig(
+    level=logging.DEBUG,
+    format="%(asctime)s [%(levelname)s]: %(message)s",
+    handlers=[
+        logging.FileHandler(LOG_FILE),
+        logging.StreamHandler(sys.stdout),
+    ],
+)
+
+logging.getLogger("asyncio").setLevel(logging.INFO)
 
 
 PROJECT_NAME = "async.madliar"

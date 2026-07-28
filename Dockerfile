@@ -1,4 +1,4 @@
-FROM python:3.7.9
+FROM python:3.13.14
 
 EXPOSE 10090
 
