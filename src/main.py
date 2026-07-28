@@ -1,7 +1,7 @@
 import sys
 import logging
 from fastapi import FastAPI
-from fastapi.staticfiles import StaticFiles
+from starlette.staticfiles import StaticFiles as StarletteStaticFiles
 from starlette.middleware.cors import CORSMiddleware
 from src.config import LOG_FILE
 from src.midddleware import ErrorCatchMiddleware
@@ -25,6 +25,18 @@ DEBUG = False
 VERSION = "1.0"
 
 
+class CORSStaticFiles(StarletteStaticFiles):
+    async def get_response(self, path: str, scope):
+        response = await super().get_response(path, scope)
+        # 字体/静态资源：不需要凭证，直接通配，最稳
+        response.headers["Access-Control-Allow-Origin"] = "*"
+        response.headers["Access-Control-Allow-Methods"] = "GET, HEAD, OPTIONS"
+        response.headers["Access-Control-Allow-Headers"] = "*"
+        response.headers["Access-Control-Max-Age"] = "86400"
+        response.headers["Vary"] = "Origin"
+        return response
+
+
 def get_application() -> FastAPI:
     application = FastAPI(
         title=PROJECT_NAME,
@@ -36,15 +48,8 @@ def get_application() -> FastAPI:
         swagger_ui_oauth2_redirect_url="",
     )
 
-    application.add_middleware(
-        CORSMiddleware,
-        allow_origins=["*"],
-        allow_credentials=False,
-        allow_methods=["GET", "HEAD", "OPTIONS"],
-        allow_headers=["*"],
-    )
     application.add_middleware(ErrorCatchMiddleware)
-    application.mount("/static", StaticFiles(directory="src/static"), name="static")
+    application.mount("/static", CORSStaticFiles(directory="src/static", html=True), name="static")
     application.include_router(main_router, prefix="")
 
     return application
