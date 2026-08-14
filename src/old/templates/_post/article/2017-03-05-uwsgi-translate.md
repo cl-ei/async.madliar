@@ -4,7 +4,7 @@ title: Web Server Gateway Interface (wsgiref.util部分)
 category: 学习笔记
 tags: 编程， Python，WSGI
 ---
-<img src="/src/static/blog/img/project/20160811/0.jpg" alt="django" style="width:100%;"/>
+<img src="/src/old/static/blog/img/project/20160811/0.jpg" alt="django" style="width:100%;"/>
 ### WSGI Utilities and Reference Implementation
 　　WSGI是一个介于web服务器与Python应用程序之间的标准接口，采用标准接口可以使应用程序方便的在各个web服务器间复用和移植。
 

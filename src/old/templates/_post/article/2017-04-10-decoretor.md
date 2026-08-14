@@ -4,7 +4,7 @@ title: Pythonic - 装饰器正解
 category: 学习笔记
 tags: 编程， Python
 ---
-<img src="/src/static/blog/img/blog/20161231/0.jpeg" style="width: 100%">
+<img src="/src/old/static/blog/img/blog/20161231/0.jpeg" style="width: 100%">
 
 　　Python装饰器是Python高级特性中相当重要的一部分，但由于涉及函数式编程、闭包等概念，所以相对难以理解。包括廖雪峰的教程在内，很多教程讲述的都十分晦涩，甚至有很多帖子只是贴出大量没有意义的代码，完完全全是电子垃圾。关于编程，__我们的目的是理解它的原理而写出代码，而不是通过看代码来推敲它的原理__，可偏就有很多人喜欢反其道而行。
 

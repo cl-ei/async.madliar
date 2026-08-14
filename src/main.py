@@ -2,7 +2,6 @@ import sys
 import logging
 from fastapi import FastAPI
 from starlette.staticfiles import StaticFiles as StarletteStaticFiles
-from starlette.middleware.cors import CORSMiddleware
 from src.config import LOG_FILE
 from src.midddleware import ErrorCatchMiddleware
 from src.router import router as main_router
@@ -49,7 +48,7 @@ def get_application() -> FastAPI:
     )
 
     application.add_middleware(ErrorCatchMiddleware)
-    application.mount("/static", CORSStaticFiles(directory="src/static", html=True), name="static")
+    application.mount("/old/static", CORSStaticFiles(directory="src/static", html=True), name="static")
     application.include_router(main_router, prefix="")
 
     return application

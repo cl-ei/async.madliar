@@ -4,7 +4,7 @@ category: 观点
 tags: 生活
 description: 放别人一条生路，也是放自己一条生路
 ---
-<img src="/static/blog/img/blog/20170724/0.jpg" style="width: 100%">
+<img src="/old/static/blog/img/blog/20170724/0.jpg" style="width: 100%">
 
 　　前不久得知我的一个邻居W，也是十几年的同窗同学，在河北某工地被人杀死了。虽然自从上大学之后，我与W已没有太多联系，但在现在这个和平社会里，发生这样恶劣的杀人事件，着实让人震惊，我的心情因此久久不能平静。
 <!--more-->

@@ -1,49 +1,81 @@
-import datetime
-
-import starlette
+import re
+import json
+import http
+import logging
+import traceback
 from starlette.requests import Request
-from typing import Optional
 from starlette.middleware.base import BaseHTTPMiddleware
-from . import error
-from fastapi.responses import JSONResponse, Response, HTMLResponse
+from fastapi.responses import JSONResponse, HTMLResponse
 
 
 class ErrorCatchMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
-        if request.url.path == "/show_314":
-            print(
-                "receive show req: \n"
-                f"\t{request.method}: {request.url.path}\n"
-                f"\tQuery: {request.query_params}\n"
-                f"\tHeaders: ",
-                end=""
-            )
-            for key, value in request.headers.items():
-                print(f"\n\t\t{key}: {value}", end="")
-
-            print(
-                f"\n\tBody: {await request.body()}\n\n"
-                f"<- {datetime.datetime.now()}\n"
-            )
-            return JSONResponse({"code": 0, "msg": "ok", "data": None})
-
-        stream_resp_t = starlette.middleware.base._StreamingResponse  # noqa
         try:
-            response: Optional[stream_resp_t, Response] = await call_next(request)
-            if response.status_code == 404:
-                raise error.NotFound
-        except error.NotFound:
-            return HTMLResponse(content="<center><h1>404 - Not Found</h1></center>", status_code=404)
-        except error.Forbidden:
-            return HTMLResponse(content="<center><h1>403 - Forbidden</h1></center>", status_code=403)
-        except Exception as e:  # noqa
-            return HTMLResponse(content=f"internal error: {e}", status_code=500)
+            response = await call_next(request)
+        except Exception as e:
+            logging.error(f"internal error: {e}\n{traceback.format_exc()}")
+            return self._create_error_response(request, status_code=500, message="Internal Server Error")
 
         if response.status_code >= 400:
-            origin_err = []
-            async for content in response.body_iterator:
-                origin_err.append(content.decode("utf-8", errors="ignore"))
-            return JSONResponse({"code": response.status_code, "msg": "".join(origin_err)})
+            # 尝试从原响应中提取错误信息
+            message = self._extract_message(response) or http.HTTPStatus(response.status_code).phrase
+            response = self._create_error_response(request, status_code=response.status_code, message=message)
 
-        response.headers['Server'] = 'madliar'
         return response
+
+    @staticmethod
+    def _extract_message(response) -> str | None:
+        """从已有响应中提取错误信息（兼容 JSON / HTML）"""
+        content_type = response.headers.get("content-type", "")
+
+        if "application/json" in content_type:
+            try:
+                body = b"".join(response.body_iterator).decode("utf-8")
+                data = json.loads(body)
+                return data.get("detail") or data.get("msg")
+            except:  # noqa
+                return None
+
+        if "text/html" in content_type:
+            try:
+                body = b"".join(response.body_iterator).decode("utf-8")
+                # 简单粗暴：取 <p> 标签内容
+                m = re.search(r"<p>(.*?)</p>", body)
+                if m:
+                    return m.group(1)
+            except:  # noqa
+                pass
+
+        return None
+
+    @staticmethod
+    def _wants_json(request: Request) -> bool:
+        """判断客户端是否偏好 JSON 响应"""
+        accept = request.headers.get("accept", "")
+        # 明确要 JSON 就返回 JSON
+        if "application/json" in accept:
+            return True
+        # 明确要 HTML 就返回 HTML
+        if "text/html" in accept:
+            return False
+        # 都没明确指定时的默认策略：对 API 服务来说，默认 JSON 更友好
+        return True
+
+    def _create_error_response(self, request: Request, status_code: int, message: str):
+        if self._wants_json(request):
+            return JSONResponse(
+                status_code=status_code,
+                content={"code": status_code, "msg": message}
+            )
+
+        # 获取标准的 HTTP 状态短语
+        status_phrase = http.HTTPStatus(status_code).phrase
+
+        html = (
+            f"<!DOCTYPE html>"
+            f"<html>"
+            f"<head><title>{status_code} {status_phrase}</title></head>"
+            f"<body><h1>{status_code} {status_phrase}</h1><p>{message}</p></body>"
+            f"</html>"
+        )
+        return HTMLResponse(status_code=status_code, content=html)

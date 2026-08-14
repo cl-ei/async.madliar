@@ -7,7 +7,7 @@ tags: 编程 树莓派
 ---
 ##树莓派
 
-![raspberrypi](/src/static/blog/img/project/20150628/raspberrypi.jpg)
+![raspberrypi](/src/old/static/blog/img/project/20150628/raspberrypi.jpg)
 
 　　如果你是一位极客，那你必然听说过“树莓派”这个名词。我记得第一次听说树莓派的时候，是在网络上看到一段关于它的视频，开发者拿一块和身份证差不多大的电路板做演示，接上键盘和显示器，在英国就登陆了中国网络电视台的官网，这段视频还介绍了一些其他的功能。但当时我并不觉得它有多么神秘，不久就淡忘了。那是在2012年。
 
@@ -17,4 +17,4 @@ tags: 编程 树莓派
 
 　　下面是一个老外把树莓派用热气球送到太空后拍到的照片，事后还成功的进行了回收（好屌的说）。
 
-![space](/src/static/blog/img/project/20150628/space.jpg)
+![space](/src/old/static/blog/img/project/20150628/space.jpg)

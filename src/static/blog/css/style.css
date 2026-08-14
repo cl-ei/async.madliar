@@ -342,7 +342,7 @@ input[type="color"]:focus, .uneditable-input:focus{
     font-family:'TeXGyreAdventorBold';
 }
 #service li i {
-    background: url("/src/static/img/hex.png") no-repeat scroll center center transparent !important;
+    background: url("/src/old/static/img/hex.png") no-repeat scroll center center transparent !important;
     color: #FFFFFF;
     font-size: 15px;
     height: 80px;
@@ -371,7 +371,7 @@ input[type="color"]:focus, .uneditable-input:focus{
 }
 #address ul li span{font-family:'TeXGyreAdventorBold';}
 #address li i {
-    background: url("/src/static/img/hex.png") no-repeat scroll center center transparent !important;
+    background: url("/src/old/static/img/hex.png") no-repeat scroll center center transparent !important;
     color: #FFFFFF;
     font-size: 15px;
     height: 80px;
@@ -442,16 +442,16 @@ input[type="color"]:focus, .uneditable-input:focus{
     transition: opacity 3s;
 }
 .sub-mask:nth-child(1){
-    background-image: url("/src/static/img/slider1.jpg");
+    background-image: url("/src/old/static/img/slider1.jpg");
 }
 .sub-mask:nth-child(2){
-    background-image: url("/src/static/img/slider2.jpg");
+    background-image: url("/src/old/static/img/slider2.jpg");
 }
 .sub-mask:nth-child(3){
-    background-image: url("/src/static/img/slider3.jpg");
+    background-image: url("/src/old/static/img/slider3.jpg");
 }
 .sub-mask:nth-child(4){
-    background-image: url("/src/static/img/slider0.jpg");
+    background-image: url("/src/old/static/img/slider0.jpg");
 }
 #home-sub-page{
     margin-top: 40px;

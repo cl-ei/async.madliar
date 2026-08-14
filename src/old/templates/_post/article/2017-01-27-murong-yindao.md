@@ -3,7 +3,7 @@ title: 诗和远方
 category: 观点
 tags: 诗和远方
 ---------------------------------
-<img   src="/src/static/blog/img/blog/20170127/0.jpg" style="width: 100%">
+<img   src="/src/old/static/blog/img/blog/20170127/0.jpg" style="width: 100%">
 　　
 
 我躺在路的中央

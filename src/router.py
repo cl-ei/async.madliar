@@ -24,12 +24,12 @@ class CachedTPL:
 
 @router.get("/")
 async def home_page() -> RedirectResponse:
-    return RedirectResponse(url="/notebook/publish/i/caoliang.net/index.html")
+    return RedirectResponse(url="/old")
 
 
 @router.get("/old")
 async def old_blog() -> HTMLResponse:
-    DIST_ARTICLE_PATH = "src/static/blog/dist_article"  # noqa
+    DIST_ARTICLE_PATH = "src/old/static/blog/dist_article"  # noqa
 
     article_js_file_name = ""
     for file in os.listdir(DIST_ARTICLE_PATH):
@@ -37,7 +37,7 @@ async def old_blog() -> HTMLResponse:
             article_js_file_name = file
             break
 
-    article_js_link = f"/static/blog/dist_article/{article_js_file_name}"
+    article_js_link = f"/old/old/static/blog/dist_article/{article_js_file_name}"
     context = {
         "article_js_link": article_js_link,
         "page": {

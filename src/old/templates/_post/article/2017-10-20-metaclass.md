@@ -5,7 +5,7 @@ category: 学习笔记
 tags: 编程， Python
 ---
 
-## <img src="/static/blog/img/project/20160821/0.jpg" alt="released" style="width:100%;"/>
+## <img src="/old/static/blog/img/project/20160821/0.jpg" alt="released" style="width:100%;"/>
 
 　　译注：这是一篇在Stack overflow上很热的帖子。提问者自称已经掌握了有关Python OOP编程中的各种概念，但始终觉得元类(metaclass)难以理解。他知道这肯定和自省有关，但仍然觉得不太明白，希望大家可以给出一些实际的例子和代码片段以帮助理解，以及在什么情况下需要进行元编程。于是e-satis同学给出了神一般的回复，该回复获得了985点的赞同点数，更有人评论说这段回复应该加入到Python的官方文档中去。而e-satis同学本人在Stack Overflow中的声望积分也高达64271分。以下就是这篇精彩的回复（提示：非常长）
 <!--more-->

@@ -4,7 +4,7 @@ title: 系统性学习的重要性
 category: 观点
 tag: 编程
 ---
-<img src="/src/static/blog/img/project/20160811/0.jpg" alt="django" style="width:100%;"/>
+<img src="/src/old/static/blog/img/project/20160811/0.jpg" alt="django" style="width:100%;"/>
 
 　　很久以前学校召开了一场电子设计大赛的经验交谈会。会上不知不觉聊到了大学教育体制、课程设置等问题，大家都畅所欲言，当时我也发表了自己的观点。我当然是讨厌那时的大学课堂的，认为即便课堂上传授的知识非常重要，也容易使人在枯燥无味的学习过程和应试体制中丧失兴趣和意志，从而迷失方向。
 

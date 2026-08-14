@@ -4,7 +4,7 @@ title: 先挣他一个亿
 category: 观点
 tag: 生活
 ---
-<img src="/src/static/blog/img/blog/20160904/0.jpg" alt="money" style="width:100%;"/>
+<img src="/src/old/static/blog/img/blog/20160904/0.jpg" alt="money" style="width:100%;"/>
 
 　　难得的周末时光，当我正要上床休息时，一个同学给我发来求助信息，说是自己的比赛项目没有进展，请我稍稍指导一下。谁没有做新手的时候呢，心想着应该也不是什么大问题，就爽快答应了。
 <!--more-->

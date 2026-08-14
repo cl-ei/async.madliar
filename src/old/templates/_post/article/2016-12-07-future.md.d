@@ -4,7 +4,7 @@ title: 未来，有谁会知道
 category: 观点
 tag: 生活
 ---
-<img src="/static/blog/img/project/20160811/0.jpg" alt="django" style="width:100%;"/>
+<img src="/old/static/blog/img/project/20160811/0.jpg" alt="django" style="width:100%;"/>
 
 　　6年前，我获得了我的第一台电脑。那个时候的乡下，淘宝是个新鲜的概念，你敢在网上买东西，他们就很佩服你的勇气，在网上买几千块钱的东西，这简直不是常人所能理解的。但我不管不顾爸妈的警告，在网上买来这台电脑。二代i3处理器，4G内存, GTX550Ti显卡，DIY的整机。
 

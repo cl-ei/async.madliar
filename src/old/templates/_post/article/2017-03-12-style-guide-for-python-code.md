@@ -4,14 +4,14 @@ title: Pythonic
 category: 学习笔记
 tags: 编程， Python
 ---
-<img src="/src/static/blog/img/blog/20161211/0.jpg" style="width: 100%">
+<img src="/src/old/static/blog/img/blog/20161211/0.jpg" style="width: 100%">
 
 ### 代码规范
 　　谈及Python编程，《PEP 8》总是说不过去的，它是比较官方的代码风格的规范和建议。除此之外，还有《Google编程风格指导》之类的文档等，都是非常不错的文档。代码规范的重要性不言而喻，但这也是人们学习编程时最常忽略的章节。
 
 　　在我读过的入门Python书籍里，中这部分的内容都比较少。但在进阶的书籍中，有的不惜用上两个章节专门讲述，如何写出遵循PEP 8规范的Python代码，并介绍各种工具来审查代码、管理项目结构和文档。当然，事情也没这么复杂，很多时候只要配置一个顺手的IDE就够了。这里我非常推荐PyCharm，它是一款非常优秀的IDE，而且提供免费的社区版。
 <!--more-->
-<img src="https://www.caoliang.net/static/thrdfiles/i@caoliang.netQQ%E6%88%AA%E5%9B%BE20170311233522.png" style="width:100%;"/>
+<img src="https://www.caoliang.net/old/static/thrdfiles/i@caoliang.netQQ%E6%88%AA%E5%9B%BE20170311233522.png" style="width:100%;"/>
 
 　　PyChram安装之时就自带PEP 8检查，但不应把代码格式化依赖于快捷键和autopep8之类的工具进行。合格的程序员能潜移默化、自然而然的写出规整的代码。当他成为习惯时你会发现，这不是所谓的细枝末节，而且并不会拖累写代码的速度，相反，带有这种习惯会使码代码这件事更加惬意。
 
