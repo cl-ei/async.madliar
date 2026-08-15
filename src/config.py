@@ -1,19 +1,15 @@
 import os
-import sys
 from pathlib import Path
 
-DEBUG = bool(sys.platform == "win32")
+
+IS_PROD = os.environ.get("RUN_ENV", "") == "prod"
+
+DEBUG = not IS_PROD
 if DEBUG:
     print("The app is running in DEBUG mode.")
+    LOG_FILE = str(Path.home() / "async.log")
+else:
+    os.makedirs("/var/log", exist_ok=True)
+    LOG_FILE = "/var/log/async.log"
 
-LOG_FILE = str(Path.home() / "async.log")
 print(f"APP log will be written to this file: {LOG_FILE}")
-
-LOG_PATH = "logs/"
-BLOG_REPO_ROOT = "temp/blog"
-BLOG_DIST_PATH = "src/old/static/new_blog"
-LAST_COMMIT_FILE = "src/old/static/new_blog/last_commit_id"
-BLOG_STATIC_PREFIX = "/old/static/new_blog"
-
-os.makedirs(BLOG_REPO_ROOT, exist_ok=True)
-os.makedirs(BLOG_DIST_PATH, exist_ok=True)

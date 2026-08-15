@@ -1,8 +1,6 @@
 import re
 import json
 import http
-import logging
-import traceback
 from starlette.requests import Request
 from starlette.middleware.base import BaseHTTPMiddleware
 from fastapi.responses import JSONResponse, HTMLResponse
@@ -19,7 +17,7 @@ class ErrorCatchMiddleware(BaseHTTPMiddleware):
                 response = self._create_error_response(request, status_code=response.status_code, message=message)
 
         except Exception as e:
-            logging.error(f"internal error: {e}\n{traceback.format_exc()}")
+            _ = e
             response = self._create_error_response(request, status_code=500, message="Internal Server Error")
 
         response.headers.setdefault("server", "async")

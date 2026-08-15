@@ -48,7 +48,11 @@ def get_application() -> FastAPI:
     )
 
     application.add_middleware(ErrorCatchMiddleware)
-    application.mount("/old/static", CORSStaticFiles(directory="src/static", html=True), name="static")
+    application.mount(
+        "/original-intention/statics",
+        CORSStaticFiles(directory="src/statics", html=True),
+        name="statics",
+    )
     application.include_router(main_router, prefix="")
 
     return application
