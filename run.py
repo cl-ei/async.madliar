@@ -2,4 +2,4 @@ import uvicorn
 
 
 if __name__ == "__main__":
-    uvicorn.run("src.main:app", port=8080, workers=1, reload=False)
+    uvicorn.run("src.main:app", port=8080, workers=2, reload=False, server_header=False)

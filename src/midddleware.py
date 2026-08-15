@@ -12,15 +12,17 @@ class ErrorCatchMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         try:
             response = await call_next(request)
+
+            # 尝试从原响应中提取错误信息
+            if response.status_code >= 400:
+                message = self._extract_message(response) or http.HTTPStatus(response.status_code).phrase
+                response = self._create_error_response(request, status_code=response.status_code, message=message)
+
         except Exception as e:
             logging.error(f"internal error: {e}\n{traceback.format_exc()}")
-            return self._create_error_response(request, status_code=500, message="Internal Server Error")
+            response = self._create_error_response(request, status_code=500, message="Internal Server Error")
 
-        if response.status_code >= 400:
-            # 尝试从原响应中提取错误信息
-            message = self._extract_message(response) or http.HTTPStatus(response.status_code).phrase
-            response = self._create_error_response(request, status_code=response.status_code, message=message)
-
+        response.headers.setdefault("server", "async")
         return response
 
     @staticmethod
