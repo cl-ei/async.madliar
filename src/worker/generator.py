@@ -57,7 +57,7 @@ async def generate():
 
 async def upload_to_oss():
     if IS_PROD:
-        env_file = "root/.env"
+        env_file = "/root/.env"
     else:
         env_file = r"C:\Users\Administrator\.env"
 
