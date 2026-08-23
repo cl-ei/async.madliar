@@ -10,6 +10,7 @@ docker run -itd \
   --name ${DOCKER_NAME} \
   --net=host \
   -e APP_KEY="3.1415926" \
+  -e STORAGE_ROOT="/storage_root" \
   -v /var/log:/var/log \
   -v /root/cl-service/.env:/root/.env:ro \
   -v /data/nvme/notebook_user:/storage_root \
