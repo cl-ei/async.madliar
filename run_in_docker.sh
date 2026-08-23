@@ -9,4 +9,7 @@ docker run -itd \
   --restart=unless-stopped \
   --name ${DOCKER_NAME} \
   --net=host \
+  -v /var/log:/var/log \
+  -v /root/cl-service/.env:/root/.env:ro \
+  -v /data/nvme/notebook_user:/storage_root \
   ${DOCKER_IMAGE}

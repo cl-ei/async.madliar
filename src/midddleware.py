@@ -4,6 +4,7 @@ import http
 from starlette.requests import Request
 from starlette.middleware.base import BaseHTTPMiddleware
 from fastapi.responses import JSONResponse, HTMLResponse
+from .custom_statics_adaptor import process_statics
 
 
 class ErrorCatchMiddleware(BaseHTTPMiddleware):
@@ -11,12 +12,19 @@ class ErrorCatchMiddleware(BaseHTTPMiddleware):
         try:
             response = await call_next(request)
 
+            if response.status_code == 404:
+                try:
+                    response = await process_statics(request.url.path)
+                except:  # noqa
+                    pass
+
             # 尝试从原响应中提取错误信息
             if response.status_code >= 400:
                 message = self._extract_message(response) or http.HTTPStatus(response.status_code).phrase
                 response = self._create_error_response(request, status_code=response.status_code, message=message)
 
         except Exception as e:
+            print(f"find exc: {e}")
             _ = e
             response = self._create_error_response(request, status_code=500, message="Internal Server Error")
 

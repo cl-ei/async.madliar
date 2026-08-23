@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SSG 管理控制台</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        /* 日志原样保留换行/空格 */
+        .log-pre { white-space: pre-wrap; word-break: break-word; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen">
+<div x-data="ssgApp()" x-init="init()" class="max-w-5xl mx-auto p-6 space-y-6">
+
+    <!-- 顶部：AppKey 锁定栏 -->
+    <header class="bg-slate-800 border border-slate-700 rounded-xl p-5 shadow">
+        <div class="flex items-center gap-3">
+            <label class="text-sm font-medium text-slate-300 w-24 shrink-0">AppKey</label>
+            <input x-model="appkey"
+                   :type="showKey ? 'text' : 'password'"
+                   placeholder="请输入 AppKey"
+                   class="flex-1 bg-slate-900 border border-slate-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-lg px-3 py-2 text-sm outline-none">
+            <button @click="showKey = !showKey"
+                    class="text-xs px-3 py-2 rounded-lg bg-slate-700 hover:bg-slate-600"
+                    x-text="showKey ? '隐藏' : '显示'"></button>
+            <button @click="setAppKey()"
+                    class="text-sm font-semibold px-5 py-2 rounded-lg bg-indigo-500 hover:bg-indigo-400 text-white shadow">
+                锁定 Set
+            </button>
+        </div>
+        <p class="mt-2 text-xs text-slate-400">AppKey 将保存在 localStorage，并在每次 POST 请求以 Header（AppKey）携带。</p>
+    </header>
+
+    <!-- 操作按钮区 -->
+    <section class="bg-slate-800 border border-slate-700 rounded-xl p-5 shadow">
+        <div class="flex flex-wrap gap-4">
+            <button @click="call('/original-intention/ssg/gen', '生成')"
+                    class="flex-1 min-w-[120px] py-3 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-white font-semibold shadow">
+                生成
+            </button>
+            <button @click="call('/original-intention/ssg/log', '刷新日志')"
+                    class="flex-1 min-w-[120px] py-3 rounded-lg bg-sky-500 hover:bg-sky-400 text-white font-semibold shadow">
+                刷新日志
+            </button>
+            <button @click="call('/original-intention/ssg/upload', '上传 OSS')"
+                    class="flex-1 min-w-[120px] py-3 rounded-lg bg-amber-500 hover:bg-amber-400 text-white font-semibold shadow">
+                上传 OSS
+            </button>
+        </div>
+    </section>
+
+    <!-- 请求状态 / 消息提示 -->
+    <div x-show="message" x-transition
+         :class="msgType === 'error' ? 'bg-red-900/40 border-red-700 text-red-200' : 'bg-slate-800 border-slate-700 text-slate-200'"
+         class="border rounded-lg px-4 py-3 text-sm">
+        <span x-text="message"></span>
+    </div>
+
+    <!-- 日志预览框 -->
+    <section class="bg-slate-800 border border-slate-700 rounded-xl p-5 shadow">
+        <div class="flex items-center justify-between mb-3">
+            <h2 class="text-base font-semibold text-slate-200">日志预览</h2>
+            <span class="text-xs text-slate-400">来自 /original-intention/ssg/log</span>
+        </div>
+        <div class="bg-slate-950 border border-slate-700 rounded-lg p-4 min-h-[260px] max-h-[560px] overflow-auto">
+            <pre x-show="logText" x-text="logText" class="log-pre text-xs text-emerald-200"></pre>
+            <p x-show="!logText" class="text-sm text-slate-500">暂无日志，点击「刷新日志」获取。</p>
+        </div>
+    </section>
+
+</div>
+
+<script>
+function ssgApp() {
+    return {
+        appkey: '',
+        showKey: false,
+        message: '',
+        msgType: 'info',
+        logText: '',
+
+        init() {
+            const saved = localStorage.getItem('ssg_appkey');
+            if (saved) {
+                this.appkey = saved;
+                this.flash('已自动填充已保存的 AppKey', 'info');
+            }
+        },
+
+        setAppKey() {
+            const v = (this.appkey || '').trim();
+            if (!v) {
+                this.flash('请输入 AppKey 后再锁定', 'error');
+                return;
+            }
+            localStorage.setItem('ssg_appkey', v);
+            this.flash('AppKey 已锁定保存', 'info');
+        },
+
+        flash(msg, type) {
+            this.message = msg;
+            this.msgType = type;
+            clearTimeout(this._t);
+            this._t = setTimeout(() => { this.message = ''; }, 4000);
+        },
+
+        getHeaders() {
+            const v = (this.appkey || '').trim();
+            if (!v) {
+                // 即使未填也允许发起请求，由后端校验；这里给出提示
+            }
+            return {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'AppKey': v
+            };
+        },
+
+        async call(url, action) {
+            const body = JSON.stringify({});
+            let res, json;
+            try {
+                res = await fetch(url, { method: 'POST', headers: this.getHeaders(), body });
+            } catch (e) {
+                this.flash(`[${action}] 网络错误：${e.message}`, 'error');
+                return;
+            }
+
+            // 解析 JSON（兼容非 JSON 响应）
+            try {
+                json = await res.json();
+            } catch (e) {
+                this.flash(`[${action}] 响应非 JSON（HTTP ${res.status}）`, 'error');
+                return;
+            }
+
+            if (!res.ok || (json.code !== 0 && json.code !== undefined)) {
+                const msg = json.msg || `HTTP ${res.status}`;
+                this.flash(`[${action}] 失败：${msg}`, 'error');
+                return;
+            }
+
+            // 成功：根据接口处理 data
+            const data = json.data;
+            if (url.endsWith('/log')) {
+                // data 为日志字符串，原样渲染
+                this.logText = typeof data === 'string' ? data : JSON.stringify(data, null, 2);
+                this.flash(`[${action}] 日志已刷新`, 'info');
+            } else {
+                // 生成 / 上传：展示返回 data（字符串或对象）
+                const txt = typeof data === 'string' ? data : JSON.stringify(data, null, 2);
+                this.flash(`[${action}] 成功：${txt}`, 'info');
+            }
+        }
+    };
+}
+</script>
+</body>
+</html>
