@@ -487,7 +487,7 @@ class StaticSiteGenerator:
             img_path = item["path"]
             target = item["href"]
 
-            if "property" in item:
+            if "property" in item and item["property"]:
                 # 拷贝AVIF
                 avif_full_path = item["property"]["avif_full_path"]
                 avif_href = item["property"]["avif_href"]
