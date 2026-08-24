@@ -1,11 +1,11 @@
 import os
 import logging
-from PIL import Image, ImageOps, UnidentifiedImageError
+from PIL import Image, ImageOps, UnidentifiedImageError, ImageFilter
+from PIL.features import check_codec
+
 from pathlib import Path
 from typing import Tuple
 
-from PIL import Image, UnidentifiedImageError
-from PIL.features import check_codec
 
 from src.config import IS_PROD
 
