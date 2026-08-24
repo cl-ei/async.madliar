@@ -1,4 +1,5 @@
 import hashlib
+import logging
 import re
 import contextvars
 from pathlib import Path
@@ -14,7 +15,7 @@ from pygments.styles import get_style_by_name, STYLE_MAP
 from pygments.util import ClassNotFound
 from markupsafe import escape as html_escape
 
-from .schema import ImageRef, TocItem
+from .schema import ImageRef, TocItem, ImageProperty
 
 
 # ---------------------- TOC ----------------------------
@@ -23,6 +24,7 @@ UGC_TAGS = {
     'p', 'br', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
     'ul', 'ol', 'li', 'strong', 'em', 'del', 'blockquote',
     'a', 'img', 'table', 'thead', 'tbody', 'tr', 'th', 'td',
+    'picture', 'source'
 }
 
 PIPELINE_TAGS = UGC_TAGS | {
@@ -39,6 +41,7 @@ PIPELINE_ATTRS: dict[str, set[str]] = {
     "code":  {"data-language"},
     "td":    {"colspan", "rowspan", "align"},
     "th":    {"colspan", "rowspan", "align"},
+    "source": {"srcset", "type"}
 }
 
 
@@ -118,6 +121,7 @@ class CollectingRenderer(HTMLRenderer):
         self._lazy_load_enabled = True
         self._rel_to_storage_root = ""
         self._dst_path = ""
+        self._images_pi: dict[str, ImageProperty] = {}
 
     def set_formatter(self, formatter: HtmlFormatter):
         self._formatter = formatter
@@ -136,6 +140,10 @@ class CollectingRenderer(HTMLRenderer):
 
     def set_dst_path(self, path: str):
         self._dst_path = path
+
+    def set_image_pi(self, info: dict):
+        if info:
+            self._images_pi = info
 
     @property
     def toc(self) -> List[TocItem]:
@@ -218,12 +226,23 @@ class CollectingRenderer(HTMLRenderer):
         else:
             path: str = ""
 
-        collector.append(ImageRef(path=path, href=url, alt=text, title=title or ""))
-
         # ⚠️ 关键：仍然调用父类方法生成正常 HTML，不改变渲染输出
+        # 这里的content是 <img> 标签
         content = super().image(text, url, title)
         if self._lazy_load_enabled and 'loading="lazy"' not in content and content.endswith(" />"):
             content = content.removesuffix(" />") + ' loading="lazy" decoding="async" />'
+
+        img_ref = ImageRef(path=path, href=url, alt=text, title=title or "")
+
+        if path in self._images_pi:
+            info: ImageProperty = self._images_pi[path]
+            img_ref.property = info
+
+            # 包含avif信息
+            img = content.removesuffix(" />") + f'width="{info.width}" height="{info.height}" />'
+            content = f'<picture><source srcset="{info.avif_href}" type="image/avif">{img}</picture>'
+
+        collector.append(img_ref)
         return content
 
     def block_html(self, raw: str) -> str:
@@ -287,6 +306,7 @@ class MarkdownRenderPipeline:
             highlight_linenos: bool = False,     # 默认开启行号
             highlight_stripnl: bool = False,     # 保留空行语义
             highlight_theme: str = "default",    # Pygments 内置主题名或自定义 Style 类
+            image_preprocess_info: dict[str, ImageProperty] = None,
     ):
         plugins = plugins or {}
         # 严格校验：检查是否有预期外的插件参数
@@ -336,6 +356,7 @@ class MarkdownRenderPipeline:
         renderer.set_img_base_path(img_base_path)
         renderer.set_rel_to_storage_root(rel_path_to_storage_root)
         renderer.set_dst_path(dst_path_to_build_root)
+        renderer.set_image_pi(image_preprocess_info)
 
         self._markdown = mistune.create_markdown(
             renderer=renderer,
@@ -361,7 +382,7 @@ class MarkdownRenderPipeline:
         """暴露当前生效的插件列表，方便调试和序列化配置"""
         return list(self._plugins)
 
-    def render_to_html(self, content: str) -> Dict[str, Any]:
+    def covert_to_html(self, content: str) -> Dict[str, Any]:
         """
         渲染 Markdown 并同步返回采集到的图片引用。
 
@@ -417,7 +438,7 @@ def test():
     )
 
     md_content = md_path.read_text(encoding="utf-8")
-    result = pipeline.render_to_html(md_content)
+    result = pipeline.covert_to_html(md_content)
 
     # ✅ CSS 内联，生成完全自包含的预览文件
     html_output = f"""<!DOCTYPE html>

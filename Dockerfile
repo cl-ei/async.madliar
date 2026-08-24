@@ -6,6 +6,10 @@ ENV TZ=Asia/Shanghai
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 RUN echo 'export LANG="C.UTF-8"' >> /etc/profile
 
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends libavif-dev \
+    && rm -rf /var/lib/apt/lists/*
+
 ENV RUN_ENV prod
 
 WORKDIR /app

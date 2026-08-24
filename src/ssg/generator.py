@@ -1,6 +1,7 @@
 import copy
 import hashlib
 import logging
+import os.path
 import traceback
 from asyncio.queues import Queue
 import re
@@ -9,11 +10,11 @@ import datetime
 from pathlib import Path
 import jinja2
 from src.error import ErrorWithPrompt
-from .schema import SiteConfig, Article, SITE_CONFIG_FILE
+from .schema import SiteConfig, Article, SITE_CONFIG_FILE, ImageRef, ImageProperty
 from .filesystem.user_fs_adapter import UserFSAdapter
 from .parsing import ArticleBuilder
 from .templating import render_layout
-
+from .img_preparing import get_image_size, covert_to_avif
 _VALID_LASTMOD = re.compile(
     r'^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})?)?$'
 )
@@ -180,6 +181,10 @@ class StaticSiteGenerator:
         return f"{self.adapter.meta_root}/static_site"
 
     @property
+    def avif_tmp_dir(self) -> str:
+        return f"{self.adapter.storage_root}/__avif_tmp__"
+
+    @property
     def write_root(self) -> str:
         if self._write_root:
             return self._write_root
@@ -220,9 +225,63 @@ class StaticSiteGenerator:
         all_files: list[str] = await self.adapter.find_files(posts_path, is_markdown_file)
         self.record_log(f"已获取posts总数：{len(all_files)}。")
 
+        # 统计静态资源
+        all_images: list[ImageRef] = []
+        collector = ArticleBuilder(config, self.adapter.storage_root, {})
+        for file_path in all_files:
+            try:
+                # 读取源文件
+                full_path = f"{self.adapter.storage_root}/{file_path.lstrip('/')}"
+                raw_content = await self.adapter.storage.read_text(full_path)
+                filesize, file_mtime = await self.adapter.storage.stat(full_path)
+
+                # 构建Article对象
+                try:
+                    article: Article = collector.build_one_post(file_path, raw_content, file_mtime)
+                    all_images.extend(article.images)
+                except ErrorWithPrompt:
+                    pass
+            except Exception as e:
+                logging.warning(f"error happened when collect: {e}\n{traceback.format_exc()}")
+                continue
+
+        # 准备写入！清除临时输出目录
+        if (await self.adapter.storage.exists(self.write_root_tmp) and
+                await self.adapter.storage.is_dir(self.write_root_tmp)):
+            await self.adapter.storage.remove_tree(self.write_root_tmp)
+
+        logging.info(f"total images: {len(all_images)}")
+        images_cache: dict[str, ImageProperty] = {}  # path -> ImageProperty
+        for img in all_images:
+            try:
+                full_img_path = self.adapter.storage_root + "/" + img.path.lstrip("/")
+                w, h = get_image_size(full_img_path)
+
+                # 计算 avif 写入路径，这里是绝对路径，根据原图的 path 替换为 avif 的 path
+                base, _ = os.path.splitext(img.path)
+                avif_path = base + ".avif"
+                avif_full_path = self.avif_tmp_dir + "/" + avif_path.lstrip("/")
+                flag, msg = covert_to_avif(full_img_path, avif_full_path)
+                if not flag:
+                    logging.error(f"cannot covert img {img.path}, msg:\n\t{msg}")
+                    continue
+
+                # 计算链接（url）
+                href_base, _ = os.path.splitext(img.href)
+                avif_href = href_base + ".avif"
+
+                # 放到全局
+                images_cache[img.path] = ImageProperty(
+                    width=w, height=h, avif_full_path=avif_full_path, avif_href=avif_href
+                )
+
+            except Exception as e:
+                logging.error(f"error in process image: {img.path}, e: {e}\n{traceback.format_exc()}")
+
         # 构建文章列表，解析基础信息
+        logging.info(f"start covert one! images cache len: {len(images_cache)}")
         url_to_src_path: dict[str, str] = {}  # 检测 URL 冲突之用
-        article_builder = ArticleBuilder(config, self.adapter.storage_root)
+        article_builder = ArticleBuilder(config, self.adapter.storage_root, images_cache)
         all_posts: dict[str, list[Article]] = {}  # layout -> [articles...]
         for file_path in all_files:
             try:
@@ -296,11 +355,6 @@ class StaticSiteGenerator:
         context["email"] = self.email
         context["user"] = user
         context["service"] = service
-
-        # 准备写入！清除临时输出目录
-        if (await self.adapter.storage.exists(self.write_root_tmp) and
-                await self.adapter.storage.is_dir(self.write_root_tmp)):
-            await self.adapter.storage.remove_tree(self.write_root_tmp)
 
         # 写入文件，移动产物
         sitemap = []
@@ -432,6 +486,21 @@ class StaticSiteGenerator:
         for item in images:
             img_path = item["path"]
             target = item["href"]
+
+            if "property" in item:
+                # 拷贝AVIF
+                avif_full_path = item["property"]["avif_full_path"]
+                avif_href = item["property"]["avif_href"]
+
+                if config.build.base_path:
+                    avif_href = Path(avif_href).relative_to(config.build.base_path).as_posix()
+
+                target_avif = "%s/%s" % (self.write_root_tmp, avif_href)
+                target_parent, _ = os.path.split(target_avif)
+                os.makedirs(target_parent, exist_ok=True)
+                with open(avif_full_path, "rb") as r:
+                    with open(target_avif, "wb") as w:
+                        w.write(r.read())
 
             if not img_path:
                 continue

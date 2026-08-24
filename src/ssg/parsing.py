@@ -8,7 +8,7 @@ from dataclasses import dataclass, field
 from typing import Any
 from pathlib import Path
 from src.error import ErrorWithPrompt
-from .schema import SiteConfig, Article, SITE_CONFIG_FILE
+from .schema import SiteConfig, Article, SITE_CONFIG_FILE, ImageProperty
 from .rendering import MarkdownRenderPipeline
 
 
@@ -51,9 +51,10 @@ def normalize_identifier(content: str) -> str:
 class ArticleBuilder:
     """构建Article对象"""
 
-    def __init__(self, config: SiteConfig, storage_root: str):
+    def __init__(self, config: SiteConfig, storage_root: str, image_preprocess_info: dict[str, ImageProperty]):
         self.config = config
         self.storage_root = storage_root
+        self.image_preprocess_info = image_preprocess_info
 
     @staticmethod
     def parse_front_matter(content: str, fm_delimiter: str = "---") -> tuple[dict, str]:
@@ -241,9 +242,10 @@ class ArticleBuilder:
             lazy_load=lazy_load,
             highlight_theme="xcode",
             img_base_path=self.config.build.base_path,
+            image_preprocess_info=self.image_preprocess_info,
         )
 
-        result = pipeline.render_to_html(body)
+        result = pipeline.covert_to_html(body)
 
         # 4. 补充默认元数据
         fm.setdefault("layout", self.config.build.default_layout)

@@ -48,6 +48,7 @@ class FeaturesConfig(BaseModel):
     toc: bool = Field(default=True, description="全局目录开关")
     lazy_load: bool = Field(default=True, description="全局懒加载模式开关")
 
+
 class SiteConfig(BaseModel):
     model_config = ConfigDict(extra="ignore")  # 宽松模式：忽略未知字段
 
@@ -57,12 +58,20 @@ class SiteConfig(BaseModel):
 
 
 # -------- 渲染管线的产物 --------
+class ImageProperty(BaseModel):
+    width: int
+    height: int
+    avif_full_path: str
+    avif_href: str
+
+
 class ImageRef(BaseModel):
     """不可变的图片引用记录"""
     path: str  # 文件路径
     href: str  # 渲染的路径
     alt: str
     title: str | None = Field(default=None)
+    property: ImageProperty | None = Field(default=None)
 
 
 class TocItem(BaseModel):

@@ -30,7 +30,7 @@ async def old_blog() -> HTMLResponse:
     return HTMLResponse(html)
 
 
-@router.get("/original-intention/ssg")
+@router.get("/ssg")
 async def ssg() -> HTMLResponse:
     html = render_template("src/tpl/ssg.html")
     return HTMLResponse(html)
