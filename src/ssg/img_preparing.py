@@ -24,46 +24,48 @@ def _convert_to_avif(
         src: str,
         dst: str,
         max_size: int = 1300,
-        quality: int = 80,
-        speed: int = 6,
+        quality: int = 85,
+        speed: int = 5,
+        sharpen: bool = True,
 ) -> Tuple[bool, str]:
     """
-    将图片转换为 AVIF，确保输出长边不超过 max_size，等比缩放不变形。
-
-    Args:
-        src:      源图片绝对路径（调用方保证存在且为文件）
-        dst:      目标 AVIF 绝对路径（父目录已存在）
-        max_size: 输出长边上限，默认 1300
-        quality:  AVIF 质量 0-100，默认 80
-        speed:    AVIF 编码速度 0-10，默认 6
+    将图片转换为 AVIF，长边不超过 max_size，等比缩放，针对清晰度优化。
 
     Returns:
         (True, "") 成功
         (False, "<error message>") 失败，不抛异常
     """
-    # ---- 后缀修正：dst 统一以 .avif 结尾 ----
     dst_path = Path(dst)
     if dst_path.suffix.lower() != ".avif":
         dst_path = dst_path.with_suffix(".avif")
 
     try:
-        # ---- 打开并校验 ----
         with Image.open(src) as img:
-            # 先检查真实编码格式
+            # 已经是 AVIF → 跳过
             if img.format and img.format.upper() == "AVIF":
                 return False, "source image is already AVIF, skip re-encoding"
 
-            # ---- 等比缩放：长边不超过 max_size ----
+            # ---- 等比缩放 ----
             w, h = img.size
             long_side = max(w, h)
+
             if long_side > max_size:
                 scale = max_size / long_side
                 new_w = int(round(w * scale))
                 new_h = int(round(h * scale))
-                # LANCZOS 是高质量下采样滤镜
                 img = img.resize((new_w, new_h), Image.Resampling.LANCZOS)
 
-            # ---- 色彩处理：保留透明 ----
+                # ---- 缩小后轻微锐化，补偿插值带来的软 ----
+                if sharpen:
+                    img = img.filter(
+                        ImageFilter.UnsharpMask(
+                            radius=0.8,    # 锐化半径，小一点避免噪点
+                            percent=50,    # 锐化强度
+                            threshold=3,   # 只锐化差异明显的边缘
+                        )
+                    )
+
+            # ---- 色彩：保留透明 ----
             if img.mode in ("RGBA", "LA") or (
                     img.mode == "P" and "transparency" in img.info
             ):
@@ -71,12 +73,13 @@ def _convert_to_avif(
             else:
                 img = img.convert("RGB")
 
-            # ---- 编码保存 ----
+            # ---- 保存：关键改动在这里 ----
             img.save(
                 str(dst_path),
                 "AVIF",
                 quality=quality,
                 speed=speed,
+                subsampling="4:4:4",   # ← 核心！禁用色度子采样
             )
 
         return True, ""
@@ -84,10 +87,8 @@ def _convert_to_avif(
     except UnidentifiedImageError:
         return False, f"cannot identify image file: {src}"
     except OSError as e:
-        # Pillow 编码失败（编码器不可用、磁盘满等）
         return False, f"OS error during save: {e}"
     except Exception as e:
-        # 兜底，绝不抛出
         return False, f"unexpected error: {e}"
 
 
