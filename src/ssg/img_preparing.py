@@ -77,9 +77,9 @@ def _convert_to_avif(
             img.save(
                 str(dst_path),
                 "AVIF",
-                quality=quality,
-                speed=speed,
-                subsampling="4:4:4",   # ← 核心！禁用色度子采样
+                quality=80,
+                speed=6,
+                subsampling="4:2:2",
             )
 
         return True, ""
