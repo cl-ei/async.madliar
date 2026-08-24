@@ -127,11 +127,11 @@ def get_image_size(
 
 
 def covert_to_avif(src: str, dst: str) -> tuple[bool, str]:
-    if IS_PROD:
-        return _convert_to_avif(src, dst)
-
     parent, _ = os.path.split(dst)
     os.makedirs(parent, exist_ok=True)
+
+    if IS_PROD:
+        return _convert_to_avif(src, dst)
 
     # if DEBUG:
     with open(src, "rb") as r:
