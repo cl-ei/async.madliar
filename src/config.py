@@ -19,3 +19,6 @@ STORAGE_ROOT = os.environ.get("STORAGE_ROOT")
 if not STORAGE_ROOT:
     STORAGE_ROOT = str(Path.home() / "notebook_storage_root")
     print(f"No STORAGE_ROOT configured, storage root dir will be set as: {STORAGE_ROOT}")
+
+# 用于 API 操作
+APP_KEY = os.getenv("APP_KEY") or "1"

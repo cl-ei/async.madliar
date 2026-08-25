@@ -409,7 +409,7 @@ class StaticSiteGenerator:
                 self.record_log(f"已处理 {count} 个图像对象。")
 
                 # 添加进 site map
-                if create_sitemap:
+                if create_sitemap and not post.get("fm", {}).get("x-exclude-sitemap"):
                     sitemap.append([post.get("fm", {}).get("lastmod"), f"{config.site.url}{post['dest_url']}"])
 
         if create_sitemap:

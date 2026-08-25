@@ -1,161 +1,437 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SSG 管理控制台</title>
-    <script src="/original-intention/statics/js/tailwindcss-3.4.17.js"></script>
-    <script defer src="/original-intention/statics/js/alpinejs-3.x.x-cdn.min.js"></script>
+    <title>SSG 管理后台</title>
     <style>
-        /* 日志原样保留换行/空格 */
-        .log-pre { white-space: pre-wrap; word-break: break-word; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #30363d;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #484f58;
+        }
+
+        ::-webkit-scrollbar-thumb:active {
+            background: #58a6ff;
+        }
+
+        /* 滚动条角落（横竖同时出现时） */
+        ::-webkit-scrollbar-corner {
+            background: transparent;
+        }
+
+        /* ===== Firefox ===== */
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: #30363d transparent;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: #0d1117;
+            color: #c9d1d9;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", monospace;
+            overflow: hidden;
+        }
+
+        /* ===== 顶部工具栏（固定，不收缩） ===== */
+        #toolbar {
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 16px;
+            background: #161b22;
+            border-bottom: 1px solid #30363d;
+            flex-wrap: wrap;
+        }
+
+        #toolbar button {
+            background: #21262d;
+            color: #c9d1d9;
+            border: 1px solid #30363d;
+            padding: 6px 16px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        #toolbar button:hover { background: #30363d; }
+
+        /* 操作按钮用不同颜色区分 */
+        #btn-gen   { background: #238636; border-color: #2ea043; }
+        #btn-gen:hover   { background: #2ea043; }
+        #btn-upload { background: #9a6700; border-color: #bb8009; }
+        #btn-upload:hover { background: #bb8009; }
+
+        #status {
+            font-size: 12px;
+            margin-left: auto;
+            padding: 2px 8px;
+            border-radius: 10px;
+            white-space: nowrap;
+        }
+
+        #status.connected    { color: #3fb950; background: rgba(63,185,80,.1); }
+        #status.disconnected { color: #f85149; background: rgba(248,81,73,.1); }
+
+        /* ===== 日志区域（占满剩余高度，自己滚） ===== */
+        #log-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px 16px;
+            scroll-behavior: smooth;   /* ← 新增 */
+        }
+
+        #log {
+            white-space: pre-wrap;
+            word-break: break-all;
+            line-height: 1.6;
+            font-size: 13px;
+        }
+
+        /* ===== 浮空提示 ===== */
+        #toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #30363d;
+            color: #c9d1d9;
+            padding: 8px 20px;
+            border-radius: 6px;
+            font-size: 13px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .3s;
+            z-index: 9999;
+            max-width: 80vw;
+        }
+
+        #toast.show { opacity: 1; }
+        #toast.error { background: #f85149; color: #fff; }
+
+        /* ===== AppKey 指示灯 ===== */
+        #key-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 12px;
+            color: #8b949e;
+            user-select: none;
+        }
+        #key-dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: #f85149;   /* 未设置 = 红 */
+            transition: background .2s;
+        }
+        #key-dot.ok { background: #3fb950; }  /* 已设置 = 绿 */
+
+        /* 图标按钮（设置 AppKey） */
+        #btn-key {
+            background: #21262d; border-color: #30363d;
+            padding: 6px 10px; font-size: 14px;
+        }
+        #btn-key:hover { background: #30363d; }
+
+        /* ===== AppKey 浮空模态框（脱离文档流，不撑页面） ===== */
+        #key-modal {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,.5);
+            display: none;
+            align-items: center; justify-content: center;
+            z-index: 10000;
+        }
+        #key-modal.show { display: flex; }
+
+        #key-card {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 20px 24px;
+            width: 360px;
+            max-width: 90vw;
+            box-shadow: 0 8px 24px rgba(0,0,0,.4);
+        }
+        #key-card h3 { font-size: 14px; margin-bottom: 14px; color: #c9d1d9; }
+        #key-card input {
+            width: 100%; box-sizing: border-box;
+            background: #0d1117; border: 1px solid #30363d; color: #c9d1d9;
+            padding: 8px 10px; border-radius: 4px;
+            font-size: 13px; font-family: inherit; margin-bottom: 14px;
+        }
+        #key-card input:focus { outline: none; border-color: #58a6ff; }
+        #key-card .actions { display: flex; justify-content: flex-end; gap: 8px; }
+        #key-card button {
+            background: #21262d; color: #c9d1d9;
+            border: 1px solid #30363d;
+            padding: 6px 16px; border-radius: 4px; cursor: pointer; font-size: 13px;
+        }
+        #key-card button:hover { background: #30363d; }
+        #key-card button.primary { background: #238636; border-color: #2ea043; }
+        #key-card button.primary:hover { background: #2ea043; }
     </style>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen">
-<div x-data="ssgApp()" x-init="init()" class="max-w-5xl mx-auto p-6 space-y-6">
+<body>
 
-    <!-- 顶部：AppKey 锁定栏 -->
-    <header class="bg-slate-800 border border-slate-700 rounded-xl p-5 shadow">
-        <div class="flex items-center gap-3">
-            <label class="text-sm font-medium text-slate-300 w-24 shrink-0">AppKey</label>
-            <input x-model="appkey"
-                   :type="showKey ? 'text' : 'password'"
-                   placeholder="请输入 AppKey"
-                   class="flex-1 bg-slate-900 border border-slate-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-lg px-3 py-2 text-sm outline-none">
-            <button @click="showKey = !showKey"
-                    class="text-xs px-3 py-2 rounded-lg bg-slate-700 hover:bg-slate-600"
-                    x-text="showKey ? '隐藏' : '显示'"></button>
-            <button @click="setAppKey()"
-                    class="text-sm font-semibold px-5 py-2 rounded-lg bg-indigo-500 hover:bg-indigo-400 text-white shadow">
-                锁定 Set
-            </button>
+<div id="toolbar">
+    <button id="btn-gen" onclick="callApi('/ssg/gen', '生成')">生成</button>
+    <button id="btn-upload" onclick="callApi('/ssg/upload', '上传 OSS')">上传 OSS</button>
+    <span style="width:1px; height:20px; background:#30363d; margin:0 4px;"></span>
+    <button onclick="startStream()">▶ 实时日志</button>
+    <button onclick="stopStream()">⏹ 停止</button>
+    <button onclick="clearLog()">🗑 清屏</button>
+    <button id="btn-key" onclick="openKeyModal()" title="设置 AppKey">🔑</button>
+    <span id="key-status"><span id="key-dot"></span><span id="key-text">AppKey 未设置</span></span>
+    <label style="font-size:12px; color:#8b949e; cursor:pointer;">
+        <input type="checkbox" id="autoscroll" checked> 自动滚动
+    </label>
+    <span id="status" class="disconnected">● 未连接</span>
+</div>
+
+<div id="log-container">
+    <div id="log"></div>
+</div>
+
+<div id="toast"></div>
+
+<div id="key-modal">
+    <div id="key-card">
+        <h3>设置 AppKey</h3>
+        <input id="key-input" type="password" placeholder="请输入 AppKey" autocomplete="off">
+        <div class="actions">
+            <button onclick="closeKeyModal()">取消</button>
+            <button class="primary" onclick="saveKey()">保存</button>
         </div>
-        <p class="mt-2 text-xs text-slate-400">AppKey 将保存在 localStorage，并在每次 POST 请求以 Header（AppKey）携带。</p>
-    </header>
-
-    <!-- 操作按钮区 -->
-    <section class="bg-slate-800 border border-slate-700 rounded-xl p-5 shadow">
-        <div class="flex flex-wrap gap-4">
-            <button @click="call('/original-intention/ssg/gen', '生成')"
-                    class="flex-1 min-w-[120px] py-3 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-white font-semibold shadow">
-                生成
-            </button>
-            <button @click="call('/original-intention/ssg/log', '刷新日志')"
-                    class="flex-1 min-w-[120px] py-3 rounded-lg bg-sky-500 hover:bg-sky-400 text-white font-semibold shadow">
-                刷新日志
-            </button>
-            <button @click="call('/original-intention/ssg/upload', '上传 OSS')"
-                    class="flex-1 min-w-[120px] py-3 rounded-lg bg-amber-500 hover:bg-amber-400 text-white font-semibold shadow">
-                上传 OSS
-            </button>
-        </div>
-    </section>
-
-    <!-- 请求状态 / 消息提示 -->
-    <div x-show="message" x-transition
-         :class="msgType === 'error' ? 'bg-red-900/40 border-red-700 text-red-200' : 'bg-slate-800 border-slate-700 text-slate-200'"
-         class="border rounded-lg px-4 py-3 text-sm">
-        <span x-text="message"></span>
     </div>
-
-    <!-- 日志预览框 -->
-    <section class="bg-slate-800 border border-slate-700 rounded-xl p-5 shadow">
-        <div class="flex items-center justify-between mb-3">
-            <h2 class="text-base font-semibold text-slate-200">日志预览</h2>
-            <span class="text-xs text-slate-400">来自 /original-intention/ssg/log</span>
-        </div>
-        <div class="bg-slate-950 border border-slate-700 rounded-lg p-4 min-h-[260px] max-h-[560px] overflow-auto">
-            <pre x-show="logText" x-text="logText" class="log-pre text-xs text-emerald-200"></pre>
-            <p x-show="!logText" class="text-sm text-slate-500">暂无日志，点击「刷新日志」获取。</p>
-        </div>
-    </section>
-
 </div>
 
 <script>
-function ssgApp() {
-    return {
-        appkey: '',
-        showKey: false,
-        message: '',
-        msgType: 'info',
-        logText: '',
+    let evtSource = null;
 
-        init() {
-            const saved = localStorage.getItem('ssg_appkey');
-            if (saved) {
-                this.appkey = saved;
-                this.flash('已自动填充已保存的 AppKey', 'info');
-            }
-        },
+    const logEl = document.getElementById('log');
+    const container = document.getElementById('log-container');
+    const statusEl = document.getElementById('status');
+    const toastEl = document.getElementById('toast');
+    const autoscrollEl = document.getElementById('autoscroll');
+    const keyModal = document.getElementById('key-modal');
+    const keyInput = document.getElementById('key-input');
+    const keyDot = document.getElementById('key-dot');
+    const keyText = document.getElementById('key-text');
 
-        setAppKey() {
-            const v = (this.appkey || '').trim();
-            if (!v) {
-                this.flash('请输入 AppKey 后再锁定', 'error');
-                return;
-            }
-            localStorage.setItem('ssg_appkey', v);
-            this.flash('AppKey 已锁定保存', 'info');
-        },
+    /* ============ AppKey 设置（toolbar 内，浮空模态框，不撑布局） ============ */
+    const KEY = 'ssg_appkey';
 
-        flash(msg, type) {
-            this.message = msg;
-            this.msgType = type;
-            clearTimeout(this._t);
-            this._t = setTimeout(() => { this.message = ''; }, 4000);
-        },
-
-        getHeaders() {
-            const v = (this.appkey || '').trim();
-            if (!v) {
-                // 即使未填也允许发起请求，由后端校验；这里给出提示
-            }
-            return {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'AppKey': v
-            };
-        },
-
-        async call(url, action) {
-            const body = JSON.stringify({});
-            let res, json;
-            try {
-                res = await fetch(url, { method: 'POST', headers: this.getHeaders(), body });
-            } catch (e) {
-                this.flash(`[${action}] 网络错误：${e.message}`, 'error');
-                return;
-            }
-
-            // 解析 JSON（兼容非 JSON 响应）
-            try {
-                json = await res.json();
-            } catch (e) {
-                this.flash(`[${action}] 响应非 JSON（HTTP ${res.status}）`, 'error');
-                return;
-            }
-
-            if (!res.ok || (json.code !== 0 && json.code !== undefined)) {
-                const msg = json.msg || `HTTP ${res.status}`;
-                this.flash(`[${action}] 失败：${msg}`, 'error');
-                return;
-            }
-
-            // 成功：根据接口处理 data
-            const data = json.data;
-            if (url.endsWith('/log')) {
-                // data 为日志字符串，原样渲染
-                this.logText = typeof data === 'string' ? data : JSON.stringify(data, null, 2);
-                this.flash(`[${action}] 日志已刷新`, 'info');
-            } else {
-                // 生成 / 上传：展示返回 data（字符串或对象）
-                const txt = typeof data === 'string' ? data : JSON.stringify(data, null, 2);
-                this.flash(`[${action}] 成功：${txt}`, 'info');
-            }
+    function refreshKeyStatus() {
+        if (localStorage.getItem(KEY)) {
+            keyDot.classList.add('ok');
+            keyText.textContent = 'AppKey 已设置';
+        } else {
+            keyDot.classList.remove('ok');
+            keyText.textContent = 'AppKey 未设置';
         }
-    };
-}
+    }
+
+    function openKeyModal() {
+        keyInput.value = localStorage.getItem(KEY) || '';
+        keyModal.classList.add('show');
+        // 下次渲染再聚焦，保证 display:flex 已生效
+        requestAnimationFrame(() => keyInput.focus());
+    }
+
+    function closeKeyModal() {
+        keyModal.classList.remove('show');
+    }
+
+    function saveKey() {
+        const v = keyInput.value.trim();
+        if (!v) {
+            localStorage.removeItem(KEY);
+            showToast('AppKey 已清除');
+        } else {
+            localStorage.setItem(KEY, v);
+            showToast('AppKey 已保存');
+        }
+        refreshKeyStatus();
+        closeKeyModal();
+    }
+
+    // 点击遮罩层（modal 本身）关闭，点击卡片内部不关闭
+    keyModal.addEventListener('click', (e) => { if (e.target === keyModal) closeKeyModal(); });
+    // ESC 关闭
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && keyModal.classList.contains('show')) closeKeyModal();
+        // 在输入框内按回车 = 保存
+        if (e.key === 'Enter' && keyModal.classList.contains('show')) saveKey();
+    });
+
+    refreshKeyStatus(); // 初始刷新指示灯
+
+    /* ============ Toast 提示 ============ */
+    let toastTimer = null;
+    function showToast(msg, type) {
+        toastEl.textContent = msg;
+        toastEl.className = 'show' + (type === 'error' ? ' error' : '');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => { toastEl.className = ''; }, 3000);
+    }
+
+    /* ============ 通用 API 请求（对应原来的 call()） ============ */
+    async function callApi(url, action) {
+        const appkey = localStorage.getItem('ssg_appkey') || '';
+        if (!appkey) {
+            showToast(`[${action}] 请先设置 AppKey`, 'error');
+            return;
+        }
+
+        let res, json;
+        try {
+            res = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'AppKey': appkey,
+                },
+                body: JSON.stringify({}),
+            });
+        } catch (e) {
+            showToast(`[${action}] 网络错误：${e.message}`, 'error');
+            return;
+        }
+
+        // 解析 JSON（兼容非 JSON 响应）
+        try {
+            json = await res.json();
+        } catch (e) {
+            showToast(`[${action}] 响应非 JSON（HTTP ${res.status}）`, 'error');
+            return;
+        }
+
+        // 业务码判断（兼容 code === 0 或 无 code 字段）
+        if (!res.ok || (json.code !== 0 && json.code !== undefined)) {
+            const msg = json.msg || `HTTP ${res.status}`;
+            showToast(`[${action}] 失败：${msg}`, 'error');
+            return;
+        }
+
+        // 成功：把 data 追加到日志区（和后端日志统一展示，也符合原来 flash 的逻辑）
+        const data = json.data;
+        scrollToBottom();
+        showToast(`[${action}] 成功`);
+    }
+
+    /* ============ 日志流控制 ============ */
+    const MAX_LOG_CHARS = 300000; // ~300KB，大约 3000-5000 行
+
+    function appendLog(text) {
+        logEl.textContent += text + '\n';
+
+        // 超长了就截断前半段
+        if (logEl.textContent.length > MAX_LOG_CHARS) {
+            const truncated = logEl.textContent.slice(-MAX_LOG_CHARS / 2);
+            logEl.textContent = '…（已自动截断旧日志）…\n' + truncated;
+        }
+
+        scrollToBottom();
+    }
+
+    function setStatus(state, text) {
+        statusEl.className = state;
+        statusEl.textContent = text;
+    }
+
+    function scrollToBottom() {
+        if (!autoscrollEl.checked) return;
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                container.scrollTop = container.scrollHeight;
+            });
+        });
+    }
+
+    function startStream() {
+        if (evtSource) {
+            showToast('已在连接中');
+            return;
+        }
+
+        const appkey = localStorage.getItem('ssg_appkey') || '';
+        if (!appkey) {
+            showToast('请先设置 AppKey', 'error');
+            return;
+        }
+
+        setStatus('disconnected', '● 连接中...');
+
+        const url = '/ssg/logs/stream?appkey=' + encodeURIComponent(appkey);
+        evtSource = new EventSource(url);
+
+        evtSource.onopen = () => {
+            setStatus('connected', '● 已连接');
+            showToast('实时日志已连接');
+        };
+
+        evtSource.onmessage = (e) => {
+            appendLog(e.data);
+            scrollToBottom();
+        };
+
+        evtSource.addEventListener('rotate', () => {
+            appendLog('\n⚠️ 检测到日志轮转，重新连接...\n\n');
+            evtSource.close();
+            evtSource = null;
+            setTimeout(startStream, 500);
+        });
+
+        evtSource.onerror = () => {
+            setStatus('disconnected', '● 断开·重连中');
+        };
+    }
+
+    function stopStream() {
+        if (evtSource) {
+            evtSource.close();
+            evtSource = null;
+            setStatus('disconnected', '● 已停止');
+            showToast('已停止实时日志');
+        } else {
+            showToast('当前未连接');
+        }
+    }
+
+    function clearLog() {
+        logEl.textContent = '';
+        showToast('已清屏');
+    }
+
+    /* ============ 生命周期 ============ */
+    autoscrollEl.addEventListener('change', () => {
+        showToast(autoscrollEl.checked ? '已开启自动滚动' : '已暂停自动滚动');
+        if (autoscrollEl.checked) scrollToBottom();
+    });
+
+    window.addEventListener('beforeunload', () => {
+        if (evtSource) evtSource.close();
+    });
 </script>
+
 </body>
 </html>
