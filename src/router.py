@@ -78,14 +78,14 @@ async def submit_comment(
     email: str = Body(""),
     bot: str = Body(""),
     ts: float = Body(""),
+    url: str = Body(""),
 ):
     # ---- 1. honeypot 检测 ----
     if bot:
         return {"ok": False, "error": "bot_fill_honeypot"}
 
     # ---- 2. 填写耗时检测 ----
-    if not ts or (time.time() - ts) < MIN_ELAPSE_SECONDS:
-        return {"ok": False, "error": "too_fast"}
+    # skip, 因为服务端时间和客户端需要同步，这里有较大误差
 
     # ---- 3. 内容校验 ----
     content = (content or "").strip()
@@ -117,6 +117,8 @@ async def submit_comment(
         "referer": request.headers.get("referer", ""),
         "email": email,
         "content": content,
+        "url": url,
+        "ts": ts,
     }
 
     with open(fpath, "a", encoding="utf-8") as f:
