@@ -26,7 +26,7 @@ def render_template(template_name: str, context: dict = None) -> str:
 router = APIRouter()
 
 
-@router.get("/ssg")
+@router.get("/ssg/")
 async def ssg() -> HTMLResponse:
     html = render_template("src/tpl/ssg.html")
     return HTMLResponse(html)
