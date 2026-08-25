@@ -20,8 +20,8 @@ async def process_statics(path: str) -> Response:
     sub = "_build"
     target = (Path(storage_root) / build_root.strip("/") / sub / path.strip("/")).as_posix()
     target2 = target + ".html"
-    for try_file in (target, target2):
+    target3 = (Path(storage_root) / build_root.strip("/") / sub / "404.html").as_posix()
+    for i, try_file in enumerate((target, target2, target3)):
         if os.path.exists(try_file) and os.path.isfile(try_file):
-            return FileResponse(try_file)
-
-    return Response(status_code=404)
+            return FileResponse(try_file, status_code=404 if i == 2 else 200)
+    raise ValueError("not found")

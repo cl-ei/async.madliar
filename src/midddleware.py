@@ -15,6 +15,7 @@ class ErrorCatchMiddleware(BaseHTTPMiddleware):
             if response.status_code == 404:
                 try:
                     response = await process_statics(request.url.path)
+                    return response
                 except:  # noqa
                     pass
 
