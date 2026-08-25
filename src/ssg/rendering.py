@@ -239,8 +239,9 @@ class CollectingRenderer(HTMLRenderer):
             img_ref.property = info
 
             # 包含avif信息
-            img = content.removesuffix(" />") + f'width="{info.width}" height="{info.height}" />'
-            content = f'<picture><source srcset="{info.avif_href}" type="image/avif">{img}</picture>'
+            content = content.removesuffix(" />") + f'width="{info.width}" height="{info.height}" />'
+            if info.avif_href:
+                content = f'<picture><source srcset="{info.avif_href}" type="image/avif">{content}</picture>'
 
         collector.append(img_ref)
         return content

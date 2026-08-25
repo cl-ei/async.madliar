@@ -256,6 +256,8 @@ class StaticSiteGenerator:
             try:
                 full_img_path = self.adapter.storage_root + "/" + img.path.lstrip("/")
                 w, h = get_image_size(full_img_path)
+                img_property = ImageProperty(width=w, height=h, avif_full_path="", avif_href="")
+                images_cache[img.path] = img_property
 
                 # 计算 avif 写入路径，这里是绝对路径，根据原图的 path 替换为 avif 的 path
                 base, _ = os.path.splitext(img.path)
@@ -266,14 +268,12 @@ class StaticSiteGenerator:
                     logging.error(f"cannot covert img {img.path}, msg:\n\t{msg}")
                     continue
 
-                # 计算链接（url）
+                # 转换成功，进行赋值
                 href_base, _ = os.path.splitext(img.href)
                 avif_href = href_base + ".avif"
 
-                # 放到全局
-                images_cache[img.path] = ImageProperty(
-                    width=w, height=h, avif_full_path=avif_full_path, avif_href=avif_href
-                )
+                img_property.avif_full_path=avif_full_path
+                img_property.avif_href=avif_href
 
             except Exception as e:
                 logging.error(f"error in process image: {img.path}, e: {e}\n{traceback.format_exc()}")
@@ -486,8 +486,8 @@ class StaticSiteGenerator:
         for item in images:
             img_path = item["path"]
             target = item["href"]
-
-            if "property" in item and item["property"]:
+            ip = item.get("property") or {}
+            if ip.get("avif_full_path") and ip.get("avif_href"):
                 # 拷贝AVIF
                 avif_full_path = item["property"]["avif_full_path"]
                 avif_href = item["property"]["avif_href"]

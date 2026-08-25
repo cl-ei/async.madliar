@@ -132,6 +132,8 @@ def covert_to_avif(src: str, dst: str) -> tuple[bool, str]:
     os.makedirs(parent, exist_ok=True)
 
     if IS_PROD:
+        if os.stat(src).st_size < 100*1024:
+            return False, "image file too small, skip"
         return _convert_to_avif(src, dst)
 
     # if DEBUG:
