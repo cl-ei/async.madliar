@@ -134,6 +134,8 @@ def covert_to_avif(src: str, dst: str) -> tuple[bool, str]:
     if IS_PROD:
         if os.stat(src).st_size < 100*1024:
             return False, "image file too small, skip"
+        if os.path.exists(dst) and os.path.isfile(dst):
+            return True, "avif already exists, skip"
         return _convert_to_avif(src, dst)
 
     # if DEBUG:

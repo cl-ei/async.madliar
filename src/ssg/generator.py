@@ -264,16 +264,16 @@ class StaticSiteGenerator:
                 avif_path = base + ".avif"
                 avif_full_path = self.avif_tmp_dir + "/" + avif_path.lstrip("/")
                 flag, msg = covert_to_avif(full_img_path, avif_full_path)
+                logging.info(f"Covert img to avif: {img.path}, result: {flag}, msg:\n\t{msg}")
                 if not flag:
-                    logging.error(f"cannot covert img {img.path}, msg:\n\t{msg}")
                     continue
 
                 # 转换成功，进行赋值
                 href_base, _ = os.path.splitext(img.href)
                 avif_href = href_base + ".avif"
 
-                img_property.avif_full_path=avif_full_path
-                img_property.avif_href=avif_href
+                img_property.avif_full_path = avif_full_path
+                img_property.avif_href = avif_href
 
             except Exception as e:
                 logging.error(f"error in process image: {img.path}, e: {e}\n{traceback.format_exc()}")
