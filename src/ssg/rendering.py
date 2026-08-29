@@ -360,6 +360,7 @@ class MarkdownRenderPipeline:
         renderer.set_image_pi(image_preprocess_info)
 
         self._markdown = mistune.create_markdown(
+            hard_wrap=True,
             renderer=renderer,
             plugins=self._plugins,
         )
@@ -405,10 +406,9 @@ class MarkdownRenderPipeline:
             self._markdown.renderer.reset()  # noqa
 
             html = self._markdown(content)
-            safe_html = clean_ugc_html(html)
             renderer: CollectingRenderer = self._markdown.renderer  # noqa
             data = {
-                "html": safe_html,
+                "html": html,
                 "css": self._formatter.get_style_defs('.code-highlight'),
                 "images": list(collected),  # 返回副本防止外部修改
                 "used_math": renderer.used_math,
