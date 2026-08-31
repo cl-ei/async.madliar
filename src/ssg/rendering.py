@@ -172,12 +172,7 @@ class CollectingRenderer(HTMLRenderer):
         text = re.sub(r'[^\w\s-]', '', text)        # 移除特殊字符
         text = re.sub(r'[\s_]+', '-', text)         # 空格/下划线转连字符
         text = re.sub(r'-+', '-', text).strip('-')  # 去除连续连字符
-        base = text or 'heading'
-
-        if base and all('\u4e00' <= c <= '\u9fff' for c in base.replace('-', '')):
-            short_hash = hashlib.md5(base.encode()).hexdigest()[:6]
-            return f"{base}-{short_hash}"
-        return base
+        return text or 'heading'
 
     def heading(self, text: str, level: int, **attrs) -> str:
         # 无论是否开启 TOC，都要正常渲染 heading HTML
