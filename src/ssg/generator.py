@@ -340,6 +340,13 @@ class StaticSiteGenerator:
                 # 写入文件
                 # 分两步，避免 permalink 为“/”或空，导致生成包含非预期的“//”的问题
                 dst_url = post["dest_url"]
+
+                # 后缀自动处理，兼容 sitemap.xml 逻辑
+                # 如果有 ext, 并且在白名单里，说明是手动指定的，跳过；否则默认添加 .html 以兼容 OSS 上传逻辑
+                base, ext = os.path.splitext(dst_url)
+                if not ext or ext.lower() not in (".html", ".txt", ".text", ".json", ".xml", ".md"):
+                    dst_url += ".html"
+
                 filepath = f"{self.write_root_tmp}/{dst_url}"
                 try:
                     await self.adapter.storage.write_text(filepath, final_html)
