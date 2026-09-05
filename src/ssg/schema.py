@@ -57,20 +57,16 @@ class SiteConfig(BaseModel):
 
 
 # -------- 渲染管线的产物 --------
-class ImageProperty(BaseModel):
-    width: int
-    height: int
-    avif_full_path: str
-    avif_href: str
-
 
 class ImageRef(BaseModel):
     """不可变的图片引用记录"""
-    path: str  # 文件路径
-    href: str  # 渲染的路径
+    src: str  # 渲染的路径
     alt: str
     title: str | None = Field(default=None)
-    property: ImageProperty | None = Field(default=None)
+
+    width: int = Field(default=0)
+    height: int = Field(default=0)
+    avif_src: str = Field(default="")
 
 
 class ImageProcResult(BaseModel):

@@ -7,7 +7,7 @@ from xpinyin import Pinyin
 from src.error import ErrorWithPrompt
 from bs4 import BeautifulSoup
 from pathlib import Path
-from .schema import SiteConfig, Article, ImageProcResult
+from .schema import SiteConfig, Article, ImageProcResult, ImageRef
 from src.ssg.marked.bridge import covert_to_html
 from src.ssg.img_preparing import process_image
 
@@ -252,7 +252,7 @@ class ArticleBuilder:
             fm["description"] = description
 
         abs_filepath = (Path(self.storage_root) / file_path.lstrip("/")).as_posix()
-        html = self.process_images_in_html(
+        html, images = self.process_images_in_html(
             html=result["html"],
             filepath=abs_filepath,
             storage_root=self.storage_root,
@@ -267,13 +267,14 @@ class ArticleBuilder:
             raw_content=body,
             rendered_html=html,
             toc=result["toc"],
-            images=[],
+            images=images,
             used_code=bool(result.get("usedCode")),
             used_math=bool(result.get("usedMath")),
         )
 
     @staticmethod
-    def process_images_in_html(html: str, filepath: str, storage_root: str, write_root: str, dest_url: str) -> str:
+    def process_images_in_html(
+            html: str, filepath: str, storage_root: str, write_root: str, dest_url: str) -> tuple[str, list[ImageRef]]:
         """
         处理每篇文章的图片路径
 
@@ -284,6 +285,10 @@ class ArticleBuilder:
             write_root: 写入目录的根路径
             dest_url: 文章的目标 URL
 
+        Returns:
+            str: html
+            images: List[ImageRef]
+
         由于 windows 不允许存在与目录同名的文件，必须曲线救国了。这里的做法是 write_root 下建一个 images 文件夹，这样可以避免冲突
         针对绝对路径引用的情况：
             - 保留其绝对路径，相当于把文件从 storage_root 节点连带路径，切到 write_root/images 下。
@@ -293,6 +298,7 @@ class ArticleBuilder:
             - 写入到 write_root/images/<dest_url>/<rel_path> 下面
         src 为该文件相对于 write_root 的剩余路径
         """
+        collected_images: list[ImageRef] = []
         soup = BeautifulSoup(html, 'html.parser')
         imgs = soup.find_all('img')
 
@@ -354,12 +360,22 @@ class ArticleBuilder:
 
             # avif 与主图同目录同名，仅扩展名不同；主图本身就是 avif 时无需再包一层
             avif_path = target_path.with_suffix('.avif')
+            avif_src = ""
             if result.avif and avif_path != target_path:
                 picture = soup.new_tag('picture')
                 img.wrap(picture)  # 用 picture 占据 img 原位，img 成为其子节点
                 source = soup.new_tag('source')
-                source['srcset'] = '/' + avif_path.relative_to(write_root_resolved).as_posix()
+                avif_src = '/' + avif_path.relative_to(write_root_resolved).as_posix()
+                source['srcset'] = avif_src
                 source['type'] = 'image/avif'
                 picture.insert(0, source)  # source 必须排在 img 之前
 
-        return str(soup)
+            collected_images.append(ImageRef(
+                src=img['src'],
+                alt=img['alt'],
+                title=img['alt'],
+                width=result.width,
+                height=result.height,
+                avif_src=avif_src,
+            ))
+        return str(soup), collected_images

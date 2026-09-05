@@ -165,7 +165,6 @@ class StaticSiteGenerator:
     def __init__(self, email: str):
         self.email = email
         self.adapter = UserFSAdapter(email)
-        self.err_q: Queue = Queue()
 
         self._config: SiteConfig | None = None
         self._write_root: str = ""
@@ -207,13 +206,9 @@ class StaticSiteGenerator:
         self._layouts_root = self.adapter.resolve(layouts_root)
         return self._layouts_root
 
-    def record_log(self, msg: str):
-        self.err_q.put_nowait(f"{datetime.datetime.now()} {msg}")
-
     async def _do_generate(self, config: SiteConfig):
         logging.info(f"start generate static site: {self.email}")
-
-        self.record_log(f"{SITE_CONFIG_FILE} 加载成功。")
+        logging.info(f"{SITE_CONFIG_FILE} 加载成功。")
 
         # 扫描所有Markdown文件
         # 有两种生成方式：
@@ -223,7 +218,7 @@ class StaticSiteGenerator:
         #   挨个渲染。能够控制内存占用，后续可以按此法优化。
         posts_path = f"{config.build.source_root.rstrip('/')}/_posts"
         all_files: list[str] = await self.adapter.find_files(posts_path, is_markdown_file)
-        self.record_log(f"已获取posts总数：{len(all_files)}。")
+        logging.info(f"已获取posts总数：{len(all_files)}。")
 
         # 准备写入！清除临时输出目录
         if os.path.exists(self.write_root_tmp) and os.path.isdir(self.write_root_tmp):
@@ -247,11 +242,11 @@ class StaticSiteGenerator:
                 try:
                     article: Article = article_builder.build_one_post(file_path, raw_content, file_mtime)
                 except ErrorWithPrompt as e:
-                    self.record_log(f"文件{file_path}解析时发生错误：{e.msg}。")
+                    logging.error(f"文件{file_path}解析时发生错误：{e.msg}\n{traceback.format_exc()}")
                     continue
                 except Exception as e:
                     logging.error(f"error happened when build one post: {e}\n{traceback.format_exc()}")
-                    self.record_log(f"文件{file_path}解析时发生错误。")
+                    logging.error(f"文件{file_path}解析时发生错误。")
                     continue
 
                 # 套用模板
@@ -260,12 +255,12 @@ class StaticSiteGenerator:
                 layout_filename = layout_name if layout_name.endswith(".html") else f"{layout_name}.html"
                 layout = f"{self.layouts_root}/{layout_filename}"
                 if not await self.adapter.storage.exists(layout):
-                    self.record_log(f"未找到文件{file_path}声明的layout “{layout_name}”，跳过处理。")
+                    logging.error(f"未找到文件{file_path}声明的layout “{layout_name}”，跳过处理。")
                     continue
 
                 all_posts.setdefault(layout_name, []).append(article)
             except Exception as e:
-                self.record_log(f"在解析{file_path}时发生错误：{e}。")
+                logging.error(f"在解析{file_path}时发生错误：{e}。")
                 print(f"parse one error: {e}\n{traceback.format_exc()}")
                 # 继续处理其他文件，不中断构建
                 continue
@@ -326,15 +321,15 @@ class StaticSiteGenerator:
                         adapter=self.adapter,
                     )
                 except jinja2.exceptions.TemplateNotFound:
-                    self.record_log(f"未找到layout文件“{layout_name}”，跳过处理：{post['src_path']}。")
+                    logging.error(f"未找到layout文件“{layout_name}”，跳过处理：{post['src_path']}。")
                     continue
 
                 except jinja2.exceptions.UndefinedError as e:
-                    self.record_log(f"渲染文件{post['src_path']}时出错：{e}, 已跳过。")
+                    logging.error(f"渲染文件{post['src_path']}时出错：{e}, 已跳过。")
                     continue
 
                 except jinja2.exceptions.TemplateSyntaxError as e:
-                    self.record_log(f"渲染文件{post['src_path']}时检测到模板格式错误：{e}, 已跳过。")
+                    logging.error(f"渲染文件{post['src_path']}时检测到模板格式错误：{e}, 已跳过。")
                     continue
 
                 # 写入文件
@@ -350,18 +345,12 @@ class StaticSiteGenerator:
                 filepath = f"{self.write_root_tmp}/{dst_url}"
                 try:
                     await self.adapter.storage.write_text(filepath, final_html)
-                    self.record_log(f"已生成：{post['dest_url']}。")
+                    logging.info(f"已生成：{post['dest_url']}。")
                 except Exception as e:
                     logging.error(f"生成{post['dest_url']}时失败：{e}\n{traceback.format_exc()}")
 
         # 写日志
-        print("generate complete!\n")
-        self.record_log(f"生成结束。")
-        log_file = f"{self.write_root_tmp}/build.log"
-        contents = []
-        while not self.err_q.empty():
-            contents.append(self.err_q.get_nowait())
-        await self.adapter.storage.write_text(log_file, '\n'.join(contents))
+        logging.info(f"生成结束。")
 
         # 移动到目标目录
         if await self.adapter.storage.exists(self.write_root) and \
@@ -377,9 +366,9 @@ class StaticSiteGenerator:
                 await self.adapter.storage.exists(statics_dir) and \
                 await self.adapter.storage.is_dir(statics_dir):
             await self.adapter.copy_tree(src=statics_dir, dst=self.write_root)
-            self.record_log(f"静态文件拷贝成功。")
+            logging.info(f"静态文件拷贝成功。")
         else:
-            self.record_log(f"跳过拷贝静态文件。")
+            logging.info(f"跳过拷贝静态文件。")
 
     async def gen(self) -> tuple[bool, str]:
         error_msg = ""
@@ -388,14 +377,13 @@ class StaticSiteGenerator:
             config = await self.load_config()
             if config is None:
                 return False, "未能加载 _site_config.yaml"
-
             await self._do_generate(config)
         except ErrorWithPrompt as e:
-            self.record_log(f"发生错误：{e.msg}。")
+            logging.error(f"发生错误：{e.msg}。")
             error_msg = e.msg
         except Exception as e:
             logging.error(f"error happened in _do_generate: {e}\n{traceback.format_exc()}")
-            self.record_log(f"发生未知错误。")
+            logging.error(f"发生未知错误。")
             error_msg = "致命错误"
 
         return False if error_msg else True, error_msg
