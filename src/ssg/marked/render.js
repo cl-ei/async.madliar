@@ -60,6 +60,14 @@ function renderOne(content, options) {
         return `<h${level}>${token.text}</h${level}>\n`;
     }
 
+    renderer.blockquote = function (token) {
+        let body = this.parser.parse(token.tokens);
+        // 只替换 <p>...</p> 内部的换行；标签之间的换行保持不动，否则块之间会多空行
+        body = body.replace(/<p>([\s\S]*?)<\/p>/g,
+            (mm, inner) => '<p>' + inner.replace(/\n/g, '<br>\n') + '</p>');
+        return `<blockquote>\n${body}</blockquote>\n`;
+    };
+
     // 👇 新增：代码块高亮
     let usedCode = false;   // 👈 追踪是否遇到代码块
     renderer.code = function (token) {
