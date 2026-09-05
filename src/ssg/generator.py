@@ -11,11 +11,10 @@ import datetime
 from pathlib import Path
 import jinja2
 from src.error import ErrorWithPrompt
-from .schema import SiteConfig, Article, SITE_CONFIG_FILE, ImageRef, ImageProperty
+from .schema import SiteConfig, Article, SITE_CONFIG_FILE
 from .filesystem.user_fs_adapter import UserFSAdapter
 from .parsing import ArticleBuilder
 from .templating import render_layout
-from .img_preparing import get_image_size, covert_to_avif
 _VALID_LASTMOD = re.compile(
     r'^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})?)?$'
 )
@@ -233,7 +232,9 @@ class StaticSiteGenerator:
 
         # 构建文章列表，解析基础信息
         url_to_src_path: dict[str, str] = {}  # 检测 URL 冲突之用
-        article_builder = ArticleBuilder(config, self.adapter.storage_root)
+        article_builder = ArticleBuilder(
+            config=config, storage_root=self.adapter.storage_root, write_root=self.write_root_tmp
+        )
         all_posts: dict[str, list[Article]] = {}  # layout -> [articles...]
         for file_path in all_files:
             try:

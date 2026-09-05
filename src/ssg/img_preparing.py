@@ -1,145 +1,80 @@
-import os
 import logging
-from PIL import Image, ImageOps, UnidentifiedImageError, ImageFilter
-from PIL.features import check_codec
+import os
+import shutil
+import traceback
 
-from pathlib import Path
-from typing import Tuple
-
-
-from src.config import IS_PROD
+from PIL import Image
+from .schema import ImageProcResult
 
 logging.getLogger("PIL").setLevel(logging.WARNING)
 
-# 模块加载时即检测 AVIF 编码器是否可用，避免每次调用都重复检查。
-# 旧版 Pillow（<11.3 或未编译 AVIF 支持）会把 "avif" 视为未知 codec 并抛 ValueError，
-# 此时视为不可用，函数将返回明确的错误提示。
-try:
-    _AVIF_ENCODER_OK = check_codec("avif")
-except ValueError:
-    _AVIF_ENCODER_OK = False
 
-
-def _convert_to_avif(
-        src: str,
-        dst: str,
-        max_size: int = 1300,
-        quality: int = 85,
-        speed: int = 5,
-        sharpen: bool = True,
-) -> Tuple[bool, str]:
+def process_image(img: str, target: str) -> ImageProcResult:
     """
-    将图片转换为 AVIF，长边不超过 max_size，等比缩放，针对清晰度优化。
+    处理单张图片并落盘到 target（父目录会自动创建）。
 
-    Returns:
-        (True, "") 成功
-        (False, "<error message>") 失败，不抛异常
+    规则：
+      - 原图 < 100KB 且 最长边 < 1300  → 原样搬运，不缩放、不生成 avif
+      - 其余情况：
+          最长边 > 1300 时等比缩放到长边 1300（不变形）
+          再按落盘后的实际体积决定：<= 100KB 不生成 avif，否则在同目录生成同名 .avif
+
+    注意：进入缩放/压缩流程的图片，落盘内容可能是重新编码的结果；
+          尺寸合规但体积超标的图片仍然搬运原文件（保真），由 avif 兜底体积。
     """
-    dst_path = Path(dst)
-    if dst_path.suffix.lower() != ".avif":
-        dst_path = dst_path.with_suffix(".avif")
+    os.makedirs(os.path.dirname(target) or '.', exist_ok=True)
 
     try:
-        with Image.open(src) as img:
-            # 已经是 AVIF → 跳过
-            if img.format and img.format.upper() == "AVIF":
-                return False, "source image is already AVIF, skip re-encoding"
+        im = Image.open(img)
+        im.load()  # 真正的解码，避免懒加载把错误推迟到 save 阶段
+    except Exception:
+        # 解析失败：原样搬运，尺寸置 0 交由调用方决定如何处理
+        shutil.copyfile(img, target)
+        return ImageProcResult(width=0, height=0, avif=False)
 
-            # ---- 等比缩放 ----
-            w, h = img.size
-            long_side = max(w, h)
+    w, h = im.size
 
-            if long_side > max_size:
-                scale = max_size / long_side
-                new_w = int(round(w * scale))
-                new_h = int(round(h * scale))
-                img = img.resize((new_w, new_h), Image.Resampling.LANCZOS)
+    # 小图且尺寸不大：直接搬运原文件，不做任何重新编码
+    if os.path.getsize(img) < 100 * 1024 and max(w, h) < 1300:
+        shutil.copyfile(img, target)
+        return ImageProcResult(width=w, height=h, avif=False)
 
-                # ---- 缩小后轻微锐化，补偿插值带来的软 ----
-                if sharpen:
-                    img = img.filter(
-                        ImageFilter.UnsharpMask(
-                            radius=0.8,    # 锐化半径，小一点避免噪点
-                            percent=50,    # 锐化强度
-                            threshold=3,   # 只锐化差异明显的边缘
-                        )
-                    )
+    if max(w, h) > 1300:
+        # 等比缩放，int 截断保证缩放后长边不超过 1300
+        scale = 1300 / max(w, h)
+        w, h = max(1, int(w * scale)), max(1, int(h * scale))
+        im = im.resize((w, h), Image.Resampling.LANCZOS)
+        _write_image(im, target)
+    else:
+        # 尺寸合规但体积超标：保留原文件字节，交给 avif 兜底
+        shutil.copyfile(img, target)
 
-            # ---- 色彩：保留透明 ----
-            if img.mode in ("RGBA", "LA") or (
-                    img.mode == "P" and "transparency" in img.info
-            ):
-                img = img.convert("RGBA")
-            else:
-                img = img.convert("RGB")
+    # 以落盘后的实际体积作为是否生成 avif 的依据
+    if os.path.getsize(target) <= 100 * 1024:
+        return ImageProcResult(width=w, height=h, avif=False)
 
-            # ---- 保存：关键改动在这里 ----
-            img.save(
-                str(dst_path),
-                "AVIF",
-                quality=80,
-                speed=6,
-                subsampling="4:2:2",
-            )
+    avif_path = os.path.splitext(target)[0] + '.avif'
+    if avif_path == target:
+        # 原图扩展名本就是 .avif，主图即 avif，无需重复编码
+        return ImageProcResult(width=w, height=h, avif=True)
 
-        return True, ""
-
-    except UnidentifiedImageError:
-        return False, f"cannot identify image file: {src}"
-    except OSError as e:
-        return False, f"OS error during save: {e}"
+    try:
+        im.save(avif_path, format='AVIF', quality=60)
     except Exception as e:
-        return False, f"unexpected error: {e}"
+        logging.warning(f"cannot generate avif, e: {e}\n{traceback.format_exc()}")
+        # 环境不支持 avif 编码时降级：主图已就位，不阻断构建
+        return ImageProcResult(width=w, height=h, avif=False)
+
+    return ImageProcResult(width=w, height=h, avif=True)
 
 
-def get_image_size(
-        image_path: str | Path,
-        respect_orientation: bool = False
-) -> Tuple[int, int]:
-    """
-    获取图像尺寸。
-
-    Args:
-        image_path: 图像路径。
-        respect_orientation: 是否根据 EXIF Orientation 标签调整尺寸。
-                             手机竖拍照通常存为横图+旋转标记，设为 True
-                             会返回旋转后的实际显示尺寸。
-
-    Returns:
-        (width, height)
-    """
-    path = Path(image_path)
-    if not path.is_file():
-        raise FileNotFoundError(f"文件不存在: {path}")
-
-    try:
-        with Image.open(path) as img:
-            if respect_orientation:
-                # exif_transpose 会根据 Orientation 标签自动旋转/翻转
-                img = ImageOps.exif_transpose(img)
-            w, h = img.size
-            if max(w, h) > 1300:
-                scale = 1300 / max(w, h)
-                w, h = int(w * scale), int(h * scale)
-            return w, h
-
-    except UnidentifiedImageError:
-        raise ValueError(f"无法识别图像格式: {path}")
-
-
-def covert_to_avif(src: str, dst: str) -> tuple[bool, str]:
-    parent, _ = os.path.split(dst)
-    os.makedirs(parent, exist_ok=True)
-
-    if IS_PROD:
-        if os.stat(src).st_size < 100*1024:
-            return False, "image file too small, skip"
-        if os.path.exists(dst) and os.path.isfile(dst):
-            return True, "avif already exists, skip"
-        return _convert_to_avif(src, dst)
-
-    # if DEBUG:
-    with open(src, "rb") as r:
-        with open(dst, "wb") as w:
-            w.write(r.read())
-    return True, ""
+def _write_image(im: Image.Image, path: str) -> None:
+    """按扩展名落盘，处理有损格式不接受 alpha 通道的情况"""
+    lower = path.lower()
+    if lower.endswith(('.jpg', '.jpeg')):
+        # JPEG 不支持 alpha，带透明通道的图必须先转 RGB
+        if im.mode in ('RGBA', 'LA', 'P'):
+            im = im.convert('RGB')
+        im.save(path, quality=85)
+    else:
+        im.save(path)

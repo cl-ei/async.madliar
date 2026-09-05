@@ -14,3 +14,5 @@ MarkupSafe==3.0.3
 aiofiles==25.1.0
 oss2==2.19.1
 pillow==12.3.0
+bs4==0.0.2
+beautifulsoup4==4.15.0

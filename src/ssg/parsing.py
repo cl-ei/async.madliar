@@ -4,12 +4,12 @@ import re
 import yaml
 import datetime
 from xpinyin import Pinyin
-from dataclasses import dataclass, field
-from typing import Any
-from pathlib import Path
 from src.error import ErrorWithPrompt
-from .schema import SiteConfig, Article, SITE_CONFIG_FILE, ImageProperty
+from bs4 import BeautifulSoup
+from pathlib import Path
+from .schema import SiteConfig, Article, ImageProcResult
 from src.ssg.marked.bridge import covert_to_html
+from src.ssg.img_preparing import process_image
 
 
 DATE_FORMAT = "%Y-%m-%d"
@@ -51,9 +51,10 @@ def normalize_identifier(content: str) -> str:
 class ArticleBuilder:
     """构建Article对象"""
 
-    def __init__(self, config: SiteConfig, storage_root: str):
+    def __init__(self, config: SiteConfig, storage_root: str, write_root: str):
         self.config = config
         self.storage_root = storage_root
+        self.write_root: str = write_root
 
     @staticmethod
     def parse_front_matter(content: str, fm_delimiter: str = "---") -> tuple[dict, str]:
@@ -250,115 +251,115 @@ class ArticleBuilder:
                 description = fm.get("title", slug)
             fm["description"] = description
 
-        # TODO: 在这里处理 images
-        # lazy_load = fm["x-lazy-load"] if "x-lazy-load" in fm else self.config.features.lazy_load
+        abs_filepath = (Path(self.storage_root) / file_path.lstrip("/")).as_posix()
+        html = self.process_images_in_html(
+            html=result["html"],
+            filepath=abs_filepath,
+            storage_root=self.storage_root,
+            write_root=self.write_root,
+            dest_url=dest_url,
+        )
 
         return Article(
             src_path=file_path,
             dest_url=dest_url,
             fm=fm,
             raw_content=body,
-            rendered_html=result["html"],
+            rendered_html=html,
             toc=result["toc"],
             images=[],
             used_code=bool(result.get("usedCode")),
             used_math=bool(result.get("usedMath")),
         )
 
-    """
-    logging.info(f"start covert one! images cache len: {len(images_cache)}")
-    for img in all_images:
-        try:
-            full_img_path = self.adapter.storage_root + "/" + img.path.lstrip("/")
-            w, h = get_image_size(full_img_path)
-            img_property = ImageProperty(width=w, height=h, avif_full_path="", avif_href="")
-            images_cache[img.path] = img_property
+    @staticmethod
+    def process_images_in_html(html: str, filepath: str, storage_root: str, write_root: str, dest_url: str) -> str:
+        """
+        处理每篇文章的图片路径
 
-            # 计算 avif 写入路径，这里是绝对路径，根据原图的 path 替换为 avif 的 path
-            base, _ = os.path.splitext(img.path)
-            avif_path = base + ".avif"
-            avif_full_path = self.avif_tmp_dir + "/" + avif_path.lstrip("/")
-            flag, msg = covert_to_avif(full_img_path, avif_full_path)
-            logging.info(f"Covert img to avif: {img.path}, result: {flag}, msg:\n\t{msg}")
-            if not flag:
+        Args:
+            html: marked 输出的 HTML 字符串
+            filepath: 该 markdown 文件所在的【绝对路径】
+            storage_root: 用户的根目录
+            write_root: 写入目录的根路径
+            dest_url: 文章的目标 URL
+
+        由于 windows 不允许存在与目录同名的文件，必须曲线救国了。这里的做法是 write_root 下建一个 images 文件夹，这样可以避免冲突
+        针对绝对路径引用的情况：
+            - 保留其绝对路径，相当于把文件从 storage_root 节点连带路径，切到 write_root/images 下。
+            - src 即它原来的绝对路径
+        相对路径：
+            - 获取原始文件路径
+            - 写入到 write_root/images/<dest_url>/<rel_path> 下面
+        src 为该文件相对于 write_root 的剩余路径
+        """
+        soup = BeautifulSoup(html, 'html.parser')
+        imgs = soup.find_all('img')
+
+        # target_path 走过了 resolve()，必须用同样 resolve 过的根来算相对路径，
+        # 否则 write_root 是相对路径、或含 .. 时 relative_to 会直接抛 ValueError
+        write_root_resolved = Path(write_root).resolve()
+        # 同一篇文章里多处引用同一张图时只处理一次（avif 编码很慢）
+        handled: dict[str, ImageProcResult] = {}
+
+        for img in imgs:
+            # 1. 拿到原始 src（Markdown 里写的路径）
+            raw_src = img.get('src', '')
+            if not raw_src:
                 continue
 
-            # 转换成功，进行赋值
-            href_base, _ = os.path.splitext(img.href)
-            avif_href = href_base + ".avif"
+            # 2. 外链 / 内联数据等，不参与静态资源迁移
+            if raw_src.startswith(("https://", "http://", "//", "file://", "data:", "blob:", "#", "?")):
+                continue
 
-            img_property.avif_full_path = avif_full_path
-            img_property.avif_href = avif_href
+            # 3. 解析为磁盘绝对路径与目标写入路径
+            if raw_src.startswith("/"):  # 绝对路径，参照用户根目录
+                source_path = (Path(storage_root) / raw_src.lstrip("/")).resolve()
+                target_path = (write_root_resolved / "images" / raw_src.lstrip("/")).resolve()
+            else:  # 相对路径，参照 md 文件所在目录
+                source_path = (Path(filepath).parent / raw_src).resolve()
+                target_path = (write_root_resolved / "images" / dest_url.lstrip("/") / raw_src).resolve()
 
-        except Exception as e:
-            logging.error(f"error in process image: {img.path}, e: {e}\n{traceback.format_exc()}")
-    """
-    # async def copy_images(self, config: SiteConfig, images: list[dict]) -> int:
-    #     """
-    #     迁移 md文件关联的图片文件，分三种情况：
-    #
-    #     # ![alt](./a.jpg)      → 相对当前页面，将图片挪动到相对于当前文件的路径下
-    #     # ![alt](/a.jpg)       → 相对站点根目录 _build/ 下）
-    #     # ![alt](https://...)  → 不做任何处理
-    #
-    #     Args:
-    #         config: SiteConfig, md 文件渲染的 html 的目标位置，是包括 storage_root 的绝对路径
-    #         images: list[dict], 元素为 ImageRef 结构: {
-    #             'path': 'board.jpg',
-    #             'href': 'board.jpg',
-    #             'alt': '',
-    #             'title': '',
-    #         }
-    #
-    #
-    #     # 进行静态资源的迁移
-    #     count = await self.copy_images(config, post["images"])
-    #     self.record_log(f"已处理 {count} 个图像对象。")
-    #     """
-    #     proc_count = 0
-    #     if not images:
-    #         return proc_count
-    #
-    #     logging.info(f"start copy image files, total: {len(images)}")
-    #     for item in images:
-    #         img_path = item["path"]
-    #         target = item["href"]
-    #         ip = item.get("property") or {}
-    #         if ip.get("avif_full_path") and ip.get("avif_href"):
-    #             # 拷贝AVIF
-    #             avif_full_path = item["property"]["avif_full_path"]
-    #             avif_href = item["property"]["avif_href"]
-    #
-    #             if config.build.base_path:
-    #                 avif_href = Path(avif_href).relative_to(config.build.base_path).as_posix()
-    #
-    #             target_avif = "%s/%s" % (self.write_root_tmp, avif_href)
-    #             target_parent, _ = os.path.split(target_avif)
-    #             os.makedirs(target_parent, exist_ok=True)
-    #             with open(avif_full_path, "rb") as r:
-    #                 with open(target_avif, "wb") as w:
-    #                     w.write(r.read())
-    #
-    #         if not img_path:
-    #             continue
-    #
-    #         if config.build.base_path:
-    #             target = Path(target).relative_to(config.build.base_path).as_posix()
-    #
-    #         img_src = "%s/%s" % (self.adapter.storage_root, img_path.lstrip('/'))
-    #         img_dst = "%s/%s" % (self.write_root_tmp, target)
-    #
-    #         logging.debug(f"copy img file by abs way:\n"
-    #                       f"\timg_src:  {img_src}\n"
-    #                       f"\timg_dst: {img_dst}\n"
-    #                       f"\ttarget: {target}")
-    #
-    #         if await self.adapter.storage.exists(img_src) and \
-    #                 await self.adapter.storage.is_file(img_src):
-    #             await self.adapter.storage.copy(img_src, img_dst)
-    #             logging.debug(f"source img copy success: {img_src}")
-    #         else:
-    #             logging.warning(f"source img not exist: {img_src}")
-    #         proc_count += 1
-    #
-    #     return proc_count
+            src = "/" + target_path.relative_to(write_root_resolved).as_posix()
+
+            if not source_path.exists():
+                print(f"  ⚠ 图片不存在: {source_path}, filepath: {filepath}, raw_src: {raw_src}, storage root: {storage_root}")
+                continue
+
+            key = target_path.as_posix()
+            if key not in handled:
+                handled[key] = process_image(source_path.as_posix(), target_path.as_posix())
+            result: ImageProcResult = handled[key]
+
+            img['src'] = src
+            img['loading'] = 'lazy'
+            img['decoding'] = 'async'
+
+            # ---- 私有扩展：![描述 powerstyle={...}](url) ----
+            # 样式写在 alt 里只为书写顺手，渲染时必须剥离：
+            # alt 是无障碍语义（屏幕阅读器朗读、图片加载失败时的替代文本），不能混入样式
+            raw_alt = img.get('alt') or ''
+            style_match = re.search(r'\s*powerstyle=\{([^}]*)\}', raw_alt)
+            if style_match:
+                # 黑名单剔除：只干掉能逃逸 HTML 属性/标签边界的字符，
+                # 其余一律放行（; : % # ( ) + 等在 CSS 里都是合法且必需的）
+                img['style'] = re.sub(r'[<>"\'&\\\r\n]', '', style_match.group(1).strip())
+                raw_alt = (raw_alt[:style_match.start()] + raw_alt[style_match.end():]).strip()
+            img['alt'] = raw_alt or source_path.stem
+
+            # 解析失败时宽高为 0，此时不写死尺寸，留给浏览器按原图自适应
+            if result.width > 0 and result.height > 0:
+                img['width'] = str(result.width)
+                img['height'] = str(result.height)
+
+            # avif 与主图同目录同名，仅扩展名不同；主图本身就是 avif 时无需再包一层
+            avif_path = target_path.with_suffix('.avif')
+            if result.avif and avif_path != target_path:
+                picture = soup.new_tag('picture')
+                img.wrap(picture)  # 用 picture 占据 img 原位，img 成为其子节点
+                source = soup.new_tag('source')
+                source['srcset'] = '/' + avif_path.relative_to(write_root_resolved).as_posix()
+                source['type'] = 'image/avif'
+                picture.insert(0, source)  # source 必须排在 img 之前
+
+        return str(soup)

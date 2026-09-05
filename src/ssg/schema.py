@@ -73,6 +73,12 @@ class ImageRef(BaseModel):
     property: ImageProperty | None = Field(default=None)
 
 
+class ImageProcResult(BaseModel):
+    width: int      # 图像的宽度，处理之后的，如果图片解析失败则填充0
+    height: int     # 图像的高度，同上
+    avif: bool      # 转换为 avif 之后的 src 属性，如果转换失败或者没必要，则为空字符串
+
+
 class TocItem(BaseModel):
     level: int
     text: str      # 纯文本（已转义）
