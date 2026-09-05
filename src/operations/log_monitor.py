@@ -48,7 +48,7 @@ def _get_file_meta(path: str):
 def _generate_windows():
     # ---- 首次加载最后 200 行 ----
     try:
-        with open(LOG_FILE, "r", encoding="utf-8", errors="replace") as f:
+        with open(LOG_FILE, "r", encoding="gbk", errors="replace") as f:
             for line in deque(f, maxlen=200):
                 yield f"data: {line.rstrip()}\n\n"
     except FileNotFoundError:
@@ -59,7 +59,7 @@ def _generate_windows():
     if file_size == 0:
         return
 
-    f = open(LOG_FILE, "r", encoding="utf-8", errors="replace")
+    f = open(LOG_FILE, "r", encoding="gbk", errors="replace")
     f.seek(file_size)
 
     try:

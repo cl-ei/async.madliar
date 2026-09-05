@@ -9,7 +9,7 @@ from typing import Any
 from pathlib import Path
 from src.error import ErrorWithPrompt
 from .schema import SiteConfig, Article, SITE_CONFIG_FILE, ImageProperty
-from .rendering import MarkdownRenderPipeline
+from src.ssg.marked.bridge import covert_to_html
 
 
 DATE_FORMAT = "%Y-%m-%d"
@@ -51,10 +51,9 @@ def normalize_identifier(content: str) -> str:
 class ArticleBuilder:
     """构建Article对象"""
 
-    def __init__(self, config: SiteConfig, storage_root: str, image_preprocess_info: dict[str, ImageProperty]):
+    def __init__(self, config: SiteConfig, storage_root: str):
         self.config = config
         self.storage_root = storage_root
-        self.image_preprocess_info = image_preprocess_info
 
     @staticmethod
     def parse_front_matter(content: str, fm_delimiter: str = "---") -> tuple[dict, str]:
@@ -234,18 +233,7 @@ class ArticleBuilder:
 
         # 3. 获取必要数据，生成html
         toc = fm["x-toc"] if "x-toc" in fm else self.config.features.toc
-        lazy_load = fm["x-lazy-load"] if "x-lazy-load" in fm else self.config.features.lazy_load
-        pipeline = MarkdownRenderPipeline(
-            rel_path_to_storage_root=Path(file_path).parent.as_posix(),
-            dst_path_to_build_root=dest_url,
-            toc=toc,
-            lazy_load=lazy_load,
-            highlight_theme="xcode",
-            img_base_path=self.config.build.base_path,
-            image_preprocess_info=self.image_preprocess_info,
-        )
-
-        result = pipeline.covert_to_html(body)
+        result = covert_to_html(body, toc=toc)
 
         # 4. 补充默认元数据
         fm.setdefault("layout", self.config.build.default_layout)
@@ -262,6 +250,9 @@ class ArticleBuilder:
                 description = fm.get("title", slug)
             fm["description"] = description
 
+        # TODO: 在这里处理 images
+        # lazy_load = fm["x-lazy-load"] if "x-lazy-load" in fm else self.config.features.lazy_load
+
         return Article(
             src_path=file_path,
             dest_url=dest_url,
@@ -269,6 +260,105 @@ class ArticleBuilder:
             raw_content=body,
             rendered_html=result["html"],
             toc=result["toc"],
-            images=result["images"],
-            code_css=result["css"],
+            images=[],
+            used_code=bool(result.get("usedCode")),
+            used_math=bool(result.get("usedMath")),
         )
+
+    """
+    logging.info(f"start covert one! images cache len: {len(images_cache)}")
+    for img in all_images:
+        try:
+            full_img_path = self.adapter.storage_root + "/" + img.path.lstrip("/")
+            w, h = get_image_size(full_img_path)
+            img_property = ImageProperty(width=w, height=h, avif_full_path="", avif_href="")
+            images_cache[img.path] = img_property
+
+            # 计算 avif 写入路径，这里是绝对路径，根据原图的 path 替换为 avif 的 path
+            base, _ = os.path.splitext(img.path)
+            avif_path = base + ".avif"
+            avif_full_path = self.avif_tmp_dir + "/" + avif_path.lstrip("/")
+            flag, msg = covert_to_avif(full_img_path, avif_full_path)
+            logging.info(f"Covert img to avif: {img.path}, result: {flag}, msg:\n\t{msg}")
+            if not flag:
+                continue
+
+            # 转换成功，进行赋值
+            href_base, _ = os.path.splitext(img.href)
+            avif_href = href_base + ".avif"
+
+            img_property.avif_full_path = avif_full_path
+            img_property.avif_href = avif_href
+
+        except Exception as e:
+            logging.error(f"error in process image: {img.path}, e: {e}\n{traceback.format_exc()}")
+    """
+    # async def copy_images(self, config: SiteConfig, images: list[dict]) -> int:
+    #     """
+    #     迁移 md文件关联的图片文件，分三种情况：
+    #
+    #     # ![alt](./a.jpg)      → 相对当前页面，将图片挪动到相对于当前文件的路径下
+    #     # ![alt](/a.jpg)       → 相对站点根目录 _build/ 下）
+    #     # ![alt](https://...)  → 不做任何处理
+    #
+    #     Args:
+    #         config: SiteConfig, md 文件渲染的 html 的目标位置，是包括 storage_root 的绝对路径
+    #         images: list[dict], 元素为 ImageRef 结构: {
+    #             'path': 'board.jpg',
+    #             'href': 'board.jpg',
+    #             'alt': '',
+    #             'title': '',
+    #         }
+    #
+    #
+    #     # 进行静态资源的迁移
+    #     count = await self.copy_images(config, post["images"])
+    #     self.record_log(f"已处理 {count} 个图像对象。")
+    #     """
+    #     proc_count = 0
+    #     if not images:
+    #         return proc_count
+    #
+    #     logging.info(f"start copy image files, total: {len(images)}")
+    #     for item in images:
+    #         img_path = item["path"]
+    #         target = item["href"]
+    #         ip = item.get("property") or {}
+    #         if ip.get("avif_full_path") and ip.get("avif_href"):
+    #             # 拷贝AVIF
+    #             avif_full_path = item["property"]["avif_full_path"]
+    #             avif_href = item["property"]["avif_href"]
+    #
+    #             if config.build.base_path:
+    #                 avif_href = Path(avif_href).relative_to(config.build.base_path).as_posix()
+    #
+    #             target_avif = "%s/%s" % (self.write_root_tmp, avif_href)
+    #             target_parent, _ = os.path.split(target_avif)
+    #             os.makedirs(target_parent, exist_ok=True)
+    #             with open(avif_full_path, "rb") as r:
+    #                 with open(target_avif, "wb") as w:
+    #                     w.write(r.read())
+    #
+    #         if not img_path:
+    #             continue
+    #
+    #         if config.build.base_path:
+    #             target = Path(target).relative_to(config.build.base_path).as_posix()
+    #
+    #         img_src = "%s/%s" % (self.adapter.storage_root, img_path.lstrip('/'))
+    #         img_dst = "%s/%s" % (self.write_root_tmp, target)
+    #
+    #         logging.debug(f"copy img file by abs way:\n"
+    #                       f"\timg_src:  {img_src}\n"
+    #                       f"\timg_dst: {img_dst}\n"
+    #                       f"\ttarget: {target}")
+    #
+    #         if await self.adapter.storage.exists(img_src) and \
+    #                 await self.adapter.storage.is_file(img_src):
+    #             await self.adapter.storage.copy(img_src, img_dst)
+    #             logging.debug(f"source img copy success: {img_src}")
+    #         else:
+    #             logging.warning(f"source img not exist: {img_src}")
+    #         proc_count += 1
+    #
+    #     return proc_count

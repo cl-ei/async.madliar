@@ -8,7 +8,7 @@ from src.ssg.generator import StaticSiteGenerator
 
 async def process_statics(path: str) -> Response:
     if path == "/":
-        path = "index.html"
+        path = "index"
 
     email = "i@caoliang.net"
     generator = StaticSiteGenerator(email)
@@ -23,5 +23,7 @@ async def process_statics(path: str) -> Response:
     target3 = (Path(storage_root) / build_root.strip("/") / sub / "404.html").as_posix()
     for i, try_file in enumerate((target, target2, target3)):
         if os.path.exists(try_file) and os.path.isfile(try_file):
-            return FileResponse(try_file, status_code=404 if i == 2 else 200)
+            base, ext = os.path.splitext(try_file)
+            media_type = None if ext else "text/html"
+            return FileResponse(try_file, status_code=404 if i == 2 else 200, media_type=media_type)
     raise ValueError("not found")

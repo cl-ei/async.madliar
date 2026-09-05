@@ -2,6 +2,7 @@ import copy
 import hashlib
 import logging
 import os.path
+import shutil
 import traceback
 from asyncio.queues import Queue
 import re
@@ -34,7 +35,7 @@ async def parse_user_site_config(email: str) -> SiteConfig:
         ErrorWithPrompt: 配置解析错误时抛出友好提示
     """
     adapter = UserFSAdapter(email)
-    site_config_file = f"{adapter.storage_root.rstrip('/')}/{SITE_CONFIG_FILE}"
+    site_config_file = f"{adapter.storage_root.rstrip('/')}/blog/{SITE_CONFIG_FILE}"
     if not await adapter.storage.exists(site_config_file) or not await adapter.storage.is_file(site_config_file):
         raise ErrorWithPrompt(
             f"配置文件不存在。\n\n"
@@ -225,63 +226,14 @@ class StaticSiteGenerator:
         all_files: list[str] = await self.adapter.find_files(posts_path, is_markdown_file)
         self.record_log(f"已获取posts总数：{len(all_files)}。")
 
-        # 统计静态资源
-        all_images: list[ImageRef] = []
-        collector = ArticleBuilder(config, self.adapter.storage_root, {})
-        for file_path in all_files:
-            try:
-                # 读取源文件
-                full_path = f"{self.adapter.storage_root}/{file_path.lstrip('/')}"
-                raw_content = await self.adapter.storage.read_text(full_path)
-                filesize, file_mtime = await self.adapter.storage.stat(full_path)
-
-                # 构建Article对象
-                try:
-                    article: Article = collector.build_one_post(file_path, raw_content, file_mtime)
-                    all_images.extend(article.images)
-                except ErrorWithPrompt:
-                    pass
-            except Exception as e:
-                logging.warning(f"error happened when collect: {e}\n{traceback.format_exc()}")
-                continue
-
         # 准备写入！清除临时输出目录
-        if (await self.adapter.storage.exists(self.write_root_tmp) and
-                await self.adapter.storage.is_dir(self.write_root_tmp)):
-            await self.adapter.storage.remove_tree(self.write_root_tmp)
-
-        logging.info(f"total images: {len(all_images)}")
-        images_cache: dict[str, ImageProperty] = {}  # path -> ImageProperty
-        for img in all_images:
-            try:
-                full_img_path = self.adapter.storage_root + "/" + img.path.lstrip("/")
-                w, h = get_image_size(full_img_path)
-                img_property = ImageProperty(width=w, height=h, avif_full_path="", avif_href="")
-                images_cache[img.path] = img_property
-
-                # 计算 avif 写入路径，这里是绝对路径，根据原图的 path 替换为 avif 的 path
-                base, _ = os.path.splitext(img.path)
-                avif_path = base + ".avif"
-                avif_full_path = self.avif_tmp_dir + "/" + avif_path.lstrip("/")
-                flag, msg = covert_to_avif(full_img_path, avif_full_path)
-                logging.info(f"Covert img to avif: {img.path}, result: {flag}, msg:\n\t{msg}")
-                if not flag:
-                    continue
-
-                # 转换成功，进行赋值
-                href_base, _ = os.path.splitext(img.href)
-                avif_href = href_base + ".avif"
-
-                img_property.avif_full_path = avif_full_path
-                img_property.avif_href = avif_href
-
-            except Exception as e:
-                logging.error(f"error in process image: {img.path}, e: {e}\n{traceback.format_exc()}")
+        if os.path.exists(self.write_root_tmp) and os.path.isdir(self.write_root_tmp):
+            shutil.rmtree(self.write_root_tmp)
+            os.makedirs(self.write_root_tmp)
 
         # 构建文章列表，解析基础信息
-        logging.info(f"start covert one! images cache len: {len(images_cache)}")
         url_to_src_path: dict[str, str] = {}  # 检测 URL 冲突之用
-        article_builder = ArticleBuilder(config, self.adapter.storage_root, images_cache)
+        article_builder = ArticleBuilder(config, self.adapter.storage_root)
         all_posts: dict[str, list[Article]] = {}  # layout -> [articles...]
         for file_path in all_files:
             try:
@@ -323,7 +275,7 @@ class StaticSiteGenerator:
             url_to_src_path[article.dest_url] = article.src_path
 
         # 聚合数据
-        context = {"site": config.site.model_dump()}
+        context = {"site": config.site.model_dump(), "layouts": {}}
         user_defined_layouts: list[str] = []
         tags_map: dict[str, list] = {}
         categories_map: dict[str, list] = {}
@@ -333,11 +285,11 @@ class StaticSiteGenerator:
                 article.index = i
 
             user_defined_layouts.append(layout_name)
-            context[layout_name] = [a.model_dump() for a in articles]
+            context["layouts"][layout_name] = [a.model_dump() for a in articles]
 
-            for data in context[layout_name]:
+            for data in context["layouts"][layout_name]:
                 sa: dict = copy.deepcopy(data)
-                for key in ("raw_content", "rendered_html", "toc", "images", "code_css"):
+                for key in ("raw_content", "rendered_html", "toc", "images"):
                     sa.pop(key)
                 for tag in sa["fm"].get("tags", []):
                     tags_map.setdefault(tag, []).append(sa)
@@ -357,16 +309,8 @@ class StaticSiteGenerator:
         context["service"] = service
 
         # 写入文件，移动产物
-        sitemap = []
-        create_sitemap = False
-        if config.build.sitemap is True and config.site.url:
-            self.record_log("将创建sitemap。")
-            create_sitemap = True
-        else:
-            self.record_log("不会创建sitemap。")
-
         for layout_name in user_defined_layouts:
-            for post in context[layout_name]:
+            for post in context["layouts"][layout_name]:
                 ctx = copy.deepcopy(context)
                 ctx["this"] = copy.deepcopy(post)
                 ctx["_ctx"] = ctx
@@ -395,28 +339,12 @@ class StaticSiteGenerator:
                 # 写入文件
                 # 分两步，避免 permalink 为“/”或空，导致生成包含非预期的“//”的问题
                 dst_url = post["dest_url"]
-                if not dst_url:
-                    filepath = f"{self.write_root_tmp}/index.html"
-                elif dst_url.endswith("/"):
-                    filepath = f"{self.write_root_tmp}/{dst_url}/index.html"
-                else:
-                    filepath = f"{self.write_root_tmp}/{dst_url}.html"
-                await self.adapter.storage.write_text(filepath, final_html)
-                self.record_log(f"已生成：{post['dest_url']}。")
-
-                # 进行静态资源的迁移
-                count = await self.copy_images(config, post["images"])
-                self.record_log(f"已处理 {count} 个图像对象。")
-
-                # 添加进 site map
-                if create_sitemap and not post.get("fm", {}).get("x-exclude-sitemap"):
-                    sitemap.append([post.get("fm", {}).get("lastmod"), f"{config.site.url}{post['dest_url']}"])
-
-        if create_sitemap:
-            content = self._gen_sitemap_content(sitemap)
-            filepath = f"{self.write_root_tmp}/sitemap.xml"
-            await self.adapter.storage.write_text(filepath, content)
-            self.record_log(f"sitemap已生成，大小：{len(content)}。")
+                filepath = f"{self.write_root_tmp}/{dst_url}"
+                try:
+                    await self.adapter.storage.write_text(filepath, final_html)
+                    self.record_log(f"已生成：{post['dest_url']}。")
+                except Exception as e:
+                    logging.error(f"生成{post['dest_url']}时失败：{e}\n{traceback.format_exc()}")
 
         # 写日志
         print("generate complete!\n")
@@ -444,87 +372,6 @@ class StaticSiteGenerator:
             self.record_log(f"静态文件拷贝成功。")
         else:
             self.record_log(f"跳过拷贝静态文件。")
-
-    @staticmethod
-    def _gen_sitemap_content(sitemap: list) -> str:
-        parts = ['<?xml version="1.0" encoding="UTF-8"?>',
-                 '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
-
-        for lastmod, loc in sitemap:
-            entry = '  <url>\n'
-            entry += f'    <loc>{loc}</loc>'
-            if isinstance(lastmod, str) and _VALID_LASTMOD.match(lastmod.strip()):
-                entry += f'\n    <lastmod>{lastmod.strip()}</lastmod>'
-            entry += '\n  </url>'
-            parts.append(entry)
-
-        parts.append('</urlset>')
-        return '\n'.join(parts)
-
-    async def copy_images(self, config: SiteConfig, images: list[dict]) -> int:
-        """
-        迁移 md文件关联的图片文件，分三种情况：
-
-        # ![alt](./a.jpg)      → 相对当前页面，将图片挪动到相对于当前文件的路径下
-        # ![alt](/a.jpg)       → 相对站点根目录 _build/ 下）
-        # ![alt](https://...)  → 不做任何处理
-
-        Args:
-            config: SiteConfig, md 文件渲染的 html 的目标位置，是包括 storage_root 的绝对路径
-            images: list[dict], 元素为 ImageRef 结构: {
-                'path': 'board.jpg',
-                'href': 'board.jpg',
-                'alt': '',
-                'title': '',
-            }
-        """
-        proc_count = 0
-        if not images:
-            return proc_count
-
-        logging.info(f"start copy image files, total: {len(images)}")
-        for item in images:
-            img_path = item["path"]
-            target = item["href"]
-            ip = item.get("property") or {}
-            if ip.get("avif_full_path") and ip.get("avif_href"):
-                # 拷贝AVIF
-                avif_full_path = item["property"]["avif_full_path"]
-                avif_href = item["property"]["avif_href"]
-
-                if config.build.base_path:
-                    avif_href = Path(avif_href).relative_to(config.build.base_path).as_posix()
-
-                target_avif = "%s/%s" % (self.write_root_tmp, avif_href)
-                target_parent, _ = os.path.split(target_avif)
-                os.makedirs(target_parent, exist_ok=True)
-                with open(avif_full_path, "rb") as r:
-                    with open(target_avif, "wb") as w:
-                        w.write(r.read())
-
-            if not img_path:
-                continue
-
-            if config.build.base_path:
-                target = Path(target).relative_to(config.build.base_path).as_posix()
-
-            img_src = "%s/%s" % (self.adapter.storage_root, img_path.lstrip('/'))
-            img_dst = "%s/%s" % (self.write_root_tmp, target)
-
-            logging.debug(f"copy img file by abs way:\n"
-                          f"\timg_src:  {img_src}\n"
-                          f"\timg_dst: {img_dst}\n"
-                          f"\ttarget: {target}")
-
-            if await self.adapter.storage.exists(img_src) and \
-                    await self.adapter.storage.is_file(img_src):
-                await self.adapter.storage.copy(img_src, img_dst)
-                logging.debug(f"source img copy success: {img_src}")
-            else:
-                logging.warning(f"source img not exist: {img_src}")
-            proc_count += 1
-
-        return proc_count
 
     async def gen(self) -> tuple[bool, str]:
         error_msg = ""

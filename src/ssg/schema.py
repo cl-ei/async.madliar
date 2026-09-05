@@ -23,7 +23,6 @@ class BuildConfig(BaseModel):
     permalink: str = "/posts/:slug/"
     default_layout: str = "post"
     base_path: str = ""
-    sitemap: bool = False
 
     @field_validator('default_layout')
     @classmethod
@@ -91,4 +90,5 @@ class Article(BaseModel):
     rendered_html: str = ""         # 渲染后的HTML
     toc: list[TocItem] = Field(default_factory=list)
     images: list[ImageRef] = Field(default_factory=list)
-    code_css: str                   # code 渲染出来的 css
+    used_code: bool                 # 是否包含 code
+    used_math: bool                 # 是否包含 math
