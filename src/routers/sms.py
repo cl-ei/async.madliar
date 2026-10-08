@@ -5,7 +5,7 @@ from fastapi import APIRouter, Request
 router = APIRouter()
 
 
-@router.post("/sms/kcaqeavz2rnkyufjs0")
+@router.post("/ssg/sms/kcaqeavz2rnkyufjs0")
 async def sms_receiver(request: Request):
     print("=" * 70)
     print(">> 来源 IP:", request.client.host if request.client else None)
