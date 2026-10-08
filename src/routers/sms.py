@@ -1,7 +1,11 @@
+import fcntl
 import json
-from datetime import datetime
+import os
+import re
+from datetime import datetime, timedelta, timezone
 from urllib.parse import parse_qsl
-from fastapi import APIRouter, Request
+
+from fastapi import APIRouter, Request, Response
 
 
 router = APIRouter()
@@ -10,46 +14,64 @@ router = APIRouter()
 @router.post("/ssg/sms/kcaqeavz2rnkyufjs0")
 async def sms_receiver(request: Request):
     raw = await request.body()
-    print()
-    print("=" * 80)
-    print(" SMS 上报 |", request.client.host if request.client else "-")
-    print("-" * 80)
-    print(" URL     :", request.url)
-    print(" QUERY   :", dict(request.query_params) or "-")
-    print(" HEADERS :")
-    for k, v in request.headers.items():
-        print(f"            {k:<22} {v}")
-    print("-" * 80)
 
-    ct = request.headers.get("content-type", "").lower()
-
-    if "json" in ct:
-        print(" BODY    : JSON")
+    src, body, ts = "", "", ""
+    if "json" in request.headers.get("content-type", "").lower():
         try:
-            print(json.dumps(json.loads(raw), ensure_ascii=False, indent=2))
-        except Exception as e:
-            print("           解析失败:", e)
-            print("           原始:", raw.decode("utf-8", "replace"))
-
-    elif "x-www-form-urlencoded" in ct:
-        print(" BODY    : form-urlencoded")
-        for k, v in parse_qsl(raw.decode("utf-8", "replace"), keep_blank_values=True):
-            if k == "content":
-                print(f"           {k:<10}:")
-                for line in v.split("\n"):
-                    print(f"                | {line}")
-            elif k == "timestamp":
-                try:
-                    t = datetime.fromtimestamp(int(v) / 1000).strftime("%Y-%m-%d %H:%M:%S")
-                except Exception:
-                    t = "-"
-                print(f"           {k:<10}: {v}  ({t})")
-            else:
-                print(f"           {k:<10}: {v}")
-
+            j = json.loads(raw)
+            src, body, ts = str(j.get("from", "")), str(j.get("content", "")), str(j.get("timestamp", ""))
+        except Exception:
+            src, body, ts = "", "", ""
     else:
-        print(" BODY    : 其他 (%s)" % (ct or "无 content-type"))
-        print("           RAW:", raw.decode("utf-8", "replace"))
+        f = dict(parse_qsl(raw.decode("utf-8", "replace"), keep_blank_values=True))
+        src, body, ts = f.get("from", ""), f.get("content", ""), f.get("timestamp", "")
 
-    print("=" * 80, flush=True)
+    try:
+        arrive = datetime.fromtimestamp(int(ts) / 1000, tz=timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M:%S")
+    except Exception:
+        arrive = datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M:%S")
+
+    lines = body.split("\n")
+    if lines and lines[0].strip() == src.strip():
+        lines = lines[1:]
+
+    meta, main = [], []
+    for l in lines:
+        s = l.strip()
+        if not s:
+            continue
+        if re.match(r"^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$", s):
+            continue
+        if s.startswith("SIM") or s.startswith("SubId"):
+            meta.append(s)
+        else:
+            main.append(s)
+
+    block = "#SMS#\n" + "=" * 74 + "\n"
+    block += f" {arrive}    {src or '-'}\n"
+    block += "-" * 74 + "\n"
+    for l in main:
+        block += f" {l}\n"
+    block += "-" * 74 + "\n"
+    block += " " + "  ·  ".join(meta + [request.client.host if request.client else "-"]) + "\n"
+    block += "=" * 74 + "\n\n"
+
+    with open("/var/log/sms.txt", "a+", encoding="utf-8") as fh:
+        fcntl.flock(fh, fcntl.LOCK_EX)
+        fh.seek(0)
+        old = fh.read()
+        fh.seek(0)
+        fh.truncate()
+        fh.write(block + "#SMS#".join(old.split("#SMS#")[:200]))
+
+    print(block.replace("#SMS#", ""), flush=True)
     return {"ok": True}
+
+
+@router.get("/ssg/sms/gamekun")
+def sms_read():
+    if not os.path.exists("/var/log/sms.txt"):
+        return Response("还没有收到短信\n", media_type="text/plain; charset=utf-8")
+    with open("/var/log/sms.txt", "r", encoding="utf-8") as fh:
+        txt = fh.read().replace("#SMS#", "")
+    return Response(txt, media_type="text/plain; charset=utf-8", headers={"Cache-Control": "no-store"})
