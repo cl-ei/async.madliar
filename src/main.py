@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from starlette.staticfiles import StaticFiles as StarletteStaticFiles
 from src.config import LOG_FILE
 from src.midddleware import ErrorCatchMiddleware
-from src.router import router as main_router
+from src.routers import ssg, sms
 
 
 logging.basicConfig(
@@ -53,7 +53,8 @@ def get_application() -> FastAPI:
         CORSStaticFiles(directory="src/statics", html=True),
         name="statics",
     )
-    application.include_router(main_router, prefix="")
+    application.include_router(ssg.router, prefix="")
+    application.include_router(sms.router, prefix="")
 
     return application
 

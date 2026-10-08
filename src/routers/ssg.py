@@ -2,16 +2,14 @@ import json
 import os
 import logging
 import datetime
-import time
 from pathlib import Path
 
-from fastapi import APIRouter, Request
+from fastapi import Header, Query, Body, APIRouter, Request
 from fastapi.responses import HTMLResponse
-from jinja2 import Environment, FileSystemLoader, select_autoescape
-from fastapi import Header, Query, Body
 from fastapi.exceptions import HTTPException
+from jinja2 import Environment, FileSystemLoader, select_autoescape
 from src.worker import entry
-from src.config import APP_KEY, IS_PROD, LOG_FILE
+from src.config import APP_KEY, IS_PROD
 from src.operations.log_monitor import get_log_streaming_response
 
 
@@ -73,12 +71,12 @@ MIN_ELAPSE_SECONDS = 3
 
 @router.post("/ssg/comment")
 async def submit_comment(
-    request: Request,
-    content: str = Body(""),
-    email: str = Body(""),
-    bot: str = Body(""),
-    ts: float = Body(""),
-    url: str = Body(""),
+        request: Request,
+        content: str = Body(""),
+        email: str = Body(""),
+        bot: str = Body(""),
+        ts: float = Body(""),
+        url: str = Body(""),
 ):
     # ---- 1. honeypot 检测 ----
     if bot:
